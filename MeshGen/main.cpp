@@ -91,7 +91,7 @@ int main() {
      *          0-wall, 1-characteristic
      */
     int npoin = nx*ny;
-    int nbound = 2*nx + 2*ny;
+    int nbound = 2*(nx-1) + 2*(ny-1);
     double dx, dy, ymin, ymax;
     auto* x = (double*)malloc(npoin*sizeof(double));
     auto* y = (double*)malloc(npoin*sizeof(double));
@@ -121,12 +121,12 @@ int main() {
     int istag=0;
     for(int ix=0; ix<nx; ix++){
         if(y[IU(ix,0,nx)] > 1e-10){
-            istag = ix;
+            istag = ix-1;
             break;
         }
     }
     //apply wall boundary condition
-    for (int ib = istag; ib < nx; ib++)
+    for (int ib = istag; ib < nx-1; ib++)
         ibound[ib] = 0;
 
 
