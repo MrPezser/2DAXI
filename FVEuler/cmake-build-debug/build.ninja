@@ -61,6 +61,18 @@ build CMakeFiles/FVEuler.dir/EulerFlux.cpp.obj: CXX_COMPILER__FVEuler_Debug C$:/
   OBJECT_DIR = CMakeFiles\FVEuler.dir
   OBJECT_FILE_DIR = CMakeFiles\FVEuler.dir
 
+build CMakeFiles/FVEuler.dir/BoundaryConditions.cpp.obj: CXX_COMPILER__FVEuler_Debug C$:/Users/tskoepli/Documents/GitHub/2DAXI/FVEuler/BoundaryConditions.cpp || cmake_object_order_depends_target_FVEuler
+  DEP_FILE = CMakeFiles\FVEuler.dir\BoundaryConditions.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\FVEuler.dir
+  OBJECT_FILE_DIR = CMakeFiles\FVEuler.dir
+
+build CMakeFiles/FVEuler.dir/FileIO.cpp.obj: CXX_COMPILER__FVEuler_Debug C$:/Users/tskoepli/Documents/GitHub/2DAXI/FVEuler/FileIO.cpp || cmake_object_order_depends_target_FVEuler
+  DEP_FILE = CMakeFiles\FVEuler.dir\FileIO.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\FVEuler.dir
+  OBJECT_FILE_DIR = CMakeFiles\FVEuler.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target FVEuler
@@ -69,7 +81,7 @@ build CMakeFiles/FVEuler.dir/EulerFlux.cpp.obj: CXX_COMPILER__FVEuler_Debug C$:/
 #############################################
 # Link the executable FVEuler.exe
 
-build FVEuler.exe: CXX_EXECUTABLE_LINKER__FVEuler_Debug CMakeFiles/FVEuler.dir/main.cpp.obj CMakeFiles/FVEuler.dir/EulerFlux.cpp.obj
+build FVEuler.exe: CXX_EXECUTABLE_LINKER__FVEuler_Debug CMakeFiles/FVEuler.dir/main.cpp.obj CMakeFiles/FVEuler.dir/EulerFlux.cpp.obj CMakeFiles/FVEuler.dir/BoundaryConditions.cpp.obj CMakeFiles/FVEuler.dir/FileIO.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\FVEuler.dir

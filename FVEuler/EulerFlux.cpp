@@ -114,5 +114,8 @@ void LeerFluxPart(const double gam, const double vx, const double vy, const doub
     }
 }
 
-void LeerFluxPart(const double gam, const double vx, const double vy, const double nx, const double ny,
-                  const double Mn, const double rho, const double c, double *fout, int isplus)
+void LeerFlux(const double gam, const double vx, const double vy, const double nx, const double ny,
+                  const double Mn, const double rho, const double c, double *fout, int isplus) {
+
+
+}

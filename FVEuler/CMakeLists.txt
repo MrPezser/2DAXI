@@ -3,4 +3,4 @@ project(FVEuler)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(FVEuler main.cpp EulerFlux.cpp EulerFlux.h)
+add_executable(FVEuler main.cpp EulerFlux.cpp EulerFlux.h BoundaryConditions.cpp BoundaryConditions.h FileIO.cpp FileIO.h Indexing.h)
