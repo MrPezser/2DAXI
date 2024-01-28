@@ -6,6 +6,9 @@
 #define FVEULER_EULERFLUX_H
 
 void getPrimatives(double gam, double *unkel, double *rho, double *u, double *v, double *p, double *c, double *M);
-void LeerFlux(const double gam, const double vx, const double vy, const double nx, const double ny,
-              const double Mn, const double rho, const double c, double *fout, int isplus);
+void LeerFlux(double gam, double normx, double normy, double* uLeft, double* uRight, double* fout);
+
+
+
+
 #endif //FVEULER_EULERFLUX_H

@@ -114,8 +114,22 @@ void LeerFluxPart(const double gam, const double vx, const double vy, const doub
     }
 }
 
-void LeerFlux(const double gam, const double vx, const double vy, const double nx, const double ny,
-                  const double Mn, const double rho, const double c, double *fout, int isplus) {
+void LeerFlux(const double gam, double normx, double normy, double* uLeft, double* uRight, double* fout) {
+    double fPlus[4], fMnus[4]\
+    ,uL,uR,vL,vR,MnL,MnR,rhoL,rhoR,cL,cR,pL,pR,ML,MR;
 
+    //Calculate all flow variables for each state
+    getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);
+    getPrimatives(gam, uRight, &rhoR, &uR, &vR, &pR, &cR, &MR);
 
+    //Calculate normal mach number
+    MnL = (uL*normx + vL*normy)/cL;
+    MnR = (uR*normx + vR*normy)/cR;
+
+    //Calculate positive and negative fluxes
+    LeerFluxPart(gam, uL, vL, normx, normy, MnL, rhoL, cL, &(fPlus[0]), 1);
+    LeerFluxPart(gam, uR, vR, normx, normy, MnR, rhoR, cR, &(fMnus[0]), 0);
+
+    //Find the combined face flux
+    fout[0] = fPlus[0] + fMnus[0];
 }

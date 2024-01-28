@@ -60,9 +60,15 @@ void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vy
     rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
 }
 
-void boundary_state(int nx, int btype, double gam, double vDOTn, double normx, double normy, double *uFS, double* geofa, double* uLeft, double* uRight) {
+void boundary_state(int btype, double gam,double normx, double normy, double *uFS, double* uLeft, double* uRight) {
     //==========Apply Boundary Condition
-    double rhoL, uL, vL;
+    double rhoL, uL, vL, vDOTn;
+
+    //==========Find Normal Velocity
+    rhoL = uLeft[0];
+    uL = uLeft[1]/rhoL;
+    vL = uLeft[2]/rhoL;
+    vDOTn = uL*normx + vL*normy;
 
     rhoL = uLeft[0];
     uL = uLeft[1]/rhoL;
