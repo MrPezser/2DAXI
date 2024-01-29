@@ -140,9 +140,9 @@ int main() {
     double gam, mach, tol, CFL;
     int mxiter;
     gam =1.4;
-    mach = 2.0;
+    mach = 3.0;
     tol = 1e-6;
-    mxiter = 10;//1e4; //maximum number of iteration before stopping
+    mxiter = 1e4; //maximum number of iteration before stopping
     CFL = 0.75;
 
     printf("==================== Loading Mesh ====================\n");

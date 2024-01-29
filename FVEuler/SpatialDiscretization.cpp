@@ -42,35 +42,37 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geo
         normx = geofa[IJK(0, j, 4,nx,6)];
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(0,j,0, nx-1, NVAR)]),&(uGLeft[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(nx-2,j,0, nx-1, NVAR)]),&(uGRight[IJ(0,j,NVAR)]));
     }
 
     //top side of domain
     for (int i=0; i<(nx-1); i++){
         // left state = interior, right state = ghost
         int btype;
-        btype = ibound[i+nx+ny-2];
+        int ib = nx-2-i;
+        btype = ibound[ib+nx+ny-2];
 
         //==========Face Normal
         double normx, normy;
-        normx = geofa[IJK(i, ny-1, 1,nx,6)];
-        normy = geofa[IJK(i, ny-1, 2,nx,6)];
+        normx = -geofa[IJK(i, ny-1, 1,nx,6)];
+        normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(i,ny-1,0, nx-1, NVAR)]),&(uGTop[IJ(0,i,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, &(unk[IJK(i,ny-2,0, nx-1, NVAR)]), &(uGTop[IJ(0,i,NVAR)]));
     }
 
     //left side of domain
     for (int j=0; j<(ny-1); j++){
         // left state = interior, right state = ghost
         int btype;
-        btype = ibound[j+(2*nx)+ny-3];
+        int jb = (ny-2)-j;
+        btype = ibound[jb+(2*nx)+ny-3];
 
         //==========Face Normal
         double normx, normy;
-        normx = geofa[IJK(0, j, 4,nx,6)];
-        normy = geofa[IJK(0, j, 4,nx,6)];
+        normx = -geofa[IJK(0, j, 4,nx,6)];
+        normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(0,j,0, nx-1, 4)]),&(uGLeft[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, &(unk[IJK(0,j,0, nx-1, 4)]), &(uGLeft[IJ(0,j,NVAR)]));
     }
 
     //====================Evaluate Flux Contributions====================

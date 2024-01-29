@@ -15,13 +15,13 @@ double ramp_surface(double x, double h, double L) {
     } else if( x > 1+L) {
         return h;
     } else {
-        return h*(x-1);
+        return (h/L)*(x-1);
     }
 }
 
 void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibound) {
     //Makes a tecplot file of the grid and a setup file for the solver
-    int nb = 2*nx + 2*ny;
+    int nb = 2*(nx-1) + 2*(ny-1);
 
     FILE* fout = fopen("../Outputs/grid.tec", "w");
     if (fout == nullptr) printf("oeups\n");
@@ -65,7 +65,7 @@ int main() {
     int nx, ny;
     height = 1.5;
     length = 6.0;
-    nx = 101;
+    nx = 251;
     ny = 101;
 
     /*
@@ -83,7 +83,7 @@ int main() {
      * Need to represent bottom and top surfaces of geometry
      */
     double ramp_height = 0.25;
-    double ramp_length = 1.0;
+    double ramp_length = 0.5;
 
     /*
      * ==================== Mesh Generation ====================
@@ -117,7 +117,7 @@ int main() {
     for(int ib=0; ib<nbound; ib++)
         ibound[ib] = 1;
 
-    /*
+
     //hardcoded nosecone stagnation point finder - sucks
     int istag=0;
     for(int ix=0; ix<nx; ix++){
@@ -125,10 +125,10 @@ int main() {
             istag = ix-1;
             break;
         }
-    }*/
+    }
 
     //apply wall boundary condition
-    for (int ib = 0; ib < nx-1; ib++) {
+    for (int ib = istag; ib < nx-1; ib++) {
         ibound[ib] = 0;     //bottom surface
         ibound[ib+nx+ny-2] = 0; //top surface
     }
