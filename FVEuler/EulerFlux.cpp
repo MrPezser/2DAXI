@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <cstdio>
 #include "EulerFlux.h"
 
 void getPrimatives(const double gam, const double *unkel, double *rho, double *u, double *v, double *p, double *c, double *M) {
@@ -115,8 +116,7 @@ void LeerFluxPart(const double gam, const double vx, const double vy, const doub
 }
 
 void LeerFlux(const double gam, double normx, double normy, double* uLeft, double* uRight, double* fout) {
-    double fPlus[4], fMnus[4]\
-    ,uL,uR,vL,vR,MnL,MnR,rhoL,rhoR,cL,cR,pL,pR,ML,MR;
+    double fPlus[4],fMnus[4],uL,uR,vL,vR,MnL,MnR,rhoL,rhoR,cL,cR,pL,pR,ML,MR;
 
     //Calculate all flow variables for each state
     getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);
@@ -132,4 +132,14 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, doubl
 
     //Find the combined face flux
     fout[0] = fPlus[0] + fMnus[0];
+    fout[1] = fPlus[1] + fMnus[1];
+    fout[2] = fPlus[2] + fMnus[2];
+    fout[3] = fPlus[3] + fMnus[3];
+
+    if (_isnan(fout[0])) {
+        printf("oeups (leerflux isnan)\n");
+    }
+    if (fabs(fout[0]) > 100) {
+        printf("oeups (leerflux too large)\n");
+    }
 }

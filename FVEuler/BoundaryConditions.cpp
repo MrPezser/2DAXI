@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <cstdio>
 #include "BoundaryConditions.h"
 #include "EulerFlux.h"
 
@@ -70,10 +71,6 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
     vL = uLeft[2]/rhoL;
     vDOTn = uL*normx + vL*normy;
 
-    rhoL = uLeft[0];
-    uL = uLeft[1]/rhoL;
-    vL = uLeft[2]/rhoL;
-
     //Wall BC
     if (btype == 0) {
         //Density and energy are constant
@@ -85,10 +82,14 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         double vR = vL - 2*vDOTn*normy;
         uRight[1] = uLeft[0]*uR;
         uRight[2] = uLeft[0]*vR;
+
+        if (_isnan(normx) or _isnan(normy)){
+            printf("Undef. Surface Normal!\n");
+        }
     }
 
     //Freestream BC
-    if (btype == 4){
+    if (btype == 1){
         //get all interior primitives
         double pL, cL, ML;
         getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);

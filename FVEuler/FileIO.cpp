@@ -2,6 +2,7 @@
 // Created by tskoepli on 1/27/2024.
 //
 #include <iostream>
+#include <valarray>
 #include "FileIO.h"
 #include "Indexing.h"
 
@@ -54,7 +55,7 @@ void print_elem_stats(const char *title, int nx, int ny, const double* geoel) {
     fclose(fout);
 }
 
-void print_state(const char *title, int nx, int ny, double* x, double* y, double* unk, double* geoel ) {
+void print_state(const char *title, int nx, int ny, double gam, double* x, double* y, double* unk, double* geoel ) {
     //Makes a tecplot file of the grid and a setup file for the solver
     //int nb = 2*nx + 2*ny;
     int nelem = nx * ny;
@@ -64,20 +65,25 @@ void print_state(const char *title, int nx, int ny, double* x, double* y, double
 
     //printf("\nDisplaying Grid Header\n");
     fprintf(fout, "TITLE = \"%s\"\n", title);
-    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"rho\", \"u\", \"v\", \"e\"\n");
+    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"rho\", \"u\", \"v\", \"e\", \"p\", \"c\", \"M\"\n");
     fprintf(fout, "ZONE I=%d, J=%d, DATAPACKING=POINT\n", nx-1, ny-1);
 
     //printf("Printing Coordinate Information\n");
     for (int j=0; j < (ny-1); j++) {
         for (int i=0; i< (ny-1); i++) {
-            double xp, yp, rho, u, v, e;
+            double xp, yp, rho, u, v, e, p, c, M;
             xp = geoel[IJK(i,j,1,nx-1,3)];
             yp = geoel[IJK(i,j,2,nx-1,3)];
-            rho = unk[IJK(i,j,0,nx-1,4)];
-            u = unk[IJK(i,j,1,nx-1,4)];
-            v = unk[IJK(i,j,2,nx-1,4)];
-            e = unk[IJK(i,j,3,nx-1,4)];
-            fprintf(fout, "%lf,\t%lf,\t%lf,\t%lf,\t%lf,\t%lf\n", xp, yp, rho, u, v, e);
+
+            rho = unk[IJK(i,j,0,nx-1,NVAR)];
+            u   = unk[IJK(i,j,1,nx-1,NVAR)]/rho;
+            v   = unk[IJK(i,j,2,nx-1,NVAR)]/rho;
+            e   = unk[IJK(i,j,3,nx-1,NVAR)]/rho;
+            p = (gam - 1) * (rho*e- (0.5 * rho * (u*u + v*v)));
+            c = sqrt(gam * p / rho);
+            M = sqrt((u*u + v*v)) / c;
+
+            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n", xp, yp, rho, u, v, e, p, c, M);
         }
     }
     fclose(fout);

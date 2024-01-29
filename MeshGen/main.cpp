@@ -6,14 +6,13 @@
  */
 #include <iostream>
 #define IU(i, j, ni)  (((j)*(ni)) + (i))
-#define BOTSURF(x,h) ramp_surface((x), (h))
 
 //test ramp geometry for now
-double ramp_surface(double x, double h) {
+double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
     if(x < 1) {
         return 0;
-    } else if( x > 2) {
+    } else if( x > 1+L) {
         return h;
     } else {
         return h*(x-1);
@@ -64,8 +63,8 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 1.0;
-    length = 3.0;
+    height = 1.5;
+    length = 6.0;
     nx = 101;
     ny = 101;
 
@@ -84,6 +83,7 @@ int main() {
      * Need to represent bottom and top surfaces of geometry
      */
     double ramp_height = 0.25;
+    double ramp_length = 1.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -101,7 +101,7 @@ int main() {
 
     //define coordinates
     for (int i =0; i<nx; i++){
-        ymin = BOTSURF(i*dx, ramp_height) + y_offset;
+        ymin = ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         ymax = height + y_offset;             // flat top
         dy = (ymax - ymin) / ny;
 
@@ -117,18 +117,21 @@ int main() {
     for(int ib=0; ib<nbound; ib++)
         ibound[ib] = 1;
 
-    //hardcoded nosecone stagnation point finder
+    /*
+    //hardcoded nosecone stagnation point finder - sucks
     int istag=0;
     for(int ix=0; ix<nx; ix++){
         if(y[IU(ix,0,nx)] > 1e-10){
             istag = ix-1;
             break;
         }
-    }
-    //apply wall boundary condition
-    for (int ib = istag; ib < nx-1; ib++)
-        ibound[ib] = 0;
+    }*/
 
+    //apply wall boundary condition
+    for (int ib = 0; ib < nx-1; ib++) {
+        ibound[ib] = 0;     //bottom surface
+        ibound[ib+nx+ny-2] = 0; //top surface
+    }
 
 
 

@@ -4,11 +4,9 @@
  */
 #include <iostream>
 #include <cmath>
-#include "EulerFlux.h"
 #include "FileIO.h"
-#include "BoundaryConditions.h"
 #include "Indexing.h"
-
+#include "SpatialDiscretization.h"
 
 
 void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
@@ -42,253 +40,112 @@ void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
     }
 
     //face stats
-    //interior points
-    for(int i=0; i<nx-1; i++){
-        for (int j=0; j<ny-1; j++){
+    for (int ipt=0; ipt<npoin; ipt++) (*geofa)[ipt] = NAN;
+    for(int i=0; i<nx; i++){
+        for (int j=0; j<ny; j++){
             int ip0 = IJ(i,j,nx);
-            int iph = IJ(i+1,j,nx);
-            int ipv = IJ(i,j+1,nx);
+            double len, normx, normy;
 
-            //          Horizontal face 0,1,2
-            //length
-            double len  = sqrt((x[iph]-x[ip0])*(x[iph]-x[ip0]) + (y[iph]-y[ip0])*(y[iph]-y[ip0]) );
-            (*geofa)[IJK(i,j,0,nx,6)] = len;
-            //normal
-            double normx,normy;
-            normx =  (y[iph] - y[ip0])/len;
-            normy = -(x[iph] - x[ip0])/len;
-            (*geofa)[IJK(i,j,1,nx,6)] = normx;
-            (*geofa)[IJK(i,j,2,nx,6)] = normy;
+            if (i<nx-1) {
+                //          Horizontal face 0,1,2
+                int iph = IJ(i+1,j,nx);
+                //length
+                len = sqrt(((x[iph] - x[ip0]) * (x[iph] - x[ip0])) + ((y[iph] - y[ip0]) * (y[iph] - y[ip0])));
+                //normal
+                normx = (y[iph] - y[ip0]) / len;
+                normy = -(x[iph] - x[ip0]) / len;
 
-            //          Vertical face 3,4,5
-            //length
-            len  = sqrt((x[ipv]-x[ip0])*(x[ipv]-x[ip0]) + (y[ipv]-y[ip0])*(y[ipv]-y[ip0]) );
-            (*geofa)[IJK(i,j,3,nx,6)] = len;
-            //normal
-            normx =  (y[ipv] - y[ip0])/len;
-            normy = -(x[ipv] - x[ip0])/len;
-            (*geofa)[IJK(i,j,4,nx,6)] = normx;
-            (*geofa)[IJK(i,j,6,nx,6)] = normy;
+                (*geofa)[IJK(i,j,0,nx,6)] = len;
+                (*geofa)[IJK(i,j,1,nx,6)] = normx;
+                (*geofa)[IJK(i,j,2,nx,6)] = normy;
+            }
+
+            if (j<ny-1) {
+                //          Vertical face 3,4,5
+                int ipv = IJ(i,j+1,nx);
+                //length
+                len = sqrt((x[ipv] - x[ip0]) * (x[ipv] - x[ip0]) + (y[ipv] - y[ip0]) * (y[ipv] - y[ip0]));
+                //normal
+                normx = (y[ipv] - y[ip0]) / len;
+                normy = -(x[ipv] - x[ip0]) / len;
+
+                (*geofa)[IJK(i,j,3,nx,6)] = len;
+                (*geofa)[IJK(i,j,4,nx,6)] = normx;
+                (*geofa)[IJK(i,j,5,nx,6)] = normy;
+            }
         }
     }
 
 }
 
-void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geoel, double* geofa, double* unk, double* dudt) {
-    int nelem = (nx-1)*(ny-1);
-    double rhsel[nelem];
-    for(int i=0;i<nelem;i++) rhsel[i] = 0.0;
+double find_dt(double gam, int nx, int ny, double CFL, double* uRef, double* geofa){
+    double rho, u, v, rhoe, v2, p, c, vmax, dt, mindx;
+    rho = uRef[0];
+    u = uRef[1]/rho;
+    v = uRef[2]/rho;
+    rhoe = uRef[3];
 
-    //Calculate boundary cell state (ghost state)
-    double uGBot[NVAR*(nx-1)], uGRight[NVAR*(ny-1)], uGTop[NVAR*(nx-1)], uGLeft[NVAR*(ny-1)];
-    //bottom side of domain
-    for (int i=0; i<(nx-1); i++){
-        // left state = interior, right state = ghost
-        int btype;
-        btype = ibound[i];
+    //Find speed of sound
+    v2 = (u*u + v*v);
+    p = (gam - 1) * (rhoe - (0.5 * rho * v2));
+    c = sqrt(gam * p / rho);
 
-        //==========Face Normal
-        double normx, normy;
-        normx = geofa[IJK(i, 0, 1,nx-1,6)];
-        normy = geofa[IJK(i, 0, 2,nx-1,6)];
-        //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(i,0,0, nx-1, 4)]),&(uGBot[IJ(0,i,NVAR)]));
-    }
+    //Max info speed = v+c
+    vmax = sqrt(v2) + c;
 
-    //right side of domain
-    for (int j=0; j<(ny-1); j++){
-        // left state = interior, right state = ghost
-        int btype;
-        btype = ibound[j+ nx-1];
-
-        //==========Face Normal
-        double normx, normy;
-        normx = geofa[IJK(0, j, 4,nx-1,6)];
-        normy = geofa[IJK(0, j, 5,nx-1,6)];
-        //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(0,j,0, nx-1, 4)]),&(uGLeft[IJ(0,j,NVAR)]));
-    }
-
-    //top side of domain
-    for (int i=0; i<(nx-1); i++){
-        // left state = interior, right state = ghost
-        int btype;
-        btype = ibound[i+nx+ny-2];
-
-        //==========Face Normal
-        double normx, normy;
-        normx = geofa[IJK(i, ny-1, 1,nx-1,6)];
-        normy = geofa[IJK(i, ny-1, 2,nx-1,6)];
-        //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(i,ny-1,0, nx-1, 4)]),&(uGTop[IJ(0,i,NVAR)]));
-    }
-
-    //left side of domain
-    for (int j=0; j<(ny-1); j++){
-        // left state = interior, right state = ghost
-        int btype;
-        btype = ibound[j+(2*nx)+ny-3];
-
-        //==========Face Normal
-        double normx, normy;
-        normx = geofa[IJK(0, j, 4,nx-1,6)];
-        normy = geofa[IJK(0, j, 4,nx-1,6)];
-        //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(0,j,0, nx-1, 4)]),&(uGLeft[IJ(0,j,NVAR)]));
-    }
-
-    //====================Evaluate Flux Contributions====================
-    //dudt = sum(flux_in * face_length) / volume
-    //==========Fully Interior Faces
-    // I|xi fluxes
-    for (int i=1; i<nx-1; i++){
+    //Min grid spacing
+    mindx = 1.0;
+    for (int i=0; i<nx-1; i++){
         for (int j=0; j<ny-1; j++){
-            //faces to the left/above point i,j
-            double len, normx, normy, fflux[4];
-            len = geofa[IJK(i,j,3,nx-1,6)];
-            normx = geofa[IJK(i,j,4,nx-1,6)];
-            normy = geofa[IJK(i,j,5,nx-1,6)];
-
-            int iuL = IJK(i-1,j,0,nx-1,NVAR);
-            int iuR = IJK(i  ,j,0,nx-1,NVAR);
-            //Find interface flux
-            LeerFlux(gam, normx, normy, &(unk[iuL]), &(unk[iuR]), &(fflux[0]));
-
-            //Add flux contribution to elements
-            rhsel[iuL  ] -= len * fflux[0];
-            rhsel[iuL+1] -= len * fflux[1];
-            rhsel[iuL+2] -= len * fflux[2];
-            rhsel[iuL+3] -= len * fflux[3];
-
-            rhsel[iuR  ] += len * fflux[0];
-            rhsel[iuR+1] += len * fflux[1];
-            rhsel[iuR+2] += len * fflux[2];
-            rhsel[iuR+3] += len * fflux[3];
+            mindx = fmin(mindx, geofa[IJK(i,j,0,nx,6)]);
+            mindx = fmin(mindx, geofa[IJK(i,j,3,nx,6)]);
         }
     }
 
-    // J|eta fluxes
-    for (int i=0; i<nx-1; i++){
-        for (int j=1; j<ny-1; j++){
-            //faces to the left/above point i,j
-            double len, normx, normy, fflux[4];
-            len = geofa[IJK(i,j,0,nx-1,6)];
-            normx = geofa[IJK(i,j,1,nx-1,6)];
-            normy = geofa[IJK(i,j,2,nx-1,6)];
+    return CFL * mindx / vmax;
+}
 
-            int iuL = IJK(i,j  ,0,nx-1,NVAR);
-            int iuR = IJK(i,j-1,0,nx-1,NVAR);
-            //Find interface flux
-            LeerFlux(gam, normx, normy, &(unk[iuL]), &(unk[iuR]), &(fflux[0]));
+void calculate_residual(int nx, int ny, double* unk, double* unknew, double* res){
+    double res2[NVAR] = {0.0};
 
-            //Add flux contribution to elements
-            rhsel[iuL  ] -= len * fflux[0];
-            rhsel[iuL+1] -= len * fflux[1];
-            rhsel[iuL+2] -= len * fflux[2];
-            rhsel[iuL+3] -= len * fflux[3];
-
-            rhsel[iuR  ] += len * fflux[0];
-            rhsel[iuR+1] += len * fflux[1];
-            rhsel[iuR+2] += len * fflux[2];
-            rhsel[iuR+3] += len * fflux[3];
-        }
-    }
-
-    //==========Boundary faces
-    // I|xi fluxes
-    for (int j=0; j<ny-1; j++){
-        //LEFT BOUNDARY
-        double len, normx, normy, fflux[4];
-        len   = geofa[IJK(0,j,3,nx-1,6)];
-        normx = geofa[IJK(0,j,4,nx-1,6)];
-        normy = geofa[IJK(0,j,5,nx-1,6)];
-
-        int iuL = IJ(0,j,NVAR);
-        int iuR = IJK(0  ,j,0,nx-1,NVAR);
-        LeerFlux(gam, normx, normy, &(uGLeft[iuL]), &(unk[iuR]), &(fflux[0]));
-
-        //Add flux contribution to elements
-        rhsel[iuR  ] += len * fflux[0];
-        rhsel[iuR+1] += len * fflux[1];
-        rhsel[iuR+2] += len * fflux[2];
-        rhsel[iuR+3] += len * fflux[3];
-
-        //RIGHT BOUNDARY
-        len   = geofa[IJK(nx-1,j,3,nx-1,6)];
-        normx = geofa[IJK(nx-1,j,4,nx-1,6)];
-        normy = geofa[IJK(nx-1,j,5,nx-1,6)];
-
-        iuL = IJK(nx-1,j,0,nx-1,NVAR);
-        iuR = IJ(0,j,NVAR);
-        LeerFlux(gam, normx, normy, &(unk[iuL]), &(uGRight[iuR]), &(fflux[0]));
-
-        //Add flux contribution to elements
-        rhsel[iuL  ] -= len * fflux[0];
-        rhsel[iuL+1] -= len * fflux[1];
-        rhsel[iuL+2] -= len * fflux[2];
-        rhsel[iuL+3] -= len * fflux[3];
-    }
-
-    // J|eta fluxes
-    for (int i=0; i<nx-1; i++) {
-        //BOTTOM BOUNDARY
-        double len, normx, normy, fflux[4];
-        len   = geofa[IJK(i, 0, 0, nx - 1, 6)];
-        normx = geofa[IJK(i, 0, 1, nx - 1, 6)];
-        normy = geofa[IJK(i, 0, 2, nx - 1, 6)];
-
-        int iuL = IJK(i, 0, 0, nx - 1, NVAR);
-        int iuR = IJ(0,i,NVAR);
-        //Find interface flux
-        LeerFlux(gam, normx, normy, &(unk[iuL]), &(uGBot[iuR]), &(fflux[0]));
-
-        //Add flux contribution to elements
-        rhsel[iuL]     -= len * fflux[0];
-        rhsel[iuL + 1] -= len * fflux[1];
-        rhsel[iuL + 2] -= len * fflux[2];
-        rhsel[iuL + 3] -= len * fflux[3];
-
-        //TOP BOUNDARY
-        len   = geofa[IJK(i,ny-1,0,nx-1,6)];
-        normx = geofa[IJK(i,ny-1,1,nx-1,6)];
-        normy = geofa[IJK(i,ny-1,2,nx-1,6)];
-
-        iuL = IJ(0,i,NVAR);
-        iuR = IJK(i,ny-1,0,nx-1,NVAR);
-        //Find interface flux
-        LeerFlux(gam, normx, normy, &(uGTop[iuL]), &(unk[iuR]), &(fflux[0]));
-
-        //Add flux contribution to elements
-        rhsel[iuR  ] += len * fflux[0];
-        rhsel[iuR+1] += len * fflux[1];
-        rhsel[iuR+2] += len * fflux[2];
-        rhsel[iuR+3] += len * fflux[3];
-    }
-
-    //====================Combine to Find du/dt====================
     for (int i=0; i<nx-1; i++){
         for (int j=0; j<ny-1; j++){
-
             int iu = IJK(i,j,0,nx-1,NVAR);
-            double vol = geoel[IJK(i,j,0,nx-1,3)];
-            dudt[iu] = rhsel[iu] / vol;
 
+            for (int k=0; k<NVAR; k++){
+                double diff = unknew[iu+k] - unk[iu+k];
+                res2[k] += diff*diff;
+
+                if (_isnan(diff)){
+                    printf("oeups (rescalc nan)\n");
+                }
+            }
         }
     }
 
+    res[0] = sqrt(res2[0]);
+    res[1] = sqrt(res2[1]);
+    res[2] = sqrt(res2[2]);
+    res[3] = sqrt(res2[3]);
 }
 
-
+void vec_copy(double n, double* a, double* b){
+    for (int i=0; i<n; i++){
+        a[i] = b[i];
+    }
+}
 
 int main() {
     //Read in setup file
-    double gam, mach, tol;
+    double gam, mach, tol, CFL;
     int mxiter;
     gam =1.4;
-    mach = 0.5;
+    mach = 2.0;
     tol = 1e-6;
-    mxiter = 1e4; //maximum number of iteration before stopping
+    mxiter = 10;//1e4; //maximum number of iteration before stopping
+    CFL = 0.75;
 
+    printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
     int nx, ny, npoin, nb, nelem, nface;
     double *x, *y;
@@ -297,6 +154,7 @@ int main() {
     double* geofa;
 
     //read in mesh file
+    printf("Reading Mesh File..... \n");
     read_mesh(&nx, &ny, &ibound, &x, &y);
     npoin = nx*ny;
     nb = 2*nx + 2*ny;
@@ -304,12 +162,17 @@ int main() {
     nface = 2*nelem + nx + ny;
 
     //Find elem volume and centroid, face len and normals
+    printf("Calculating Grid Metrics..... \n");
     calc_geoel_geofa(nx, ny, x, y, &geoel, &geofa);
 
+    printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
-    double res;
+    double res0 = 1.0;
+    double res[4], ressum;
     int iter;
-    auto* u = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* unk    = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* unknew = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* dudt   = (double*)malloc(NVAR*nelem*sizeof(double));
 
     //initialize solution on mesh (zero aoa)
     double uFS[4];
@@ -318,17 +181,55 @@ int main() {
     uFS[2] = 0.0;
     uFS[3] = 0.5 + 1 / (gam*(gam-1)*mach*mach);
     for (int ielem=0; ielem<nelem; ielem++){
-        u[NVAR*ielem]   = uFS[0];
-        u[NVAR*ielem+1] = uFS[1];
-        u[NVAR*ielem+2] = uFS[2];
-        u[NVAR*ielem+3] = uFS[3];
+        unk[NVAR*ielem]   = uFS[0];
+        unk[NVAR*ielem+1] = uFS[1];
+        unk[NVAR*ielem+2] = uFS[2];
+        unk[NVAR*ielem+3] = uFS[3];
     }
 
-
-    res = 1.0; //Initialized residual
-    iter = 0;
-
+    printf("===== Generating Mesh and Initial State Tecplot Files ====\n");
     print_elem_stats("MeshVolumeStats", nx, ny, geoel);
-    print_state("Initial State", nx, ny, x, y, u, geoel);
+    print_state("Initial State", nx, ny, gam, x, y, unk, geoel);
 
+    printf("Calculating Timestep..... \n");
+    //Find timestep based off of CFL limit for initial condition (dt = CFL dx / c )
+    double dt = find_dt(gam, nx, ny, CFL, uFS, geofa);
+    printf("dt = %f\n", dt);
+
+    printf("==================== Starting Solver ====================\n");
+
+    for (iter=0; iter<mxiter; iter++){
+        //calculate dudt
+        calc_dudt(nx, ny, gam, uFS, ibound, geoel, geofa, unk, dudt);
+
+        for (int ielem=0; ielem<nelem; ielem++){
+            int iu = NVAR*ielem;
+            unknew[iu  ] = unk[iu  ] + dudt[iu  ]*dt;
+            unknew[iu+1] = unk[iu+1] + dudt[iu+1]*dt;
+            unknew[iu+2] = unk[iu+2] + dudt[iu+2]*dt;
+            unknew[iu+3] = unk[iu+3] + dudt[iu+3]*dt;
+        }
+
+
+        calculate_residual(nx, ny, unk, unknew, res);
+        ressum = res[0]+res[1]+res[2]+res[3];
+        if (iter==0) res0 = ressum;
+
+        if (iter%50 == 0) {
+            printf("Iter:%10d Rel Tot Res:  %8.5e\t\t Equation Abs Res:\t%10.2e%10.2e%10.2e%10.2e\n", \
+                    iter, ressum / res0, res[0], res[1], res[2], res[3]);
+        }
+
+        if (ressum/res0 < tol) break;
+
+        vec_copy(nelem*NVAR, unk, unknew);
+
+    }
+    printf("==================== Solution Found ====================\n");
+    printf("Saving Solution File..... \n");
+
+    print_state("Final State", nx, ny, gam, x, y, unk, geoel);
+
+
+    printf("Complete.");
 }
