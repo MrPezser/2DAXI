@@ -14,14 +14,14 @@ void getPrimatives(const double gam, const double *unkel, double *rho, double *u
     double rhoe  = unkel[3];
 
     //Density Limiter
-    rho[0] = fmax(1e-8, rho[0]);
+    rho[0] = fmax(1e-4, rho[0]);
 
     //break down into primatives
     u[0] = rhou / rho[0];
     v[0] = rhov / rho[0];
     double v2 = (u[0]*u[0] + v[0]*v[0]);
 
-    p[0] = (gam - 1) * (rhoe - (0.5 * rho[0] * v2));
+    p[0] = fmax((gam - 1) * (rhoe - (0.5 * rho[0] * v2)), 1e-4);
 
     //Pressure Limit
     p[0] = fmax(1e-8, p[0]);
@@ -136,10 +136,10 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, doubl
     fout[2] = fPlus[2] + fMnus[2];
     fout[3] = fPlus[3] + fMnus[3];
 
-    if (_isnan(fout[0])) {
+    if (_isnan(fout[0]) or _isnan(fout[3])) {
         printf("oeups (leerflux isnan)\n");
     }
     if (fabs(fout[0]) > 100) {
-        printf("oeups (leerflux too large)\n");
+        //printf("oeups (leerflux too large)\n");
     }
 }

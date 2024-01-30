@@ -19,6 +19,18 @@ double ramp_surface(double x, double h, double L) {
     }
 }
 
+double nozzle_surface(double x, double L1, double L2) {
+    //test geometry: Mach 3.0 CD nozzle
+    double h =  0.81481480 - 0.01481480;
+    if(x < 1) {
+        return 0;
+    } else if( x > 1+L1) {
+        return h * 0.5*(1 + (L2-(x-1-L1))/L2);
+    } else {
+        return (h/L1)*(x-1);
+    }
+}
+
 void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibound) {
     //Makes a tecplot file of the grid and a setup file for the solver
     int nb = 2*(nx-1) + 2*(ny-1);
@@ -63,9 +75,9 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 1.5;
-    length = 6.0;
-    nx = 251;
+    height = 2.0;
+    length = 5.0;
+    nx = 301;
     ny = 101;
 
     /*
@@ -83,7 +95,7 @@ int main() {
      * Need to represent bottom and top surfaces of geometry
      */
     double ramp_height = 0.25;
-    double ramp_length = 0.5;
+    double ramp_length = 1.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -101,7 +113,8 @@ int main() {
 
     //define coordinates
     for (int i =0; i<nx; i++){
-        ymin = ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
+        ymin = nozzle_surface(i*dx, ramp_length, length-ramp_length-1);
+                // ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         ymax = height + y_offset;             // flat top
         dy = (ymax - ymin) / ny;
 
@@ -126,11 +139,15 @@ int main() {
             break;
         }
     }
-
     //apply wall boundary condition
     for (int ib = istag; ib < nx-1; ib++) {
         ibound[ib] = 0;     //bottom surface
-        ibound[ib+nx+ny-2] = 0; //top surface
+        ibound[ib+nx+ny-2-istag] = 0; //top surface
+    }
+
+    //Back Pressure
+    for (int ib = nx-1; ib<nx+ny-2; ib++){
+        ibound[ib] = 2;
     }
 
 

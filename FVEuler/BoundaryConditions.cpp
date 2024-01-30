@@ -61,7 +61,7 @@ void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vy
     rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
 }
 
-void boundary_state(int btype, double gam,double normx, double normy, double *uFS, double* uLeft, double* uRight) {
+void boundary_state(int btype, double gam,double normx, double normy, double *uFS, double* uBP, double* uLeft, double* uRight) {
     //==========Apply Boundary Condition
     double rhoL, uL, vL, vDOTn;
 
@@ -89,7 +89,19 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
     }
 
     //Freestream BC
-    if (btype == 1){
+    if (btype == 1 or btype == 2 ){
+        double uBound[4];
+        if (btype == 2) {
+            uBound[0] = uFS[0];
+            uBound[1] = uFS[1];
+            uBound[2] = uFS[2];
+            uBound[3] = uFS[3];
+        } else if (btype==1){
+            uBound[0] = uBP[0];
+            uBound[1] = uBP[1];
+            uBound[2] = uBP[2];
+            uBound[3] = uBP[3];
+        }
         //get all interior primitives
         double pL, cL, ML;
         getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);
@@ -99,15 +111,15 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
 
         if (MDOTn <= -1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Supersonic Inflow - fully determined by free stream
-            uRight[0] = uFS[0];
-            uRight[1] = uFS[1];
-            uRight[2] = uFS[2];
-            uRight[3] = uFS[3];
+            uRight[0] = uBound[0];
+            uRight[1] = uBound[1];
+            uRight[2] = uBound[2];
+            uRight[3] = uBound[3];
         }
         if (MDOTn <= 0 && MDOTn > -1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Subsonic Inflow
             double rhoR, rhouR, rhovR, rhoeR;
-            SubsonInflo(gam, uL, vL, cL, uFS, normx, normy, &rhoR, &rhouR, &rhovR, &rhoeR);
+            SubsonInflo(gam, uL, vL, cL, uBound, normx, normy, &rhoR, &rhouR, &rhovR, &rhoeR);
             uRight[0] = rhoR;
             uRight[1] = rhouR;
             uRight[2] = rhovR;

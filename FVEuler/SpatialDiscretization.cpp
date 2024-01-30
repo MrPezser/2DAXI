@@ -10,7 +10,7 @@
 #include "EulerFlux.h"
 
 
-void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geoel, double* geofa, double* unk, double* dudt) {
+void calc_dudt(int nx, int ny, double gam, double *uFS, double* uBP, int* ibound, double* geoel, double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
     double rhsel[NVAR*nelem];
     for(int i=0;i<NVAR*nelem;i++) rhsel[i] = 0.0;
@@ -28,7 +28,7 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geo
         normx = geofa[IJK(i, 0, 1,nx,6)];
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(i,0,0, nx-1, 4)]),&(uGBot[IJ(0,i,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[IJK(i,0,0, nx-1, 4)]),&(uGBot[IJ(0,i,NVAR)]));
     }
 
     //right side of domain
@@ -42,7 +42,7 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geo
         normx = geofa[IJK(0, j, 4,nx,6)];
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[IJK(nx-2,j,0, nx-1, NVAR)]),&(uGRight[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[IJK(nx-2,j,0, nx-1, NVAR)]),&(uGRight[IJ(0,j,NVAR)]));
     }
 
     //top side of domain
@@ -57,7 +57,7 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geo
         normx = -geofa[IJK(i, ny-1, 1,nx,6)];
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS, &(unk[IJK(i,ny-2,0, nx-1, NVAR)]), &(uGTop[IJ(0,i,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[IJK(i,ny-2,0, nx-1, NVAR)]), &(uGTop[IJ(0,i,NVAR)]));
     }
 
     //left side of domain
@@ -72,7 +72,7 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, int* ibound, double* geo
         normx = -geofa[IJK(0, j, 4,nx,6)];
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS, &(unk[IJK(0,j,0, nx-1, 4)]), &(uGLeft[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[IJK(0,j,0, nx-1, 4)]), &(uGLeft[IJ(0,j,NVAR)]));
     }
 
     //====================Evaluate Flux Contributions====================

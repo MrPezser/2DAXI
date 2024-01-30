@@ -175,16 +175,23 @@ int main() {
     auto* dudt   = (double*)malloc(NVAR*nelem*sizeof(double));
 
     //initialize solution on mesh (zero aoa)
-    double uFS[4];
-    uFS[0] = 1.0;
+    double uFS[4], uBP[4];
+    uFS[0] = 0.246319280397921945993707147708312;
     uFS[1] = 1.0;
     uFS[2] = 0.0;
     uFS[3] = 0.5 + 1 / (gam*(gam-1)*mach*mach);
+
+    //Plenum Pressure (mach 3 for CD nozzle, A/A* = 1.68749999)
+    uBP[0] = 1.0;
+    uBP[1] = 1.0;
+    uBP[2] = 0.0;
+    uBP[3] = 13.387171568521152;
+
     for (int ielem=0; ielem<nelem; ielem++){
-        unk[NVAR*ielem]   = uFS[0];
-        unk[NVAR*ielem+1] = uFS[1];
-        unk[NVAR*ielem+2] = uFS[2];
-        unk[NVAR*ielem+3] = uFS[3];
+        unk[NVAR*ielem]   = uBP[0];
+        unk[NVAR*ielem+1] = uBP[1];
+        unk[NVAR*ielem+2] = uBP[2];
+        unk[NVAR*ielem+3] = uBP[3];
     }
 
     printf("===== Generating Mesh and Initial State Tecplot Files ====\n");
@@ -200,7 +207,7 @@ int main() {
 
     for (iter=0; iter<mxiter; iter++){
         //calculate dudt
-        calc_dudt(nx, ny, gam, uFS, ibound, geoel, geofa, unk, dudt);
+        calc_dudt(nx, ny, gam, uFS, uBP, ibound, geoel, geofa, unk, dudt);
 
         for (int ielem=0; ielem<nelem; ielem++){
             int iu = NVAR*ielem;
