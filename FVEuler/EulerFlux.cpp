@@ -14,14 +14,14 @@ void getPrimatives(const double gam, const double *unkel, double *rho, double *u
     double rhoe  = unkel[3];
 
     //Density Limiter
-    rho[0] = fmax(1e-4, rho[0]);
+    rho[0] = fmax(1e-8, rho[0]);
 
     //break down into primatives
     u[0] = rhou / rho[0];
     v[0] = rhov / rho[0];
     double v2 = (u[0]*u[0] + v[0]*v[0]);
 
-    p[0] = fmax((gam - 1) * (rhoe - (0.5 * rho[0] * v2)), 1e-4);
+    p[0] = fmax((gam - 1) * (rhoe - (0.5 * rho[0] * v2)), 1e-8);
 
     //Pressure Limit
     p[0] = fmax(1e-8, p[0]);

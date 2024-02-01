@@ -91,17 +91,20 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
     //Freestream BC
     if (btype == 1 or btype == 2 ){
         double uBound[4];
-        if (btype == 2) {
-            uBound[0] = uFS[0];
-            uBound[1] = uFS[1];
-            uBound[2] = uFS[2];
-            uBound[3] = uFS[3];
-        } else if (btype==1){
+
+        uBound[0] = uFS[0];
+        uBound[1] = uFS[1];
+        uBound[2] = uFS[2];
+        uBound[3] = uFS[3];
+
+        if (btype==2){
             uBound[0] = uBP[0];
             uBound[1] = uBP[1];
             uBound[2] = uBP[2];
             uBound[3] = uBP[3];
         }
+
+
         //get all interior primitives
         double pL, cL, ML;
         getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);

@@ -140,9 +140,9 @@ int main() {
     double gam, mach, tol, CFL;
     int mxiter;
     gam =1.4;
-    mach = 3.0;
+    mach = 2.5;
     tol = 1e-6;
-    mxiter = 1e4; //maximum number of iteration before stopping
+    mxiter = 5e4; //maximum number of iteration before stopping
     CFL = 0.75;
 
     printf("==================== Loading Mesh ====================\n");
@@ -176,7 +176,7 @@ int main() {
 
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
-    uFS[0] = 0.246319280397921945993707147708312;
+    uFS[0] = 1.0;           //0.246319280397921945993707147708312;
     uFS[1] = 1.0;
     uFS[2] = 0.0;
     uFS[3] = 0.5 + 1 / (gam*(gam-1)*mach*mach);
@@ -188,10 +188,10 @@ int main() {
     uBP[3] = 13.387171568521152;
 
     for (int ielem=0; ielem<nelem; ielem++){
-        unk[NVAR*ielem]   = uBP[0];
-        unk[NVAR*ielem+1] = uBP[1];
-        unk[NVAR*ielem+2] = uBP[2];
-        unk[NVAR*ielem+3] = uBP[3];
+        unk[NVAR*ielem]   = uFS[0];
+        unk[NVAR*ielem+1] = uFS[1];
+        unk[NVAR*ielem+2] = uFS[2];
+        unk[NVAR*ielem+3] = uFS[3];
     }
 
     printf("===== Generating Mesh and Initial State Tecplot Files ====\n");

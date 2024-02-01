@@ -21,13 +21,13 @@ double ramp_surface(double x, double h, double L) {
 
 double nozzle_surface(double x, double L1, double L2) {
     //test geometry: Mach 3.0 CD nozzle
-    double h =  0.81481480 - 0.01481480;
-    if(x < 1) {
+    double h =  1.5;//0.81481480 - 0.01481480;
+    if(x < 0.0) {
         return 0;
-    } else if( x > 1+L1) {
-        return h * 0.5*(1 + (L2-(x-1-L1))/L2);
+    } else if( x > L1) {
+        return h * ((L2-(x-L1))/L2);
     } else {
-        return (h/L1)*(x-1);
+        return (h/L1)*(x);
     }
 }
 
@@ -77,7 +77,7 @@ int main() {
     int nx, ny;
     height = 2.0;
     length = 5.0;
-    nx = 301;
+    nx = 101;
     ny = 101;
 
     /*
@@ -95,7 +95,7 @@ int main() {
      * Need to represent bottom and top surfaces of geometry
      */
     double ramp_height = 0.25;
-    double ramp_length = 1.0;
+    double ramp_length = 1.5;
 
     /*
      * ==================== Mesh Generation ====================
@@ -113,9 +113,9 @@ int main() {
 
     //define coordinates
     for (int i =0; i<nx; i++){
-        ymin = nozzle_surface(i*dx, ramp_length, length-ramp_length-1);
+        ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
                 // ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
-        ymax = height + y_offset;             // flat top
+        ymin = y_offset;             // flat top
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
