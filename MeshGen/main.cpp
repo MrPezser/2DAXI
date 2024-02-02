@@ -76,14 +76,13 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 2.0;
-    length = 4.0;//10.0;
-    nx = 101;
+    height = 0.25;//2.0;
+    length = 1.0;//10.0;
+    nx = 301;
     ny = 201;
-    double bias = 0.5;
+    double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
-
 
     /*
      * ==================== Geometry Input ====================
@@ -113,14 +112,14 @@ int main() {
     for (int i =0; i<nx; i++){
         //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
         ymax = height + y_offset;
-        ymin = ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
+        ymin = 0.0*ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
             int ip = IU(i,j,nx);
             x[ip] = i*dx;
             //y[ip] = j*dy + ymin; //equal spacing
-            y[ip] = (bias)*( j*dy*(1.0*j/(ny-1))) + (1-bias)*(j*dy) + ymin; //biased spacing
+            y[ip] = (bias)*( j*dy*(1.0*j/(ny-1))) + (1.0-bias)*(j*dy) + ymin; //biased spacing
         }
     }
 

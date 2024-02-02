@@ -141,10 +141,10 @@ int main() {
     int mxiter;
     gam =1.4;
     mu = 1e-5; // ~ 1/Re
-    mach = 2.0;
+    mach = 0.3;
     tol = 1e-6;
-    mxiter = 5e4; //maximum number of iteration before stopping
-    CFL = 0.5;
+    mxiter = 1e5; //maximum number of iteration before stopping
+    CFL = 0.75;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
