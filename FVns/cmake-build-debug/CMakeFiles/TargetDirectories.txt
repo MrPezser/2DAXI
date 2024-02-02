@@ -1,0 +1,3 @@
+C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/CMakeFiles/FVns.dir
+C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <cstdlib>
 #include "SpatialDiscretization.h"
 #include "Indexing.h"
 #include "BoundaryConditions.h"
@@ -12,7 +13,9 @@
 
 void calc_dudt(int nx, int ny, double gam, double *uFS, double* uBP, int* ibound, double* geoel, double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
-    double rhsel[NVAR*nelem];
+    double *rhsel, *tau;
+    rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
+
     for(int i=0;i<NVAR*nelem;i++) rhsel[i] = 0.0;
 
     //Calculate boundary cell state (ghost state)
@@ -242,5 +245,7 @@ void calc_dudt(int nx, int ny, double gam, double *uFS, double* uBP, int* ibound
 
         }
     }
+
+    free(rhsel);
 
 }

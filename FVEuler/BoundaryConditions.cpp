@@ -78,8 +78,13 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         uRight[3] = uLeft[3];
 
         //''ghost'' velocity is mirrored
-        double uR = uL - 2*vDOTn*normx;
-        double vR = vL - 2*vDOTn*normy;
+        //double uR = uL - 2*vDOTn*normx;
+        //double vR = vL - 2*vDOTn*normy;
+        //uRight[1] = uLeft[0]*uR;
+        //uRight[2] = uLeft[0]*vR;
+        //''ghost'' velocity is opposite (no slip)
+        double uR = -uL;
+        double vR = -vL;
         uRight[1] = uLeft[0]*uR;
         uRight[2] = uLeft[0]*vR;
 
@@ -88,8 +93,8 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         }
     }
 
-    //Freestream BC
-    if (btype == 1 or btype == 2 ){
+    //Freestream, Back Pressure, and Outflow BC
+    if (btype == 1 or btype == 2 or btype ==3){
         double uBound[4];
 
         uBound[0] = uFS[0];
@@ -97,11 +102,17 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         uBound[2] = uFS[2];
         uBound[3] = uFS[3];
 
-        if (btype==2){
+        if (btype==2) {
             uBound[0] = uBP[0];
             uBound[1] = uBP[1];
             uBound[2] = uBP[2];
             uBound[3] = uBP[3];
+        } else if (btype==3){
+            uRight[0] = uLeft[0];
+            uRight[1] = uLeft[1];
+            uRight[2] = uLeft[2];
+            uRight[3] = uLeft[3];
+            return;
         }
 
 

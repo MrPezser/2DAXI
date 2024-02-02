@@ -140,10 +140,10 @@ int main() {
     double gam, mach, tol, CFL;
     int mxiter;
     gam =1.4;
-    mach = 2.5;
+    mach = 2.0;
     tol = 1e-6;
     mxiter = 5e4; //maximum number of iteration before stopping
-    CFL = 0.75;
+    CFL = 0.5;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -181,11 +181,11 @@ int main() {
     uFS[2] = 0.0;
     uFS[3] = 0.5 + 1 / (gam*(gam-1)*mach*mach);
 
-    //Plenum Pressure (mach 3 for CD nozzle, A/A* = 1.68749999)
+    //Plenum State
     uBP[0] = 1.0;
-    uBP[1] = 1.0;
+    uBP[1] = 0.0;
     uBP[2] = 0.0;
-    uBP[3] = 13.387171568521152;
+    uBP[3] = 0.5; //uFS[3];//13.387171568521152;
 
     for (int ielem=0; ielem<nelem; ielem++){
         unk[NVAR*ielem]   = uFS[0];
@@ -200,13 +200,14 @@ int main() {
 
     printf("Calculating Timestep..... \n");
     //Find timestep based off of CFL limit for initial condition (dt = CFL dx / c )
-    double dt = find_dt(gam, nx, ny, CFL, uFS, geofa);
+    double dt;
     printf("dt = %f\n", dt);
 
     printf("==================== Starting Solver ====================\n");
 
     for (iter=0; iter<mxiter; iter++){
         //calculate dudt
+        dt = find_dt(gam, nx, ny, CFL, unk, geofa);
         calc_dudt(nx, ny, gam, uFS, uBP, ibound, geoel, geofa, unk, dudt);
 
         for (int ielem=0; ielem<nelem; ielem++){
@@ -223,8 +224,13 @@ int main() {
         if (iter==0) res0 = ressum;
 
         if (iter%50 == 0) {
-            printf("Iter:%10d Rel Tot Res:  %8.5e\t\t Equation Abs Res:\t%10.2e%10.2e%10.2e%10.2e\n", \
-                    iter, ressum / res0, res[0], res[1], res[2], res[3]);
+            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\t\t Abs Residuals:  %12.2e%12.2e%12.2e%12.2e\n", \
+                    iter, dt,ressum / res0, res[0], res[1], res[2], res[3]);
+        }
+
+        if (iter > 0 and iter%1000 == 0){
+            printf("Saving current Solution\n");
+            print_state("Final State", nx, ny, gam, x, y, unk, geoel);
         }
 
         if (ressum/res0 < tol) break;

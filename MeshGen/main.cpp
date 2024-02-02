@@ -10,12 +10,13 @@
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
-    if(x < 1) {
+    double l0 = 2.0;
+    if(x < l0) {
         return 0;
-    } else if( x > 1+L) {
+    } else if( x > l0+L) {
         return h;
     } else {
-        return (h/L)*(x-1);
+        return (h/L)*(x-l0);
     }
 }
 
@@ -76,16 +77,10 @@ int main() {
     double height, length;
     int nx, ny;
     height = 2.0;
-    length = 5.0;
+    length = 4.0;//10.0;
     nx = 101;
-    ny = 101;
-
-    /*
-    int bias; // 0:no bias, 1:bottom bias, 2:top bias
-    bias = 0;
-    double bias_ratio; // ratio of consecutive element size for bias option
-    bias_ratio = 1.0;
-    */
+    ny = 201;
+    double bias = 0.5;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
 
@@ -94,8 +89,8 @@ int main() {
      * ==================== Geometry Input ====================
      * Need to represent bottom and top surfaces of geometry
      */
-    double ramp_height = 0.25;
-    double ramp_length = 1.5;
+    double ramp_height = 1.0;
+    double ramp_length = 2.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -111,26 +106,31 @@ int main() {
 
     dx = length / (nx-1);
 
+
+
+
     //define coordinates
     for (int i =0; i<nx; i++){
-        ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
-                // ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
-        ymin = y_offset;             // flat top
+        //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
+        ymax = height + y_offset;
+        ymin = ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
             int ip = IU(i,j,nx);
             x[ip] = i*dx;
-            y[ip] = j*dy + ymin;
+            //y[ip] = j*dy + ymin; //equal spacing
+            y[ip] = (bias)*( j*dy*(1.0*j/(ny-1))) + (1-bias)*(j*dy) + ymin; //biased spacing
         }
     }
 
-    //========== Boundary cells
+
+
+
+    //   ==================== Boundary cells ====================
     //initialize with freestream
     for(int ib=0; ib<nbound; ib++)
         ibound[ib] = 1;
-
-
     //hardcoded nosecone stagnation point finder - sucks
     int istag=0;
     for(int ix=0; ix<nx; ix++){
@@ -139,18 +139,23 @@ int main() {
             break;
         }
     }
+
     //apply wall boundary condition
+    /*
     for (int ib = istag; ib < nx-1; ib++) {
         ibound[ib] = 0;     //bottom surface
-        ibound[ib+nx+ny-2-istag] = 0; //top surface
+        //ibound[ib+nx+ny-2-istag] = 0; //top surface
+    }*/
+    //full top/bot surf
+    for (int ib = 0; ib < nx-1; ib++) {
+        ibound[ib] = 0;
+        ibound[ib+nx+ny-2-istag] = 3; //top surface
     }
-
-    //Back Pressure
+    //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){
-        ibound[ib] = 2;
+        ibound[ib] = 3;
+        //ibound[ib+nx+ny-2] = 0;
     }
-
-
 
 
     // ==================== Output Mesh ====================
