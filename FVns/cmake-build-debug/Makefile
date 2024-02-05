@@ -56,10 +56,10 @@ RM = "C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe"
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns
+CMAKE_SOURCE_DIR = C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -86,9 +86,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\\CMakeFiles\progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\\CMakeFiles\progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -200,6 +200,30 @@ FileIO.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/FileIO.cpp.s
 .PHONY : FileIO.cpp.s
 
+MeshModule.obj: MeshModule.cpp.obj
+.PHONY : MeshModule.obj
+
+# target to build an object file
+MeshModule.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MeshModule.cpp.obj
+.PHONY : MeshModule.cpp.obj
+
+MeshModule.i: MeshModule.cpp.i
+.PHONY : MeshModule.i
+
+# target to preprocess a source file
+MeshModule.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MeshModule.cpp.i
+.PHONY : MeshModule.cpp.i
+
+MeshModule.s: MeshModule.cpp.s
+.PHONY : MeshModule.s
+
+# target to generate assembly for a file
+MeshModule.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MeshModule.cpp.s
+.PHONY : MeshModule.cpp.s
+
 SpatialDiscretization.obj: SpatialDiscretization.cpp.obj
 .PHONY : SpatialDiscretization.obj
 
@@ -266,6 +290,9 @@ help:
 	@echo ... FileIO.obj
 	@echo ... FileIO.i
 	@echo ... FileIO.s
+	@echo ... MeshModule.obj
+	@echo ... MeshModule.i
+	@echo ... MeshModule.s
 	@echo ... SpatialDiscretization.obj
 	@echo ... SpatialDiscretization.i
 	@echo ... SpatialDiscretization.s

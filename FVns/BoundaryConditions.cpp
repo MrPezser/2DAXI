@@ -73,16 +73,20 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
     vDOTn = uL*normx + vL*normy;
 
     //Wall BC
-    if (btype == 0) {
+    if (btype == 0 or btype == 4) {
         //Density and energy are constant
         uRight[0] = uLeft[0];
         uRight[3] = uLeft[3];
 
-        //''ghost'' velocity is mirrored (slip)
-        //double uR = uL - 2*vDOTn*normx;
-        //double vR = vL - 2*vDOTn*normy;
-        //uRight[1] = uLeft[0]*uR;
-        //uRight[2] = uLeft[0]*vR;
+        if (btype==4) {
+            //''ghost'' velocity is mirrored (slip)
+            // symmetry BC
+            double uR = uL - 2 * vDOTn * normx;
+            double vR = vL - 2 * vDOTn * normy;
+            uRight[1] = uLeft[0] * uR;
+            uRight[2] = uLeft[0] * vR;
+            return;
+        }
 
         //''ghost'' velocity is opposite (no slip)
         double uR = -uL;

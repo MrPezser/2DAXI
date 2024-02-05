@@ -22,11 +22,13 @@ double ramp_surface(double x, double h, double L) {
 
 double nozzle_surface(double x, double L1, double L2) {
     //test geometry: Mach 3.0 CD nozzle
-    double h =  1.5;//0.81481480 - 0.01481480;
+    double h =  0.555;//0.81481480 - 0.01481480;
+    double h2 = 0.365;
     if(x < 0.0) {
         return 0;
     } else if( x > L1) {
-        return h * ((L2-(x-L1))/L2);
+        return x*(h-h2)/(L1-L2) + (-h*L2 + h2*L1)/(L1-L2);
+        // h * ((L2-(x-L1))/L2);
     } else {
         return (h/L1)*(x);
     }
@@ -76,10 +78,10 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 0.25;//2.0;
-    length = 1.0;//10.0;
-    nx = 301;
-    ny = 201;
+    height = 1.255;//2.0;
+    length = 2.5;//10.0;
+    nx = 101;
+    ny = 401;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
@@ -89,7 +91,7 @@ int main() {
      * Need to represent bottom and top surfaces of geometry
      */
     double ramp_height = 1.0;
-    double ramp_length = 2.0;
+    double ramp_length = 0.75;
 
     /*
      * ==================== Mesh Generation ====================
@@ -112,7 +114,8 @@ int main() {
     for (int i =0; i<nx; i++){
         //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
         ymax = height + y_offset;
-        ymin = 0.0*ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
+        ymin = nozzle_surface(i*dx, ramp_length, length-ramp_length);
+                //ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
@@ -148,7 +151,7 @@ int main() {
     //full top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
         ibound[ib] = 0;
-        ibound[ib+nx+ny-2-istag] = 3; //top surface
+        ibound[ib+nx+ny-2-istag] = 4; //top surface
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){

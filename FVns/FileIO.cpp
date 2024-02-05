@@ -45,7 +45,7 @@ void print_elem_stats(const char *title, int nx, int ny, const double* geoel) {
 
     //printf("Printing Coordinate Information\n");
     for (int j=0; j < (ny-1); j++) {
-        for (int i=0; i< (ny-1); i++) {
+        for (int i=0; i< (nx-1); i++) {
             double x = geoel[IJK(i,j,1,nx-1,3)];
             double y = geoel[IJK(i,j,2,nx-1,3)];
             double vol = geoel[IJK(i,j,0,nx-1,3)];
