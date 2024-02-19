@@ -45,16 +45,16 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     tau[3] = 2*mu*Sij[3];
 
     // Viscous Contributions to Flux
-    vflux[0] = tau[0]*dc[0] + tau[2]*dc[1];
-    vflux[1] = tau[1]*dc[0] + tau[3]*dc[1];
+    vflux[0] = tau[0]*normx + tau[2]*normy;
+    vflux[1] = tau[1]*normx + tau[3]*normy;
 
     visc_contrib[0] = vflux[0];
     visc_contrib[1] = vflux[1];
-    visc_contrib[2] = ((uL*tau[0] + vL*tau[2])*dc[0] + (uL*tau[1] + vL*tau[3])*dc[1]);
+    visc_contrib[2] = ((uL*tau[0] + vL*tau[2])*normx + (uL*tau[1] + vL*tau[3])*normy);
 
     visc_contrib[3] = vflux[0];
     visc_contrib[4] = vflux[1];
-    visc_contrib[5] = ((uR*tau[0] + vR*tau[2])*dc[0] + (uR*tau[1] + vR*tau[3])*dc[1]);
+    visc_contrib[5] = ((uR*tau[0] + vR*tau[2])*normx + (uR*tau[1] + vR*tau[3])*normy);
 
     for (int iv=0; iv<6; iv++){
         if (_isnan(visc_contrib[iv])){

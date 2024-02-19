@@ -75,10 +75,10 @@ int main() {
     int mxiter;
     gam =1.4;
     mu = 1e-5; // ~ 1/Re
-    mach = 1.9;
+    mach = 0.25;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.5;
+    CFL = 0.75;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
