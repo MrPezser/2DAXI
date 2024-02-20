@@ -75,10 +75,10 @@ int main() {
     int mxiter;
     gam =1.4;
     mu = 1e-5; // ~ 1/Re
-    mach = 0.25;
+    mach = 0.1;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.75;
+    CFL = 0.9;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -158,8 +158,10 @@ int main() {
         if (iter==0) res0 = ressum;
 
         if (iter%50 == 0) {
-            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\t\t Abs Residuals:  %12.2e%12.2e%12.2e%12.2e\n", \
+            //printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e  \t\t Abs Residuals:  %12.2e%12.2e%12.2e%12.2e\n", \
                     iter, dt,ressum / res0, res[0], res[1], res[2], res[3]);
+            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
+                    iter, dt,ressum / res0);
         }
 
         if (iter > 0 and iter%1000 == 0){

@@ -78,10 +78,10 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 1.255;//2.0;
-    length = 2.5;//10.0;
+    height = 0.75;
+    length = 3.0;
     nx = 101;
-    ny = 401;
+    ny = 101;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
@@ -114,7 +114,7 @@ int main() {
     for (int i =0; i<nx; i++){
         //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
         ymax = height + y_offset;
-        ymin = nozzle_surface(i*dx, ramp_length, length-ramp_length);
+        ymin = 0.0*nozzle_surface(i*dx, ramp_length, length-ramp_length);
                 //ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
         dy = (ymax - ymin) / ny;
 
@@ -150,8 +150,8 @@ int main() {
     }*/
     //full top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        ibound[ib] = 0;
-        ibound[ib+nx+ny-2-istag] = 4; //top surface
+        if (ib > nx/5.0 ) ibound[ib] = 0;
+        ibound[ib+nx+ny-2-istag] = 3; //top surface
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){
