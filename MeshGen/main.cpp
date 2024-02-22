@@ -78,13 +78,14 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 0.75;
-    length = 3.0;
-    nx = 101;
-    ny = 101;
+    height = 1.5;
+    length = 5.0;
+    nx = 201;
+    ny = 201;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
+
 
     /*
      * ==================== Geometry Input ====================

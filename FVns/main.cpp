@@ -74,7 +74,7 @@ int main() {
     double gam, mu, mach, tol, CFL;
     int mxiter;
     gam =1.4;
-    mu = 1e-5; // ~ 1/Re
+    mu = 0.0*1e-5; // ~ 1/Re
     mach = 0.1;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
