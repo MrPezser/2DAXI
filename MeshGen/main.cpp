@@ -34,6 +34,19 @@ double nozzle_surface(double x, double L1, double L2) {
     }
 }
 
+double crfproj1(double x) {
+    //return deflection from top surface
+    double delta;
+    if (x < 1.0){
+        delta =  2.0 - (1.0 + 4*(x-0.5)*(x-0.5));
+    } else {
+        delta = 0.0;
+    }
+
+    return 0.4*delta; //scaling factor
+
+}
+
 void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibound) {
     //Makes a tecplot file of the grid and a setup file for the solver
     int nb = 2*(nx-1) + 2*(ny-1);
@@ -78,11 +91,11 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 1.5;
-    length = 5.0;
-    nx = 201;
+    height = 1.0;
+    length = 3.0;
+    nx = 401;
     ny = 201;
-    double bias = 1.0;
+    double bias = 0.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
 
@@ -109,25 +122,22 @@ int main() {
     dx = length / (nx-1);
 
 
-
-
     //define coordinates
     for (int i =0; i<nx; i++){
+
+        double xi = i*dx;
         //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
-        ymax = height + y_offset;
-        ymin = 0.0*nozzle_surface(i*dx, ramp_length, length-ramp_length);
-                //ramp_surface(i*dx, ramp_height, ramp_length) + y_offset;
+        ymax = height + y_offset - crfproj1(xi);
+        ymin = 0.0;
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
             int ip = IU(i,j,nx);
-            x[ip] = i*dx;
+            x[ip] = xi;
             //y[ip] = j*dy + ymin; //equal spacing
             y[ip] = (bias)*( j*dy*(1.0*j/(ny-1))) + (1.0-bias)*(j*dy) + ymin; //biased spacing
         }
     }
-
-
 
 
     //   ==================== Boundary cells ====================
@@ -144,15 +154,11 @@ int main() {
     }
 
     //apply wall boundary condition
-    /*
-    for (int ib = istag; ib < nx-1; ib++) {
-        ibound[ib] = 0;     //bottom surface
-        //ibound[ib+nx+ny-2-istag] = 0; //top surface
-    }*/
     //full top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        if (ib > nx/5.0 ) ibound[ib] = 0;
-        ibound[ib+nx+ny-2-istag] = 3; //top surface
+//        if (ib > nx/5.0 ){}
+        ibound[ib] = 4;
+        ibound[ib+nx+ny-2-istag] = 4; //top surface
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){

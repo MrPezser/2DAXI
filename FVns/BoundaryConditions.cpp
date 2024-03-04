@@ -100,7 +100,7 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
     }
 
     //Freestream, Back Pressure, and Outflow BC
-    if (btype == 1 or btype == 2 or btype ==3){
+    if (btype == 1 or btype == 2 or btype == 3) {
         double uBound[4];
 
         uBound[0] = uFS[0];
