@@ -5,6 +5,7 @@
 #include <valarray>
 #include "FileIO.h"
 #include "Indexing.h"
+#include "StateVariables.h"
 
 void read_mesh(int* nx, int* ny, int** ibound, double** x, double** y){
     int  npoin, nb = {0};
@@ -75,15 +76,16 @@ void print_state(const char *title, int nx, int ny, double gam, double* x, doubl
             xp = geoel[IJK(i,j,1,nx-1,3)];
             yp = geoel[IJK(i,j,2,nx-1,3)];
 
-            rho = unk[IJK(i,j,0,nx-1,NVAR)];
-            u   = unk[IJK(i,j,1,nx-1,NVAR)]/rho;
-            v   = unk[IJK(i,j,2,nx-1,NVAR)]/rho;
-            e   = unk[IJK(i,j,3,nx-1,NVAR)]/rho;
-            p = (gam - 1) * (rho*e- (0.5 * rho * (u*u + v*v)));
-            c = sqrt(gam * p / rho);
-            M = sqrt((u*u + v*v)) / c;
+            State var;
+            var.Initialize(&(unk[IJK(i,j,0,nx-1,NVAR)]));
+            var.UpdateState(gam);
 
-            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n", xp, yp, rho, u, v, e, p, c, M);
+            rho = unk[IJK(i,j,0,nx-1,NVAR)];
+            e   = unk[IJK(i,j,3,nx-1,NVAR)]/rho;
+            M = sqrt(var.v2) / var.a;
+
+            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
+                    xp, yp, rho, var.vx, var.vy, e, var.p, var.a, M);
         }
     }
     fclose(fout);

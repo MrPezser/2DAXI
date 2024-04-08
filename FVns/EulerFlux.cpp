@@ -5,30 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include "EulerFlux.h"
-
-void getPrimatives(const double gam, const double *unkel, double *rho, double *u, double *v, double *p, double *c, double *M) {
-    // Gets the primative variables at a specific node
-    rho[0]       = unkel[0];
-    double rhou  = unkel[1];
-    double rhov  = unkel[2];
-    double rhoe  = unkel[3];
-
-    //Density Limiter
-    rho[0] = fmax(1e-8, rho[0]);
-
-    //break down into primatives
-    u[0] = rhou / rho[0];
-    v[0] = rhov / rho[0];
-    double v2 = (u[0]*u[0] + v[0]*v[0]);
-
-    p[0] = fmax((gam - 1) * (rhoe - (0.5 * rho[0] * v2)), 1e-8);
-
-    //Pressure Limit
-    p[0] = fmax(1e-8, p[0]);
-
-    c[0] = sqrt(gam * p[0] / rho[0]);
-    M[0] = sqrt(v2) / c[0];
-}
+#include "StateVariables.h"
 
 double F1pm(const double M, const double rho, const double c, const int isplus){
     double fout = NAN;
@@ -115,20 +92,17 @@ void LeerFluxPart(const double gam, const double vx, const double vy, const doub
     }
 }
 
-void LeerFlux(const double gam, double normx, double normy, double* uLeft, double* uRight, double* fout) {
-    double fPlus[4],fMnus[4],uL,uR,vL,vR,MnL,MnR,rhoL,rhoR,cL,cR,pL,pR,ML,MR;
-
-    //Calculate all flow variables for each state
-    getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);
-    getPrimatives(gam, uRight, &rhoR, &uR, &vR, &pR, &cR, &MR);
+void LeerFlux(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
+              double* fout) {
+    double fPlus[4],fMnus[4],MnL,MnR;
 
     //Calculate normal mach number
-    MnL = (uL*normx + vL*normy)/cL;
-    MnR = (uR*normx + vR*normy)/cR;
+    MnL = (varL.vx*normx + varL.vy*normy)/varL.a;
+    MnR = (varR.vx*normx + varR.vy*normy)/varR.a;
 
     //Calculate positive and negative fluxes
-    LeerFluxPart(gam, uL, vL, normx, normy, MnL, rhoL, cL, &(fPlus[0]), 1);
-    LeerFluxPart(gam, uR, vR, normx, normy, MnR, rhoR, cR, &(fMnus[0]), 0);
+    LeerFluxPart(gam, varL.vx, varL.vy, normx, normy, MnL, uLeft[0], varL.a, &(fPlus[0]), 1);
+    LeerFluxPart(gam, varR.vx, varR.vy, normx, normy, MnR, uRight[0], varR.a, &(fMnus[0]), 0);
 
     //Find the combined face flux
     fout[0] = fPlus[0] + fMnus[0];
@@ -136,37 +110,45 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, doubl
     fout[2] = fPlus[2] + fMnus[2];
     fout[3] = fPlus[3] + fMnus[3];
 
-    if (_isnan(fout[0]) or _isnan(fout[3])) {
+    //ASSERT(!_isnan(fout[0]), "nan flux[0]")
+
+    if (_isnan(fout[0]) or _isnan(fout[1]) or _isnan(fout[2]) or _isnan(fout[3])) {
         printf("oeups (leerflux isnan)\n");
     }
+    //if (fout[0]==0.0 or fout[1]==0.0 or fout[2]==0.0 or fout[3]==0.0) {
+    //    printf("oeups (leerflux iszero)\n");
+    //    exit(0);
+    // }
     if (fabs(fout[0]) > 100) {
         //printf("oeups (leerflux too large)\n");
     }
 }
 
-void LDFSS(const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux) {
-    /*
-c --------------------------------------------------------------------
-c ----- inviscid flux contribution (LDFSS)
-c
-c     rho - density
-c     p - pressure
-c     u - velocity
-c     ho - stagnation enthalpy
-c     ys - mass fractions
-c     a - sound speed
-c     area - interface area
-c     dx   - mesh spacing for cell
-c     res  - residual vector
-c     ev - interface flux vector
-c --------------------------------------------------------------------
-    */
+
+void LDFSS(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
+           double* flux) {
+
+//--------------------------------------------------------------------
+//----- inviscid flux contribution (LDFSS)
+//
+//    rho - density
+//    p - pressure
+//    u - velocity
+//    ho - stagnation enthalpy
+//    ys - mass fractions
+//    a - sound speed
+//     area - interface area
+//     dx   - mesh spacing for cell
+//     res  - residual vector
+//     ev - interface flux vector
+// --------------------------------------------------------------------
+
 
     double ahalf = 0.5 * (varL.a + varR.a);
 
     // Flux Calculation
-    double xml = uL[NSP]/ahalf;
-    double xmr = uR[NSP]/ahalf;
+    double xml = (varL.vx*normx + varL.vy*normy)/ahalf;
+    double xmr = (varR.vx*normx + varR.vy*normy)/ahalf;
 
     double all = 0.5*(1.0 + sign(xml));
     double alr = 0.5*(1.0 - sign(xmr));
@@ -190,8 +172,8 @@ c --------------------------------------------------------------------
     double cep = cvlp - xmcp;
     double cem = cvlm + xmcm;
 
-    double fml = A*varL.rho_mix*ahalf*cep;
-    double fmr = A*varR.rho_mix*ahalf*cem;
+    double fml = ahalf*cep;
+    double fmr = ahalf*cem;
 
     double ppl = 0.25*(xml+1.0)*(xml+1.0)*(2.0-xml);
     double ppr = 0.25*(xmr-1.0)*(xmr-1.0)*(2.0+xmr);
@@ -199,10 +181,9 @@ c --------------------------------------------------------------------
     double pnet = (all*(1.0+btl) - btl*ppl)*varL.p
                 + (alr*(1.0+btr) - btr*ppr)*varR.p;
 
-    for (int isp=0; isp<NSP; isp++) {
-        flux[isp] = fml*uL[isp]/varL.rho_mix + fmr*uR[isp]/varR.rho_mix;       //species  density
-    }
-    flux[NSP] = fml*uL[NSP]  + fmr*uR[NSP];    //momentum
-    flux[NSP+1] = fml*varL.h0 + fmr*varR.h0;                    //total energy
-    flux[NSP+2] = fml*varL.hv + fmr*varR.hv;                                  //vibrational energy
+
+    flux[0] = fml*uLeft[0] + fmr*uRight[0];                        //continuity
+    flux[1] = fml*uLeft[1] + fmr*uRight[1] + pnet*normx;       //momentum
+    flux[2] = fml*uLeft[2] + fmr*uRight[2] + pnet*normy;       //momentum
+    flux[3] = fml*(uLeft[3]+ pnet) + fmr*(uRight[3]+ pnet);                    //total energy
 }

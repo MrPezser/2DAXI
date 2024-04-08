@@ -9,6 +9,7 @@
 #include "Indexing.h"
 #include "BoundaryConditions.h"
 #include "EulerFlux.h"
+#include "StateVariables.h"
 
 
 void viscous(int nx, double mu, double normy, double normx, double* uLeft, double* uRight, double* dc, double* visc_contrib){
@@ -63,27 +64,35 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     }
 }
 
-void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, int* ibound, double* geoel, double* geofa, double* unk, double* dudt) {
+void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uFS, double* uBP, int* ibound, double* geoel,
+               double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
-    double *rhsel;
-    rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
+    double rhsel[NVAR*nelem];
 
-    for(int i=0;i<NVAR*nelem;i++) rhsel[i] = 0.0;
+    for(int i=0; i<NVAR*nelem; i++) {
+        rhsel[i] = 0.0;
+    }
 
     //Calculate boundary cell state (ghost state)
     double uGBot[NVAR*(nx-1)], uGRight[NVAR*(ny-1)], uGTop[NVAR*(nx-1)], uGLeft[NVAR*(ny-1)];
+    State BotVar[NVAR*(nx-1)], TopVar[NVAR*(nx-1)], RightVar[NVAR*(ny-1)], LeftVar[NVAR*(ny-1)];
     //bottom side of domain
     for (int i=0; i<(nx-1); i++){
         // left state = interior, right state = ghost
         int btype;
         btype = ibound[i];
+        int iint = IJK(i,0,0, nx-1, 4);
+        int iel = IJ(i, 0, nx-1);
 
         //==========Face Normal
         double normx, normy;
         normx = geofa[IJK(i, 0, 1,nx,6)];
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[IJK(i,0,0, nx-1, 4)]),&(uGBot[IJ(0,i,NVAR)]));
+        BotVar[i].Initialize(&(uGBot[IJ(0,i,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+                       &(uGBot[IJ(0,i,NVAR)]));
+        BotVar[i].UpdateState(gam);
     }
 
     //right side of domain
@@ -91,13 +100,18 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         // left state = interior, right state = ghost
         int btype;
         btype = ibound[j+ nx-1];
+        int iint = IJK(nx-2,j,0, nx-1, NVAR);
+        int iel = IJ(nx-2, j, nx-1);
 
         //==========Face Normal
         double normx, normy;
         normx = geofa[IJK(0, j, 4,nx,6)];
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[IJK(nx-2,j,0, nx-1, NVAR)]),&(uGRight[IJ(0,j,NVAR)]));
+        RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+                       &(uGRight[IJ(0,j,NVAR)]));
+        RightVar[j].UpdateState(gam);
     }
 
     //top side of domain
@@ -106,13 +120,18 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         int btype;
         int ib = nx-2-i;
         btype = ibound[ib+nx+ny-2];
+        int iint = IJK(i,ny-2,0, nx-1, NVAR);
+        int iel = IJ(i, ny-2, nx-1);
 
         //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(i, ny-1, 1,nx,6)];
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[IJK(i,ny-2,0, nx-1, NVAR)]), &(uGTop[IJ(0,i,NVAR)]));
+        TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+                       &(uGTop[IJ(0,i,NVAR)]));
+        TopVar[i].UpdateState(gam);
     }
 
     //left side of domain
@@ -121,13 +140,18 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         int btype;
         int jb = (ny-2)-j;
         btype = ibound[jb+(2*nx)+ny-3];
+        int iint = IJK(0,j,0, nx-1, 4);
+        int iel = IJ(0, j, nx-1);
 
         //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(0, j, 4,nx,6)];
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[IJK(0,j,0, nx-1, 4)]), &(uGLeft[IJ(0,j,NVAR)]));
+        LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
+        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+                       &(uGLeft[IJ(0,j,NVAR)]));
+        LeftVar[j].UpdateState(gam);
     }
 
     //====================Evaluate Flux Contributions====================
@@ -146,9 +170,14 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
 
             int iuL = IJK(i-1,j,0,nx-1,NVAR);
             int iuR = IJK(i  ,j,0,nx-1,NVAR);
+            int ieL = IJ(i-1, j, nx-1);
+            int ieR = IJ(i,   j, nx-1);
+            State varL = ElemVar[ieL];
+            State varR = ElemVar[ieR];
 
             //Find interface flux
-            LeerFlux(gam, normx, normy, &(unk[iuL]), &(unk[iuR]), &(fflux[0]));
+            //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -238,8 +267,13 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
 
             int iuL = IJK(i,j  ,0,nx-1,NVAR);
             int iuR = IJK(i,j-1,0,nx-1,NVAR);
+            int ieL = IJ(i, j  , nx-1);
+            int ieR = IJ(i, j-1, nx-1);
+            State varL = ElemVar[ieL];
+            State varR = ElemVar[ieR];
             //Find interface flux
-            LeerFlux(gam, normx, normy, &(unk[iuL]), &(unk[iuR]), &(fflux[0]));
+            //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -285,8 +319,14 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         normx = geofa[IJK(0,j,4,nx,6)];
         normy = geofa[IJK(0,j,5,nx,6)];
         int iuL = IJ(0,j,NVAR);
-        int iuR = IJK(0  ,j,0,nx-1,NVAR);
-        LeerFlux(gam, normx, normy, &(uGLeft[iuL]), &(unk[iuR]), &(fflux[0]));
+        int iuR =IJK(0,j,0,nx-1,NVAR);
+        int ieL = IJ(0, j, nx-1);
+        int ieR = IJ(0, j, nx-1);
+        State varL = ElemVar[ieL];
+        State varR = ElemVar[ieR];
+
+        //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+        LDFSS(gam, normx, normy, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];
@@ -314,7 +354,12 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         normy = geofa[IJK(nx-1,j,5,nx,6)];
         iuL = IJK(nx-2,j,0,nx-1,NVAR);
         iuR = IJ(0,j,NVAR);
-        LeerFlux(gam, normx, normy, &(unk[iuL]), &(uGRight[iuR]), &(fflux[0]));
+        ieL = IJ(nx-2,j, nx-1);
+        ieR = j;
+        varL = ElemVar[ieL];
+        varR = RightVar[ieR];
+        //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL  ] -= len * fflux[0];
@@ -343,6 +388,10 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
 
         int iuL = IJK(i, 0, 0, nx - 1, NVAR);
         int iuR = IJ(0,i,NVAR);
+        int ieL = IJ(i,0,nx-1);
+        int ieR = i;
+        State varL = ElemVar[ieL];
+        State varR = BotVar[ieR];
 
         if (iuR<0 or iuL < 0){
             printf("wut\n");
@@ -352,7 +401,8 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         }
 
         //Find interface flux
-        LeerFlux(gam, normx, normy, &(unk[iuL]), &(uGBot[iuR]), &(fflux[0]));
+        //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL]     -= len * fflux[0];
@@ -381,6 +431,10 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
 
         iuL = IJ(0,i,NVAR);
         iuR = IJK(i,ny-2,0,nx-1,NVAR);
+        ieL = i;
+        ieR = IJ(i, ny-2, nx-1);
+        varL = TopVar[ieL];
+        varR = ElemVar[ieR];
 
         if (iuR<0 or iuL < 0){
             printf("wut\n");
@@ -390,7 +444,8 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
         }
 
         //Find interface flux
-        LeerFlux(gam, normx, normy, &(uGTop[iuL]), &(unk[iuR]), &(fflux[0]));
+        //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+        LDFSS(gam, normx, normy, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];
@@ -427,7 +482,5 @@ void calc_dudt(int nx, int ny, double gam, double mu, double *uFS, double* uBP, 
 
         }
     }
-
-    free(rhsel);
 
 }

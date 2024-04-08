@@ -9,67 +9,64 @@
 
 
 
-void SubsonInflo(double gam, double vxint, double vyint, double cint, double *unkel0, double nx, double ny,
+void SubsonInflo(double gam, double vxint, double vyint, double cint, const double *unkel0, State var0, double nx, double ny,
                  double *rhogst, double *rhovxgst, double *rhovygst, double *rhoegst) {
     //Copied from CFD2 project, works but should be cleaned up
     //INPUT = int and fs values
     //OUTPUT = ghost values
     //Get the free stream in primative variables
-    double rhoinfty, vxinfty, vyinfty, pinfty, cinfty, Minfty;
-    getPrimatives(gam, unkel0, &rhoinfty, &vxinfty, &vyinfty, &pinfty, &cinfty, &Minfty);
     //Calculate velocity components
     double vintDOTn = (vxint * nx) + (vyint * ny);
-    double vinftyDOTn = (vxinfty * nx) + (vyinfty * ny);
-    double vinftyTANx = vxinfty - vinftyDOTn * nx;
-    double vinftyTANy = vyinfty - vinftyDOTn * ny;
+    double vinftyDOTn = (var0.vx * nx) + (var0.vy * ny);
+    double vinftyTANx = var0.vx - vinftyDOTn * nx;
+    double vinftyTANy = var0.vy - vinftyDOTn * ny;
     //Vn at ghost cell
-    double vgstDOTn = 0.5 * (vintDOTn + vinftyDOTn) + (1 / (gam - 1)) * (cint - cinfty);
+    double vgstDOTn = 0.5 * (vintDOTn + vinftyDOTn) + (1 / (gam - 1)) * (cint - var0.a);
     //c of ghost cell
-    double cgst = cinfty + 0.5 * (gam - 1) * (vgstDOTn - vinftyDOTn);
+    double cgst = var0.a + 0.5 * (gam - 1) * (vgstDOTn - vinftyDOTn);
     //rho of ghost cell
-    rhogst[0] = rhoinfty * pow(cgst * cgst / (cinfty * cinfty), (gam - 1));
+    rhogst[0] = unkel0[0] * pow(cgst * cgst / (var0.a * var0.a), (gam - 1));
     //p  of ghost cell
-    double pgst = pinfty * pow(rhogst[0] / rhoinfty, gam);
+    double pgst = var0.p * pow(rhogst[0] / unkel0[0], gam);
     //finish by finding the conserved variables
-    rhovxgst[0] = rhoinfty * (vinftyTANx + vgstDOTn * nx);
-    rhovygst[0] = rhoinfty * (vinftyTANy + vgstDOTn * ny);
+    rhovxgst[0] =  unkel0[0] * (vinftyTANx + vgstDOTn * nx);
+    rhovygst[0] =  unkel0[0] * (vinftyTANy + vgstDOTn * ny);
     rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
 }
-void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vyint, double cint, double *unkel0,
+void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vyint, double cint, const double *unkel0, State var0,
                  double nx, double ny, double *rhogst, double *rhovxgst, double *rhovygst, double *rhoegst) {
     //Copied from CFD2 project, works but should be cleaned up
     //INPUT = int and fs values
     //OUTPUT = ghost values
     //Get the free stream in primative variables
-    double rhoinfty, vxinfty, vyinfty, pinfty, cinfty, Minfty;
-    getPrimatives(gam, unkel0, &rhoinfty, &vxinfty, &vyinfty, &pinfty, &cinfty, &Minfty);
     //Calculate velocity components
     double vintDOTn = (vxint * nx) + (vyint * ny);
-    double vinftyDOTn = (vxinfty * nx) + (vyinfty * ny);
+    double vinftyDOTn = (var0.vx * nx) + (var0.vy * ny);
     double vintTANx = vxint - vintDOTn * nx;
     double vintTANy = vyint - vintDOTn * ny;
     //Vn at ghost cell
-    double vgstDOTn = 0.5 * (vintDOTn + vinftyDOTn) + (1 / (gam - 1)) * (cint - cinfty);
+    double vgstDOTn = 0.5 * (vintDOTn + vinftyDOTn) + (1 / (gam - 1)) * (cint - var0.a);
     //c of ghost cell
-    double cgst = cinfty + 0.5 * (gam - 1) * (vgstDOTn - vinftyDOTn);
+    double cgst = var0.a + 0.5 * (gam - 1) * (vgstDOTn - vinftyDOTn);
     //rho of ghost cell
     rhogst[0] = rhoint * pow(cgst * cgst / (cint * cint), (gam - 1));
     //p  of ghost cell
     double pgst = pint * pow(rhogst[0] / rhoint, gam);
     //finish by finding the rest of the conserved variables
-    rhovxgst[0] = rhoinfty * (vintTANx + vgstDOTn * nx);
-    rhovygst[0] = rhoinfty * (vintTANy + vgstDOTn * ny);
+    rhovxgst[0] = unkel0[0] * (vintTANx + vgstDOTn * nx);
+    rhovygst[0] = unkel0[0] * (vintTANy + vgstDOTn * ny);
     rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
 }
 
-void boundary_state(int btype, double gam,double normx, double normy, double *uFS, double* uBP, double* uLeft, double* uRight) {
+void boundary_state(int btype, double gam,double normx, double normy, const double *uFS, const double* uBP,
+                    const double* uLeft, State varL, double* uRight) {
     //==========Apply Boundary Condition
     double rhoL, uL, vL, vDOTn;
 
     //==========Find Normal Velocity
     rhoL = uLeft[0];
-    uL = uLeft[1]/rhoL;
-    vL = uLeft[2]/rhoL;
+    uL = varL.vx;
+    vL = varL.vy;
     vDOTn = uL*normx + vL*normy;
 
     //Wall BC
@@ -123,11 +120,9 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
 
 
         //get all interior primitives
-        double pL, cL, ML;
-        getPrimatives(gam, uLeft, &rhoL, &uL, &vL, &pL, &cL, &ML);
 
         //Normal Mach number
-        double MDOTn = vDOTn / cL;
+        double MDOTn = vDOTn / varL.a;
 
         if (MDOTn <= -1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Supersonic Inflow - fully determined by free stream
@@ -140,7 +135,7 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         if (MDOTn <= 0 && MDOTn > -1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Subsonic Inflow
             double rhoR, rhouR, rhovR, rhoeR;
-            SubsonInflo(gam, uL, vL, cL, uBound, normx, normy, &rhoR, &rhouR, &rhovR, &rhoeR);
+            SubsonInflo(gam, uL, vL, varL.a, uBound, varL, normx, normy, &rhoR, &rhouR, &rhovR, &rhoeR);
             uRight[0] = rhoR;
             uRight[1] = rhouR;
             uRight[2] = rhovR;
@@ -158,7 +153,7 @@ void boundary_state(int btype, double gam,double normx, double normy, double *uF
         if (MDOTn > 0 && MDOTn < 1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Subsonic Outflow
             double rhoR, rhouR, rhovR, rhoeR;
-            SubsonOutfl(gam, rhoL, pL, uL, vL, cL, uFS, normx, normy, &rhoR, &rhouR, &rhovR,\
+            SubsonOutfl(gam, rhoL, varL.p, uL, vL, varL.a, uFS, varL, normx, normy, &rhoR, &rhouR, &rhovR,\
                             &rhoeR);
             uRight[0] = rhoR;
             uRight[1] = rhouR;

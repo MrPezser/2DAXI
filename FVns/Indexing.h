@@ -12,4 +12,7 @@
 
 #define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NVAR) + (kvar))
 
+#define sign(x)  ((std::signbit(x) ?  -1 : 1))
+#define ASSERT(cond, msg) if(!(cond)){printf("Failed Assert: %s:%u %s\n %s\n", __FILE__, __LINE__, #cond, msg); exit(0);}
+
 #endif //FVEULER_INDEXING_H

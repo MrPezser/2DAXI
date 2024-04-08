@@ -20,14 +20,14 @@
 class State {
 
 private:
-    double* unk{};
+    const double* unk{};
 
 public:
-    double p{},a{},h0{}, u{}, v{}, M{};
+    double p{},a{NAN},h0{}, vx{}, vy{}, v2{};
 
     State() = default;
 
-    void Initialize(double* u){
+    void Initialize(const double* u){
         unk = u;
     }
 
@@ -35,18 +35,17 @@ public:
         p=0;
         h0=0.0;
         a=0.0;
-        u = 0.0;
-        v = 0.0;
-        M = 0.0;
+        vx = 0.0;
+        vy = 0.0;
 
-        u = unk[1] / unk[0];
-        v = unk[2] / unk[0];
+        vx = unk[1] / unk[0];
+        vy = unk[2] / unk[0];
 
-        double v2 = u*u + v*v;
-        p = fmax((gam - 1) * (unk[3] - (0.5 * unk[0] * v2)), 1e-8);
-
-
+        v2 = vx*vx + vy*vy;
+        p = (gam - 1) * (unk[3] - (0.5 * unk[0] * v2));
         a = sqrt(gam*p / unk[0]);
+
+        ASSERT(!_isnan(p*a), "Error in finding pressure or wavespeed.")
     }
 
 };
