@@ -8,8 +8,7 @@
 #include "Indexing.h"
 #include "SpatialDiscretization.h"
 #include "MeshModule.h"
-
-
+#include "StateVariables.h"
 
 
 double find_dt(double gam, int nx, int ny, double CFL, double* uRef, double* geofa){
@@ -138,6 +137,13 @@ int main() {
     double dt;
 
     printf("==================== Starting Solver ====================\n");
+    State ElemVar[nelem+1];
+    //Set up structures for calculating/containing non-state variables on each element
+    for (int ielem=0; ielem<nelem; ielem++){
+        int id = uIJK(ielem,0,0);
+        ElemVar[ielem].Initialize(&(unk[id]));
+        ElemVar[ielem].UpdateState(gam);
+    }
 
     for (iter=0; iter<mxiter; iter++){
         //Explicit Euler Time Integration

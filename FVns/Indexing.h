@@ -8,5 +8,8 @@
 #define IJ(i, j, ni)  (((j)*(ni)) + (i))
 #define IJK(i, j, k, ni, nk)  ((((j)*(ni)) + (i))*(nk) + (k))
 #define NVAR 4
+#define NDEGR 1
+
+#define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NVAR) + (kvar))
 
 #endif //FVEULER_INDEXING_H

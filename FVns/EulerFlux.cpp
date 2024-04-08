@@ -143,3 +143,66 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, doubl
         //printf("oeups (leerflux too large)\n");
     }
 }
+
+void LDFSS(const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux) {
+    /*
+c --------------------------------------------------------------------
+c ----- inviscid flux contribution (LDFSS)
+c
+c     rho - density
+c     p - pressure
+c     u - velocity
+c     ho - stagnation enthalpy
+c     ys - mass fractions
+c     a - sound speed
+c     area - interface area
+c     dx   - mesh spacing for cell
+c     res  - residual vector
+c     ev - interface flux vector
+c --------------------------------------------------------------------
+    */
+
+    double ahalf = 0.5 * (varL.a + varR.a);
+
+    // Flux Calculation
+    double xml = uL[NSP]/ahalf;
+    double xmr = uR[NSP]/ahalf;
+
+    double all = 0.5*(1.0 + sign(xml));
+    double alr = 0.5*(1.0 - sign(xmr));
+
+    double btl = -fmax(0.0,1.0-double(int(fabs(xml))));
+    double btr = -fmax(0.0,1.0-double(int(fabs(xmr))));
+
+    double xmml =  0.25*(xml+1.0)*(xml+1.0);
+    double xmmr = -0.25*(xmr-1.0)*(xmr-1.0);
+
+    double xmhalf = sqrt(0.5*(xml*xml + xmr*xmr));
+    double xmc = 0.25*btl*btr*(xmhalf - 1.0)*(xmhalf - 1.0);
+
+    double delp = varL.p - varR.p;
+    double psum = varL.p + varR.p;
+
+    double xmcp = xmc * fmax(0.0,(1.0 - (delp/psum + 2.0*fabs(delp)/varL.p)));
+    double xmcm = xmc * fmax(0.0,(1.0 + (delp/psum - 2.0*fabs(delp)/varR.p)));
+    double cvlp = all*(1.0+btl)*xml - btl*xmml;
+    double cvlm = alr*(1.0+btr)*xmr - btr*xmmr;
+    double cep = cvlp - xmcp;
+    double cem = cvlm + xmcm;
+
+    double fml = A*varL.rho_mix*ahalf*cep;
+    double fmr = A*varR.rho_mix*ahalf*cem;
+
+    double ppl = 0.25*(xml+1.0)*(xml+1.0)*(2.0-xml);
+    double ppr = 0.25*(xmr-1.0)*(xmr-1.0)*(2.0+xmr);
+
+    double pnet = (all*(1.0+btl) - btl*ppl)*varL.p
+                + (alr*(1.0+btr) - btr*ppr)*varR.p;
+
+    for (int isp=0; isp<NSP; isp++) {
+        flux[isp] = fml*uL[isp]/varL.rho_mix + fmr*uR[isp]/varR.rho_mix;       //species  density
+    }
+    flux[NSP] = fml*uL[NSP]  + fmr*uR[NSP];    //momentum
+    flux[NSP+1] = fml*varL.h0 + fmr*varR.h0;                    //total energy
+    flux[NSP+2] = fml*varL.hv + fmr*varR.hv;                                  //vibrational energy
+}
