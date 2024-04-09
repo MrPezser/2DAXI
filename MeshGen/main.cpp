@@ -5,12 +5,14 @@
  * T. Sailor Koeplinger - Jan2024
  */
 #include <iostream>
+#include <cmath>
+
 #define IU(i, j, ni)  (((j)*(ni)) + (i))
 
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
-    double l0 = 2.0;
+    double l0 = 1.0;
     if(x < l0) {
         return 0;
     } else if( x > l0+L) {
@@ -32,19 +34,6 @@ double nozzle_surface(double x, double L1, double L2) {
     } else {
         return (h/L1)*(x);
     }
-}
-
-double crfproj1(double x) {
-    //return deflection from top surface
-    double delta;
-    if (x < 1.0){
-        delta =  2.0 - (1.0 + 4*(x-0.5)*(x-0.5));
-    } else {
-        delta = 0.0;
-    }
-
-    return 0.4*delta; //scaling factor
-
 }
 
 void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibound) {
@@ -92,10 +81,10 @@ int main() {
     double height, length;
     int nx, ny;
     height = 1.0;
-    length = 3.0;
+    length = 4.0;
     nx = 401;
     ny = 201;
-    double bias = 0.0;
+    double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
 
@@ -104,8 +93,8 @@ int main() {
      * ==================== Geometry Input ====================
      * Need to represent bottom and top surfaces of geometry
      */
-    double ramp_height = 1.0;
-    double ramp_length = 0.75;
+    double ramp_height = 0.3;
+    double ramp_length = 1.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -126,16 +115,20 @@ int main() {
     for (int i =0; i<nx; i++){
 
         double xi = i*dx;
-        //ymax = height-nozzle_surface(i*dx, ramp_length, length-ramp_length)+y_offset;
-        ymax = height + y_offset - crfproj1(xi);
-        ymin = 0.0;
+        ymax = height + y_offset;
+        ymin = ramp_surface(xi,ramp_height, ramp_length);
         dy = (ymax - ymin) / ny;
 
         for (int j=0; j<ny; j++){
             int ip = IU(i,j,nx);
             x[ip] = xi;
             //y[ip] = j*dy + ymin; //equal spacing
-            y[ip] = (bias)*( j*dy*(1.0*j/(ny-1))) + (1.0-bias)*(j*dy) + ymin; //biased spacing
+            double xi = (double)j/(ny-1);
+            double k=6;
+            double f = 1.0 / (1.0 + exp(-k*(xi-0.5)));//(cbrt(xi-0.5) + 2 - cbrt(0.5)) / (2.0);
+            double f1 = 1.0 / (1.0 + exp(-k*(1.0-0.5)));
+            y[ip] = (bias)*(f/f1)*dy*ny + (1.0-bias)*(j*dy) + ymin; //biased spacing
+            if (i==0) printf("y, %lf\n", y[ip]);
         }
     }
 
@@ -156,9 +149,12 @@ int main() {
     //apply wall boundary condition
     //full top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-//        if (ib > nx/5.0 ){}
-        ibound[ib] = 4;
-        ibound[ib+nx+ny-2-istag] = 4; //top surface
+        if (ib*dx > 1.0) {
+            ibound[ib] = 0;
+            if (ib*dx > 2.0) {
+                ibound[-ib + 2 * nx + ny - 3] = 0; //top surface
+            }
+        }
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){

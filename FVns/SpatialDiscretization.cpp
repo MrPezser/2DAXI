@@ -67,7 +67,8 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
 void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uFS, double* uBP, int* ibound, double* geoel,
                double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
-    double rhsel[NVAR*nelem];
+    double* rhsel;
+    rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
 
     for(int i=0; i<NVAR*nelem; i++) {
         rhsel[i] = 0.0;
@@ -482,5 +483,5 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
         }
     }
-
+    free(rhsel);
 }

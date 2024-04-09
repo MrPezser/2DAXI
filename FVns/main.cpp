@@ -129,7 +129,8 @@ int main() {
     double dt;
 
     printf("==================== Starting Solver ====================\n");
-    State ElemVar[nelem];
+    State* ElemVar;//
+    ElemVar = (State*)malloc(nelem*sizeof(State));// [nelem];
     //Set up structures for calculating/containing non-state variables on each element
     for (int i=0; i<nx-1; i++){
         for (int j=0; j<ny-1; j++) {
@@ -190,4 +191,6 @@ int main() {
 
 
     printf("Complete.");
+
+    free(ElemVar);
 }
