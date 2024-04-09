@@ -62,14 +62,16 @@ void vec_copy(double n, double* a, double* b){
 
 int main() {
     //Read in setup file
-    double gam, mu, mach, tol, CFL;
+    double p0, mu, u0, tol, CFL, T0, v0, rho0;
     int mxiter;
-    gam =1.4;
     mu = 1e-5; // ~ 1/Re
-    //mach = 3.0;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.3;
+    CFL = 0.8;
+    u0 = 10;
+    T0 = 350;
+    rho0 = 1.0;
+    v0 = 0.0;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -99,10 +101,10 @@ int main() {
 
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
-    uFS[0] = 0.5;
-    uFS[1] = 1000.0;
-    uFS[2] = 0.0;
-    uFS[3] = 350;
+    uFS[0] = rho0;
+    uFS[1] = u0;
+    uFS[2] = v0;
+    uFS[3] = T0;
 
     //Plenum State
     ///back pressure here
@@ -199,7 +201,8 @@ int main() {
         }
         restotal = 0.0;
         for (int i=0; i<NVAR; i++){
-            ASSERT(res0[i] > 0.0, "Nonpositive Residual")
+            ASSERT(ressum[i] > 0.0, "Nonpositive Residual")
+            if (res0[i] < 1e-10) res0[i] = ressum[i];
             restotal += ressum[i] / res0[i];
         }
         if (iter%10 == 0) {
