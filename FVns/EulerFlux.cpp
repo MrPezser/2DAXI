@@ -118,7 +118,7 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, State
 }
 
 
-void LDFSS(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
+void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
            double* flux) {
 
 //--------------------------------------------------------------------

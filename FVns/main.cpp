@@ -11,22 +11,14 @@
 #include "StateVariables.h"
 #include "LUtools.h"
 #include "Jacobian.h"
+#include "Thermo.h"
 
 
-double find_dt(double gam, int nx, int ny, double CFL, const double* uRef, State& var, double* geofa){
-    double rho, u, v, rhoe, v2, p, c, vmax, dt, mindx;
-    rho = uRef[0];
-    u = uRef[1];
-    v = uRef[2];
-    rhoe = rho * var.h;
-
-    //Find speed of sound
-    v2 = (u*u + v*v);
-    p = (gam - 1) * (rhoe - (0.5 * rho * v2));
-    c = sqrt(gam * p / rho);
+double find_dt(Thermo& air, int nx, int ny, double CFL, const double* uRef, State& var, double* geofa){
+    double vmax, dt, mindx;
 
     //Max info speed = v+c
-    vmax = sqrt(v2) + c;
+    vmax = sqrt(var.v2) + var.a;
 
     //Min grid spacing
     mindx = 1.0;
@@ -37,7 +29,9 @@ double find_dt(double gam, int nx, int ny, double CFL, const double* uRef, State
         }
     }
 
-    return CFL * mindx / vmax;
+    dt = CFL * mindx / vmax;
+    ASSERT(!_isnan(dt), "NAN dt")
+    return dt;
 }
 
 void calculate_residual(int nx, int ny, double* res, double* ressum){
@@ -72,7 +66,7 @@ int main() {
     int mxiter;
     gam =1.4;
     mu = 1e-5; // ~ 1/Re
-    mach = 3.0;
+    //mach = 3.0;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 0.3;
@@ -106,7 +100,7 @@ int main() {
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
     uFS[0] = 0.5;
-    uFS[1] = 500.0;
+    uFS[1] = 1000.0;
     uFS[2] = 0.0;
     uFS[3] = 350;
 
@@ -120,28 +114,37 @@ int main() {
         unk[NVAR*ielem+3] = uFS[3];
     }
 
+    Thermo air = Thermo();
+
     printf("===== Generating Mesh and Initial State Tecplot Files ====\n");
     print_elem_stats("MeshVolumeStats", nx, ny, geoel);
-    print_state("Initial State", nx, ny, gam, x, y, unk, geoel);
+    print_state("Initial State", nx, ny, air, x, y, unk, geoel);
 
     //Find timestep based off of CFL limit for initial condition (dt = CFL dx / c )
     double dt;
-
-    printf("==================== Starting Solver ====================\n");
     State* ElemVar;//
     ElemVar = (State*)malloc(nelem*sizeof(State));// [nelem];
     //Set up structures for calculating/containing non-state variables on each element
     for (int i=0; i<nx-1; i++){
         for (int j=0; j<ny-1; j++) {
             int ie = IJ(i,j,nx-1);
-            ElemVar[ie].Initialize(&(unk[IJK(i,j,0,nx-1,NVAR)]));
-            ElemVar[ie].UpdateState(gam);
+            double* unkel = &(unk[IJK(i,j,0,nx-1,NVAR)]);
+
+            unkel[0] = uFS[0];
+            unkel[1] = uFS[1];
+            unkel[2] = uFS[2];
+            unkel[3] = uFS[3];
+
+            ElemVar[ie].Initialize(unkel);
+            ElemVar[ie].UpdateState(air);
         }
     }
     //Same memory to be used for each local matrix (chg this if making parallel)
     auto D = (double**)malloc((NSP+3) * sizeof(double*));
     for (int isp = 0; isp < NSP+3; isp++)
         D[isp] = (double*)malloc( (NSP+3) * sizeof(double));
+
+    printf("==================== Starting Solver ====================\n");
 
 
     double res0[NVAR]{};
@@ -151,10 +154,10 @@ int main() {
         //Explicit Euler Time Integration
 
         //Find global timestep based off of CFl condition
-        dt = find_dt(gam, nx, ny, CFL, unk, ElemVar[0], geofa);
+        dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, gam, mu, ElemVar, uFS, uBP, ibound, geoel, geofa, unk, res);
+        calc_dudt(nx, ny, air, mu, ElemVar, uFS, ibound, geoel, geofa, unk, res);
         calculate_residual(nx, ny, res, ressum);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
@@ -168,7 +171,7 @@ int main() {
                 int P[NVAR]{}; //permutation vector for pivoting
 
                 //Evaluate the jacobian / Implicit matrix
-                BuildJacobian(gam, dt, unkij, ElemVar[iel], D);
+                BuildJacobian(dt, unkij, ElemVar[iel], D);
 
                 //get the rhs block needed
                 double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
@@ -184,7 +187,7 @@ int main() {
             unk[iu+1] += dv[iu + 1];
             unk[iu+2] += dv[iu + 2];
             unk[iu+3] += dv[iu + 3];
-            ElemVar[ielem].UpdateState(gam);
+            ElemVar[ielem].UpdateState(air);
         }
 
 
@@ -199,13 +202,13 @@ int main() {
             ASSERT(res0[i] > 0.0, "Nonpositive Residual")
             restotal += ressum[i] / res0[i];
         }
-        if (iter%50 == 0) {
+        if (iter%10 == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
         }
-        if (iter > 0 and iter%1000 == 0){
+        if (iter > 0 and iter%100 == 0){
             printf("Saving current Solution\n");
-            print_state("Final State", nx, ny, gam, x, y, unk, geoel);
+            print_state("Final State", nx, ny, air, x, y, unk, geoel);
         }
         if (restotal < tol) break;
 
@@ -213,7 +216,7 @@ int main() {
     printf("==================== Solution Found ====================\n");
     printf("Saving Solution File..... \n");
 
-    print_state("Final State", nx, ny, gam, x, y, unk, geoel);
+    print_state("Final State", nx, ny, air, x, y, unk, geoel);
 
 
     printf("Complete.");

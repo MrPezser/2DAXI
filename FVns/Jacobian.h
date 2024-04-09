@@ -6,6 +6,6 @@
 #define FVNS_JACOBIAN_H
 
 #include "StateVariables.h"
-void BuildJacobian(double gam,double  dt,const double* unk,State& var,double** D);
+void BuildJacobian(double  dt,const double* unk,State& var,double** D);
 
 #endif //FVNS_JACOBIAN_H

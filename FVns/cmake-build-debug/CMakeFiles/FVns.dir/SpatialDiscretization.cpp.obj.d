@@ -65,5 +65,6 @@ CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj: \
  C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\SpatialDiscretization.h \
  C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\StateVariables.h \
  C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\Indexing.h \
+ C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\Thermo.h \
  C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\BoundaryConditions.h \
  C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\EulerFlux.h

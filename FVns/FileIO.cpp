@@ -56,7 +56,7 @@ void print_elem_stats(const char *title, int nx, int ny, const double* geoel) {
     fclose(fout);
 }
 
-void print_state(const char *title, int nx, int ny, double gam, double* x, double* y, double* unk, double* geoel ) {
+void print_state(const char *title, int nx, int ny, Thermo& air, double* x, double* y, double* unk, double* geoel ) {
     //Makes a tecplot file of the grid and a setup file for the solver
     //int nb = 2*nx + 2*ny;
     int nelem = nx * ny;
@@ -78,7 +78,7 @@ void print_state(const char *title, int nx, int ny, double gam, double* x, doubl
 
             State var;
             var.Initialize(&(unk[IJK(i,j,0,nx-1,NVAR)]));
-            var.UpdateState(gam);
+            var.UpdateState(air);
 
             rho = unk[IJK(i,j,0,nx-1,NVAR)];
             u   = unk[IJK(i,j,1,nx-1,NVAR)];

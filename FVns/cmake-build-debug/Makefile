@@ -296,6 +296,30 @@ SpatialDiscretization.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/SpatialDiscretization.cpp.s
 .PHONY : SpatialDiscretization.cpp.s
 
+Thermo.obj: Thermo.cpp.obj
+.PHONY : Thermo.obj
+
+# target to build an object file
+Thermo.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.obj
+.PHONY : Thermo.cpp.obj
+
+Thermo.i: Thermo.cpp.i
+.PHONY : Thermo.i
+
+# target to preprocess a source file
+Thermo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.i
+.PHONY : Thermo.cpp.i
+
+Thermo.s: Thermo.cpp.s
+.PHONY : Thermo.s
+
+# target to generate assembly for a file
+Thermo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.s
+.PHONY : Thermo.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -350,6 +374,9 @@ help:
 	@echo ... SpatialDiscretization.obj
 	@echo ... SpatialDiscretization.i
 	@echo ... SpatialDiscretization.s
+	@echo ... Thermo.obj
+	@echo ... Thermo.i
+	@echo ... Thermo.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

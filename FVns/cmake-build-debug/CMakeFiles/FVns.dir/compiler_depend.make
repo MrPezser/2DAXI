@@ -66,6 +66,8 @@ CMakeFiles/FVns.dir/BoundaryConditions.cpp.obj: C:/Users/tskoepli/Documents/GitH
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/BoundaryConditions.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/EulerFlux.h
 
 CMakeFiles/FVns.dir/EulerFlux.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/EulerFlux.cpp \
@@ -132,7 +134,9 @@ CMakeFiles/FVns.dir/EulerFlux.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/EulerFlux.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h \
-  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h
 
 CMakeFiles/FVns.dir/FileIO.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/FileIO.cpp \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/iostream \
@@ -326,6 +330,7 @@ CMakeFiles/FVns.dir/FileIO.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVn
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/mask_array.h \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/indirect_array.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/FileIO.h \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h
 
@@ -393,7 +398,9 @@ CMakeFiles/FVns.dir/Jacobian.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/F
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/corecrt_stdio_config.h \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/_mingw_off_t.h \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl \
-  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h
 
 CMakeFiles/FVns.dir/LUtools.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.cpp \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.h \
@@ -591,8 +598,42 @@ CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj: C:/Users/tskoepli/Documents/G
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/SpatialDiscretization.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/BoundaryConditions.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/EulerFlux.h
+
+CMakeFiles/FVns.dir/Thermo.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.cpp \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdio \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32/bits/c++config.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32/bits/os_defines.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32/bits/cpu_defines.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/pstl/pstl_config.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/stdio.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/corecrt_stdio_config.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/corecrt.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/_mingw.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/_mingw_mac.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/_mingw_secapi.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/vadefs.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sdks/_mingw_ddk.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/_mingw_off_t.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/stdlib.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/corecrt_wstdlib.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed/limits.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed/syslimits.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/limits.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/crtdefs.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdlib_s.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/stdlib.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/malloc.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/mm_malloc.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include/errno.h \
+  C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/std_abs.h
 
 CMakeFiles/FVns.dir/main.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/main.cpp \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/iostream \
@@ -747,6 +788,7 @@ CMakeFiles/FVns.dir/main.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/tr1/poly_laguerre.tcc \
   C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/tr1/riemann_zeta.tcc \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/FileIO.h \
+  C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/SpatialDiscretization.h \
   C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h \
@@ -911,6 +953,10 @@ C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32
 
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h:
 
+C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib:
+
+C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h:
+
 C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/stl_algo.h:
 
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/EulerFlux.h:
@@ -1059,8 +1105,6 @@ C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/x86_64-w64-mingw32/include
 
 C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/ext/string_conversions.h:
 
-C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib:
-
 C:/Program\ Files/JetBrains/CLion\ 2023.1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cerrno:
 
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.cpp:
@@ -1166,5 +1210,7 @@ C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/MeshModule.h:
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/SpatialDiscretization.cpp:
 
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/SpatialDiscretization.h:
+
+C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.cpp:
 
 C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/main.cpp:

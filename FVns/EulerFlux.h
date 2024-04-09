@@ -8,7 +8,7 @@
 #include "StateVariables.h"
 
 void LeerFlux(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR, double* fout);
-void LDFSS(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR, double* fout);
+void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight, State varR, double* fout);
 
 
 

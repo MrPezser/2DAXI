@@ -130,6 +130,12 @@
 		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/StateVariables.h">
 			<Option target="FVns"/>
 		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Thermo.h">
+			<Option target="FVns"/>
+		</Unit>
 		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/main.cpp">
 			<Option target="FVns"/>
 		</Unit>

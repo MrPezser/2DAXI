@@ -60,7 +60,7 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     }
 }
 
-void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uFS, double* uBP, int* ibound, double* geoel,
+void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *uFS, int* ibound, double* geoel,
                double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
     double* rhsel;
@@ -72,7 +72,6 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
     //Calculate boundary cell state (ghost state)
     double uGBot[NVAR*(nx-1)], uGRight[NVAR*(ny-1)], uGTop[NVAR*(nx-1)], uGLeft[NVAR*(ny-1)];
     State BotVar[NVAR*(nx-1)], TopVar[NVAR*(nx-1)], RightVar[NVAR*(ny-1)], LeftVar[NVAR*(ny-1)];
-
     //bottom side of domain
     for (int i=0; i<(nx-1); i++){
         // left state = interior, right state = ghost
@@ -87,11 +86,10 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
         BotVar[i].Initialize(&(uGBot[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGBot[IJ(0,i,NVAR)]));
-        BotVar[i].UpdateState(gam);
+        BotVar[i].UpdateState(air);
     }
-
     //right side of domain
     for (int j=0; j<(ny-1); j++){
         // left state = interior, right state = ghost
@@ -106,9 +104,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGRight[IJ(0,j,NVAR)]));
-        RightVar[j].UpdateState(gam);
+        RightVar[j].UpdateState(air);
     }
 
     //top side of domain
@@ -126,9 +124,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
         TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGTop[IJ(0,i,NVAR)]));
-        TopVar[i].UpdateState(gam);
+        TopVar[i].UpdateState(air);
     }
 
     //left side of domain
@@ -146,9 +144,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGLeft[IJ(0,j,NVAR)]));
-        LeftVar[j].UpdateState(gam);
+        LeftVar[j].UpdateState(air);
     }
 
     //====================Evaluate Flux Contributions====================
@@ -174,7 +172,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+            LDFSS(normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -223,7 +221,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             State varR = ElemVar[ieR];
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+            LDFSS(normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -276,7 +274,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         State varR = ElemVar[ieR];
 
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];
@@ -309,7 +307,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         varL = ElemVar[ieL];
         varR = RightVar[ieR];
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL  ] -= len * fflux[0];
@@ -352,7 +350,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL]     -= len * fflux[0];
@@ -395,7 +393,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];

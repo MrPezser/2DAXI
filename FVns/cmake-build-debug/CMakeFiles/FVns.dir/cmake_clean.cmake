@@ -13,6 +13,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/FVns.dir/MeshModule.cpp.obj.d"
   "CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj"
   "CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj.d"
+  "CMakeFiles/FVns.dir/Thermo.cpp.obj"
+  "CMakeFiles/FVns.dir/Thermo.cpp.obj.d"
   "CMakeFiles/FVns.dir/main.cpp.obj"
   "CMakeFiles/FVns.dir/main.cpp.obj.d"
   "FVns.exe"
