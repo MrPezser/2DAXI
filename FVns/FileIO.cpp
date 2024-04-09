@@ -66,13 +66,13 @@ void print_state(const char *title, int nx, int ny, double gam, double* x, doubl
 
     //printf("\nDisplaying Grid Header\n");
     fprintf(fout, "TITLE = \"%s\"\n", title);
-    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"rho\", \"u\", \"v\", \"e\", \"p\", \"c\", \"M\"\n");
+    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"rho\", \"u\", \"v\", \"T\", \"p\", \"c\", \"M\"\n");
     fprintf(fout, "ZONE I=%d, J=%d, DATAPACKING=POINT\n", nx-1, ny-1);
 
     //printf("Printing Coordinate Information\n");
     for (int j=0; j < (ny-1); j++) {
         for (int i=0; i< (nx-1); i++) {
-            double xp, yp, rho, u, v, e, p, c, M;
+            double xp, yp, rho, u, v, T, M;
             xp = geoel[IJK(i,j,1,nx-1,3)];
             yp = geoel[IJK(i,j,2,nx-1,3)];
 
@@ -81,11 +81,13 @@ void print_state(const char *title, int nx, int ny, double gam, double* x, doubl
             var.UpdateState(gam);
 
             rho = unk[IJK(i,j,0,nx-1,NVAR)];
-            e   = unk[IJK(i,j,3,nx-1,NVAR)]/rho;
+            u   = unk[IJK(i,j,1,nx-1,NVAR)];
+            v   = unk[IJK(i,j,2,nx-1,NVAR)];
+            T   = unk[IJK(i,j,3,nx-1,NVAR)];
             M = sqrt(var.v2) / var.a;
 
             fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
-                    xp, yp, rho, var.vx, var.vy, e, var.p, var.a, M);
+                    xp, yp, rho, u, v, T, var.p, var.a, M);
         }
     }
     fclose(fout);

@@ -152,6 +152,34 @@ CMakeFiles/FVns.dir/MeshModule.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/MeshModule.cpp.s"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\MeshModule.cpp -o CMakeFiles\FVns.dir\MeshModule.cpp.s
 
+CMakeFiles/FVns.dir/LUtools.cpp.obj: CMakeFiles/FVns.dir/flags.make
+CMakeFiles/FVns.dir/LUtools.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.cpp
+CMakeFiles/FVns.dir/LUtools.cpp.obj: CMakeFiles/FVns.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/FVns.dir/LUtools.cpp.obj"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FVns.dir/LUtools.cpp.obj -MF CMakeFiles\FVns.dir\LUtools.cpp.obj.d -o CMakeFiles\FVns.dir\LUtools.cpp.obj -c C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\LUtools.cpp
+
+CMakeFiles/FVns.dir/LUtools.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/FVns.dir/LUtools.cpp.i"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\LUtools.cpp > CMakeFiles\FVns.dir\LUtools.cpp.i
+
+CMakeFiles/FVns.dir/LUtools.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/LUtools.cpp.s"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\LUtools.cpp -o CMakeFiles\FVns.dir\LUtools.cpp.s
+
+CMakeFiles/FVns.dir/Jacobian.cpp.obj: CMakeFiles/FVns.dir/flags.make
+CMakeFiles/FVns.dir/Jacobian.cpp.obj: C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Jacobian.cpp
+CMakeFiles/FVns.dir/Jacobian.cpp.obj: CMakeFiles/FVns.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/FVns.dir/Jacobian.cpp.obj"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FVns.dir/Jacobian.cpp.obj -MF CMakeFiles\FVns.dir\Jacobian.cpp.obj.d -o CMakeFiles\FVns.dir\Jacobian.cpp.obj -c C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\Jacobian.cpp
+
+CMakeFiles/FVns.dir/Jacobian.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/FVns.dir/Jacobian.cpp.i"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\Jacobian.cpp > CMakeFiles\FVns.dir\Jacobian.cpp.i
+
+CMakeFiles/FVns.dir/Jacobian.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/Jacobian.cpp.s"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\Jacobian.cpp -o CMakeFiles\FVns.dir\Jacobian.cpp.s
+
 # Object files for target FVns
 FVns_OBJECTS = \
 "CMakeFiles/FVns.dir/main.cpp.obj" \
@@ -159,7 +187,9 @@ FVns_OBJECTS = \
 "CMakeFiles/FVns.dir/BoundaryConditions.cpp.obj" \
 "CMakeFiles/FVns.dir/FileIO.cpp.obj" \
 "CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj" \
-"CMakeFiles/FVns.dir/MeshModule.cpp.obj"
+"CMakeFiles/FVns.dir/MeshModule.cpp.obj" \
+"CMakeFiles/FVns.dir/LUtools.cpp.obj" \
+"CMakeFiles/FVns.dir/Jacobian.cpp.obj"
 
 # External object files for target FVns
 FVns_EXTERNAL_OBJECTS =
@@ -170,11 +200,13 @@ FVns.exe: CMakeFiles/FVns.dir/BoundaryConditions.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/FileIO.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/MeshModule.cpp.obj
+FVns.exe: CMakeFiles/FVns.dir/LUtools.cpp.obj
+FVns.exe: CMakeFiles/FVns.dir/Jacobian.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/build.make
 FVns.exe: CMakeFiles/FVns.dir/linkLibs.rsp
 FVns.exe: CMakeFiles/FVns.dir/objects1
 FVns.exe: CMakeFiles/FVns.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable FVns.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\tskoepli\Documents\GitHub\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable FVns.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\FVns.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

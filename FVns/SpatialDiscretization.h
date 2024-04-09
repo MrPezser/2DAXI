@@ -7,6 +7,6 @@
 
 #include "StateVariables.h"
 
-void calc_dudt(int nx, int ny, double gam, double mu, State* var, double *uFS, double* uBP, int* ibound, double* geoel,
+void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uFS, double* uBP, int* ibound, double* geoel,
                double* geofa, double* unk, double* dudt);
 #endif //FVEULER_SPATIALDISCRETIZATION_H

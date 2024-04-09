@@ -15,29 +15,27 @@
 void viscous(int nx, double mu, double normy, double normx, double* uLeft, double* uRight, double* dc, double* visc_contrib){
 
     // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-    double tau[4], Sij[4], rst[4], rhoL, rhoR, dc2i, trace, vflux[2];
+    double tau[4], Sij[4], st[4], rhoL, rhoR, dc2i, trace, vflux[2];
     double uL, vL, uR, vR;
 
     dc2i = 1/(dc[0]*dc[0] + dc[1]*dc[1]);
 
-    rhoL = uLeft[0];
-    rhoR = uRight[0];
-    uL = uLeft[1]/rhoL;
-    vL = uLeft[2]/rhoL;
-    uR = uRight[1]/rhoR;
-    vR = uRight[2]/rhoR;
-    //Reynolds stress tensor
-    rst[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
-    rst[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
-    rst[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
-    rst[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
-    trace = (1.0/3.0)*(rst[0] + rst[3]);
+    uL = uLeft[1];
+    vL = uLeft[2];
+    uR = uRight[1];
+    vR = uRight[2];
+    //stress tensor
+    st[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
+    st[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
+    st[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
+    st[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
+    trace = (1.0/3.0)*(st[0] + st[3]);
 
     // Viscous strain rate
-    Sij[0] = rst[0] - trace;                //S_1,1
-    Sij[1] = 0.5*(rst[1] + rst[2]);         //S_1,2
+    Sij[0] = st[0] - trace;                //S_1,1
+    Sij[1] = 0.5*(st[1] + st[2]);         //S_1,2
     Sij[2] = Sij[1];                        //S_2,1
-    Sij[3] = rst[1] - trace;                //S_2,2
+    Sij[3] = st[1] - trace;                //S_2,2
 
     //Viscous Stress  (Stoke's Law for Monoatoms)
     tau[0] = 2*mu*Sij[0];
@@ -58,9 +56,7 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     visc_contrib[5] = ((uR*tau[0] + vR*tau[2])*normx + (uR*tau[1] + vR*tau[3])*normy);
 
     for (int iv=0; iv<6; iv++){
-        if (_isnan(visc_contrib[iv])){
-            printf("visc flux nan\n");
-        }
+        ASSERT(!_isnan(visc_contrib[iv]),"Visc Flux NaN");
     }
 }
 
@@ -69,7 +65,6 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
     int nelem = (nx-1)*(ny-1);
     double* rhsel;
     rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
-
     for(int i=0; i<NVAR*nelem; i++) {
         rhsel[i] = 0.0;
     }
@@ -77,6 +72,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
     //Calculate boundary cell state (ghost state)
     double uGBot[NVAR*(nx-1)], uGRight[NVAR*(ny-1)], uGTop[NVAR*(nx-1)], uGLeft[NVAR*(ny-1)];
     State BotVar[NVAR*(nx-1)], TopVar[NVAR*(nx-1)], RightVar[NVAR*(ny-1)], LeftVar[NVAR*(ny-1)];
+
     //bottom side of domain
     for (int i=0; i<(nx-1); i++){
         // left state = interior, right state = ghost
@@ -91,7 +87,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
         BotVar[i].Initialize(&(uGBot[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,gam,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGBot[IJ(0,i,NVAR)]));
         BotVar[i].UpdateState(gam);
     }
@@ -110,7 +106,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,gam,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGRight[IJ(0,j,NVAR)]));
         RightVar[j].UpdateState(gam);
     }
@@ -130,7 +126,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
         TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,gam,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGTop[IJ(0,i,NVAR)]));
         TopVar[i].UpdateState(gam);
     }
@@ -150,7 +146,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,gam,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGLeft[IJ(0,j,NVAR)]));
         LeftVar[j].UpdateState(gam);
     }
@@ -207,53 +203,6 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             rhsel[iuR+1] -= len * vflux[3];
             rhsel[iuR+2] -= len * vflux[4];
             rhsel[iuR+3] -= len * vflux[5];
-
-            /*
-            // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-            double tau[4], Sij[4], rst[4], rhoL, rhoR, dc[2], dc2i, trace, vflux[2];
-            double uL, vL, uR, vR;
-
-            dc[0] = geoel[IJK(i,j,1,nx-1,3)] - geoel[IJK(i-1,j,1,nx-1,3)];
-            dc[1] = geoel[IJK(i,j,2,nx-1,3)] - geoel[IJK(i-1,j,2,nx-1,3)];
-            dc2i = 1 / (dc[0]*dc[0] + dc[1]*dc[1]); // 1 / (dist bet cell centers ^2)
-
-            rhoL = unk[iuL];
-            rhoR = unk[iuR];
-            uL = unk[iuL+1]/rhoL;
-            vL = unk[iuL+2]/rhoL;
-            uR = unk[iuR+1]/rhoR;
-            vR = unk[iuR+2]/rhoR;
-            //Reynolds stress tensor
-            rst[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
-            rst[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
-            rst[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
-            rst[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
-            trace = (1.0/3.0)*(rst[0] + rst[3]);
-
-            // Viscous strain rate
-            Sij[0] = rst[0] - trace;                //S_1,1
-            Sij[1] = 0.5*(rst[1] + rst[2]) - trace; //S_1,2
-            Sij[2] = Sij[1];                        //S_2,1
-            Sij[3] = rst[1] - trace;                //S_2,2
-
-            //Viscous Stress  (Stoke's Law for Monoatoms)
-            tau[0] = 2*mu*Sij[0];
-            tau[1] = 2*mu*Sij[1];
-            tau[2] = 2*mu*Sij[2];
-            tau[3] = 2*mu*Sij[3];
-
-            // Viscous Contributions to Flux
-            vflux[0] = tau[0]*normx + tau[2]*normy;
-            vflux[1] = tau[1]*normx + tau[3]*normy;
-
-            rhsel[iuL+1] += len * vflux[0];
-            rhsel[iuL+2] += len * vflux[1];
-            rhsel[iuL+3] += len * ((uL*tau[0] + vL*tau[2])*normx + (uL*tau[1] + vL*tau[3])*normy);
-
-            rhsel[iuR+1] -= len * vflux[0];
-            rhsel[iuR+2] -= len * vflux[1];
-            rhsel[iuR+3] -= len * ((uL*tau[0] + vL*tau[2])*normx + (uL*tau[1] + vL*tau[3])*normy);
-            */
         }
     }
 

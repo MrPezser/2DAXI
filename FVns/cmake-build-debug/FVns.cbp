@@ -103,6 +103,18 @@
 		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Indexing.h">
 			<Option target="FVns"/>
 		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Jacobian.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/Jacobian.h">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/LUtools.h">
+			<Option target="FVns"/>
+		</Unit>
 		<Unit filename="C:/Users/tskoepli/Documents/GitHub/2DAXI/FVns/MeshModule.cpp">
 			<Option target="FVns"/>
 		</Unit>

@@ -200,6 +200,54 @@ FileIO.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/FileIO.cpp.s
 .PHONY : FileIO.cpp.s
 
+Jacobian.obj: Jacobian.cpp.obj
+.PHONY : Jacobian.obj
+
+# target to build an object file
+Jacobian.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.obj
+.PHONY : Jacobian.cpp.obj
+
+Jacobian.i: Jacobian.cpp.i
+.PHONY : Jacobian.i
+
+# target to preprocess a source file
+Jacobian.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.i
+.PHONY : Jacobian.cpp.i
+
+Jacobian.s: Jacobian.cpp.s
+.PHONY : Jacobian.s
+
+# target to generate assembly for a file
+Jacobian.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.s
+.PHONY : Jacobian.cpp.s
+
+LUtools.obj: LUtools.cpp.obj
+.PHONY : LUtools.obj
+
+# target to build an object file
+LUtools.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.obj
+.PHONY : LUtools.cpp.obj
+
+LUtools.i: LUtools.cpp.i
+.PHONY : LUtools.i
+
+# target to preprocess a source file
+LUtools.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.i
+.PHONY : LUtools.cpp.i
+
+LUtools.s: LUtools.cpp.s
+.PHONY : LUtools.s
+
+# target to generate assembly for a file
+LUtools.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.s
+.PHONY : LUtools.cpp.s
+
 MeshModule.obj: MeshModule.cpp.obj
 .PHONY : MeshModule.obj
 
@@ -290,6 +338,12 @@ help:
 	@echo ... FileIO.obj
 	@echo ... FileIO.i
 	@echo ... FileIO.s
+	@echo ... Jacobian.obj
+	@echo ... Jacobian.i
+	@echo ... Jacobian.s
+	@echo ... LUtools.obj
+	@echo ... LUtools.i
+	@echo ... LUtools.s
 	@echo ... MeshModule.obj
 	@echo ... MeshModule.i
 	@echo ... MeshModule.s

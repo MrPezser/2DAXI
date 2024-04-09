@@ -10,16 +10,16 @@
 
 
 void SubsonInflo(double gam, double vxint, double vyint, double cint, const double *unkel0, State var0, double nx, double ny,
-                 double *rhogst, double *rhovxgst, double *rhovygst, double *rhoegst) {
+                 double *rhogst, double *vxgst, double *vygst, double *egst) {
     //Copied from CFD2 project, works but should be cleaned up
     //INPUT = int and fs values
     //OUTPUT = ghost values
     //Get the free stream in primative variables
     //Calculate velocity components
     double vintDOTn = (vxint * nx) + (vyint * ny);
-    double vinftyDOTn = (var0.vx * nx) + (var0.vy * ny);
-    double vinftyTANx = var0.vx - vinftyDOTn * nx;
-    double vinftyTANy = var0.vy - vinftyDOTn * ny;
+    double vinftyDOTn = (unkel0[1] * nx) + (unkel0[2] * ny);
+    double vinftyTANx = unkel0[1] - vinftyDOTn * nx;
+    double vinftyTANy = unkel0[2] - vinftyDOTn * ny;
     //Vn at ghost cell
     double vgstDOTn = 0.5 * (vintDOTn + vinftyDOTn) + (1 / (gam - 1)) * (cint - var0.a);
     //c of ghost cell
@@ -29,19 +29,19 @@ void SubsonInflo(double gam, double vxint, double vyint, double cint, const doub
     //p  of ghost cell
     double pgst = var0.p * pow(rhogst[0] / unkel0[0], gam);
     //finish by finding the conserved variables
-    rhovxgst[0] =  unkel0[0] * (vinftyTANx + vgstDOTn * nx);
-    rhovygst[0] =  unkel0[0] * (vinftyTANy + vgstDOTn * ny);
-    rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
+    vxgst[0] =  (vinftyTANx + vgstDOTn * nx);
+    vygst[0] =  (vinftyTANy + vgstDOTn * ny);
+    egst[0] = pgst / (rhogst[0]*287.0);   ///hardcoded but using this as motivation for more indepth overhaul
 }
 void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vyint, double cint, const double *unkel0, State var0,
-                 double nx, double ny, double *rhogst, double *rhovxgst, double *rhovygst, double *rhoegst) {
+                 double nx, double ny, double *rhogst, double *vxgst, double *vygst, double *egst) {
     //Copied from CFD2 project, works but should be cleaned up
     //INPUT = int and fs values
     //OUTPUT = ghost values
     //Get the free stream in primative variables
     //Calculate velocity components
     double vintDOTn = (vxint * nx) + (vyint * ny);
-    double vinftyDOTn = (var0.vx * nx) + (var0.vy * ny);
+    double vinftyDOTn = (unkel0[1] * nx) + (unkel0[2] * ny);
     double vintTANx = vxint - vintDOTn * nx;
     double vintTANy = vyint - vintDOTn * ny;
     //Vn at ghost cell
@@ -53,25 +53,25 @@ void SubsonOutfl(double gam, double rhoint, double pint, double vxint, double vy
     //p  of ghost cell
     double pgst = pint * pow(rhogst[0] / rhoint, gam);
     //finish by finding the rest of the conserved variables
-    rhovxgst[0] = unkel0[0] * (vintTANx + vgstDOTn * nx);
-    rhovygst[0] = unkel0[0] * (vintTANy + vgstDOTn * ny);
-    rhoegst[0] = (pgst / (gam - 1)) + 0.5 * (rhovxgst[0] * rhovxgst[0] + rhovygst[0] * rhovygst[0]) / rhogst[0];
+    vxgst[0] = (vintTANx + vgstDOTn * nx);
+    vygst[0] = (vintTANy + vgstDOTn * ny);
+    egst[0] = pgst / (rhogst[0]*287.0);
 }
 
-void boundary_state(int btype, double gam,double normx, double normy, const double *uFS, const double* uBP,
+void boundary_state(int btype, double gam,double normx, double normy, const double *uFS,
                     const double* uLeft, State varL, double* uRight) {
     //==========Apply Boundary Condition
-    double rhoL, uL, vL, vDOTn;
+    double rhoL, uL, vL, vDOTn, uBP[NVAR];
 
     //==========Find Normal Velocity
     rhoL = uLeft[0];
-    uL = varL.vx;
-    vL = varL.vy;
+    uL = uLeft[1];
+    vL = uRight[2];
     vDOTn = uL*normx + vL*normy;
 
     //Wall BC
     if (btype == 0 or btype == 4) {
-        //Density and energy are constant
+        //Density and temperature(adiabatic) are constant
         uRight[0] = uLeft[0];
         uRight[3] = uLeft[3];
 
@@ -134,12 +134,12 @@ void boundary_state(int btype, double gam,double normx, double normy, const doub
         }
         if (MDOTn <= 0 && MDOTn > -1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Subsonic Inflow
-            double rhoR, rhouR, rhovR, rhoeR;
-            SubsonInflo(gam, uL, vL, varL.a, uBound, varL, normx, normy, &rhoR, &rhouR, &rhovR, &rhoeR);
+            double rhoR, uR, vR, eR;
+            SubsonInflo(gam, uL, vL, varL.a, uBound, varL, normx, normy, &rhoR, &uR, &vR, &eR);
             uRight[0] = rhoR;
-            uRight[1] = rhouR;
-            uRight[2] = rhovR;
-            uRight[3] = rhoeR;
+            uRight[1] = uR;
+            uRight[2] = vR;
+            uRight[3] = eR;
             return;
         }
         if (MDOTn >= 1) {
@@ -152,13 +152,13 @@ void boundary_state(int btype, double gam,double normx, double normy, const doub
         }
         if (MDOTn > 0 && MDOTn < 1) {
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~Subsonic Outflow
-            double rhoR, rhouR, rhovR, rhoeR;
-            SubsonOutfl(gam, rhoL, varL.p, uL, vL, varL.a, uFS, varL, normx, normy, &rhoR, &rhouR, &rhovR,\
-                            &rhoeR);
+            double rhoR, uR, vR, eR;
+            SubsonOutfl(gam, rhoL, varL.p, uL, vL, varL.a, uFS, varL, normx,
+                        normy, &rhoR, &uR, &vR, &eR);
             uRight[0] = rhoR;
-            uRight[1] = rhouR;
-            uRight[2] = rhovR;
-            uRight[3] = rhoeR;
+            uRight[1] = uR;
+            uRight[2] = vR;
+            uRight[3] = eR;
             return;
         }
     }

@@ -9,14 +9,16 @@
 #include "SpatialDiscretization.h"
 #include "MeshModule.h"
 #include "StateVariables.h"
+#include "LUtools.h"
+#include "Jacobian.h"
 
 
-double find_dt(double gam, int nx, int ny, double CFL, const double* uRef, double* geofa){
+double find_dt(double gam, int nx, int ny, double CFL, const double* uRef, State& var, double* geofa){
     double rho, u, v, rhoe, v2, p, c, vmax, dt, mindx;
     rho = uRef[0];
-    u = uRef[1]/rho;
-    v = uRef[2]/rho;
-    rhoe = uRef[3];
+    u = uRef[1];
+    v = uRef[2];
+    rhoe = rho * var.h;
 
     //Find speed of sound
     v2 = (u*u + v*v);
@@ -98,20 +100,18 @@ int main() {
     printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
     auto* unk    = (double*)malloc(NVAR*nelem*sizeof(double));
-    auto* dudt   = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* res   = (double*)malloc(NVAR * nelem * sizeof(double));
+    auto* dv   = (double*)malloc(NVAR * nelem * sizeof(double));
 
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
-    uFS[0] = 1.0;           //0.246319280397921945993707147708312;
-    uFS[1] = 1.0;
+    uFS[0] = 0.5;
+    uFS[1] = 500.0;
     uFS[2] = 0.0;
-    uFS[3] = 0.5 + 1 / (gam*(gam-1)*mach*mach);
+    uFS[3] = 350;
 
     //Plenum State
-    uBP[0] = 1.0;
-    uBP[1] = 0.0;
-    uBP[2] = 0.0;
-    uBP[3] = uFS[3];//13.387171568521152;
+    ///back pressure here
 
     for (int ielem=0; ielem<nelem; ielem++){
         unk[NVAR*ielem]   = uFS[0];
@@ -124,7 +124,6 @@ int main() {
     print_elem_stats("MeshVolumeStats", nx, ny, geoel);
     print_state("Initial State", nx, ny, gam, x, y, unk, geoel);
 
-    printf("Calculating Timestep..... \n");
     //Find timestep based off of CFL limit for initial condition (dt = CFL dx / c )
     double dt;
 
@@ -139,49 +138,76 @@ int main() {
             ElemVar[ie].UpdateState(gam);
         }
     }
-
+    //Same memory to be used for each local matrix (chg this if making parallel)
+    auto D = (double**)malloc((NSP+3) * sizeof(double*));
+    for (int isp = 0; isp < NSP+3; isp++)
+        D[isp] = (double*)malloc( (NSP+3) * sizeof(double));
 
 
     double res0[NVAR]{};
-    double res[4], ressum;
+    double ressum[4], restotal;
     int iter;
     for (iter=0; iter<mxiter; iter++){
         //Explicit Euler Time Integration
-        dt = find_dt(gam, nx, ny, CFL, unk, geofa);
-        calc_dudt(nx, ny, gam, mu, ElemVar, uFS, uBP, ibound, geoel, geofa, unk, dudt);
 
-        for (int ielem=0; ielem<nelem; ielem++){
-            int iu = NVAR*ielem;
-            unk[iu  ] += dudt[iu  ]*dt;
-            unk[iu+1] += dudt[iu+1]*dt;
-            unk[iu+2] += dudt[iu+2]*dt;
-            unk[iu+3] += dudt[iu+3]*dt;
-            ElemVar[ielem].UpdateState(gam);
-        }
-        calculate_residual(nx, ny, dudt, res);
-        if (iter==0) {
-            for (int i=0; i<NVAR; i++){
-                res0[i] = res[i];
+        //Find global timestep based off of CFl condition
+        dt = find_dt(gam, nx, ny, CFL, unk, ElemVar[0], geofa);
+
+        //calculate the right hand side residual term (change of conserved quantities)
+        calc_dudt(nx, ny, gam, mu, ElemVar, uFS, uBP, ibound, geoel, geofa, unk, res);
+        calculate_residual(nx, ny, res, ressum);
+
+        //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
+        int flg = 0;
+        for (int i=0; i<nx-1; i++) {
+            for (int j=0; j<ny-1; j++) {
+                double *unkij = &(unk[IJK(i, j, 0, nx-1, NVAR)]);
+                double LUtol = 1e-16;
+                int iel = IJ(i,j,nx-1);
+                int N = NVAR;
+                int P[NVAR]{}; //permutation vector for pivoting
+
+                //Evaluate the jacobian / Implicit matrix
+                BuildJacobian(gam, dt, unkij, ElemVar[iel], D);
+
+                //get the rhs block needed
+                double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
+                double *xLU = &(dv[ IJK(i, j, 0, nx - 1, NVAR)]);
+                LUPDecompose(D, N, LUtol, P);
+                LUPSolve(D, P, b, N, xLU);
             }
         }
-
-        ressum = 0.0;
-        for (int i=0; i<NVAR; i++){
-            ASSERT(res0[i] > 0.0, "Negative or Zero Residual")
-            ressum += res[i] / res0[i];
+        //perform iteration
+        for (int ielem=0; ielem<nelem; ielem++){
+            int iu = NVAR*ielem;
+            unk[iu  ] += dv[iu  ];
+            unk[iu+1] += dv[iu + 1];
+            unk[iu+2] += dv[iu + 2];
+            unk[iu+3] += dv[iu + 3];
+            ElemVar[ielem].UpdateState(gam);
         }
 
+
+
+        if (iter==0) {
+            for (int i=0; i<NVAR; i++){
+                res0[i] = ressum[i];
+            }
+        }
+        restotal = 0.0;
+        for (int i=0; i<NVAR; i++){
+            ASSERT(res0[i] > 0.0, "Nonpositive Residual")
+            restotal += ressum[i] / res0[i];
+        }
         if (iter%50 == 0) {
-            //printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e  \t\t Abs Residuals:  %12.2e%12.2e%12.2e%12.2e\n", \
-                    iter, dt,ressum / res0, res[0], res[1], res[2], res[3]);
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
-                    iter, dt,ressum);
+                    iter, dt, restotal);
         }
         if (iter > 0 and iter%1000 == 0){
             printf("Saving current Solution\n");
             print_state("Final State", nx, ny, gam, x, y, unk, geoel);
         }
-        if (ressum < tol) break;
+        if (restotal < tol) break;
 
     }
     printf("==================== Solution Found ====================\n");
@@ -193,4 +219,6 @@ int main() {
     printf("Complete.");
 
     free(ElemVar);
+    free(res);
+    free(dv);
 }
