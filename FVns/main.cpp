@@ -68,9 +68,9 @@ int main() {
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 0.8;
-    u0 = 10;
+    u0 = 1000;
     T0 = 350;
-    rho0 = 1.0;
+    rho0 = 1.0e-2;
     v0 = 0.0;
 
     printf("==================== Loading Mesh ====================\n");

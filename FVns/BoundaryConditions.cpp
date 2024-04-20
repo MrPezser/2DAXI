@@ -80,16 +80,16 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
             // symmetry BC
             double uR = uL - 2 * vDOTn * normx;
             double vR = vL - 2 * vDOTn * normy;
-            uRight[1] = uLeft[0] * uR;
-            uRight[2] = uLeft[0] * vR;
+            uRight[1] = uR;
+            uRight[2] = vR;
             return;
         }
 
         //''ghost'' velocity is opposite (no slip)
         double uR = -uL;
         double vR = -vL;
-        uRight[1] = uLeft[0]*uR;
-        uRight[2] = uLeft[0]*vR;
+        uRight[1] = uR;
+        uRight[2] = vR;
 
         if (_isnan(normx) or _isnan(normy)){
             printf("Undef. Surface Normal!\n");

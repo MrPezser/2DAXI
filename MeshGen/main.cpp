@@ -12,7 +12,7 @@
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
-    double l0 = 1.0;
+    double l0 = 0.5;//1.0;
     if(x < l0) {
         return 0;
     } else if( x > l0+L) {
@@ -80,9 +80,9 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int nx, ny;
-    height = 1.0;
-    length = 4.0;
-    nx = 401;
+    height = 2.0;
+    length = 1.5;//4.0;
+    nx = 201;
     ny = 201;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
@@ -93,8 +93,8 @@ int main() {
      * ==================== Geometry Input ====================
      * Need to represent bottom and top surfaces of geometry
      */
-    double ramp_height = 0.3;
-    double ramp_length = 1.0;
+    double ramp_height = 0.75;//0.3;
+    double ramp_length = 1.0;//1.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -149,10 +149,10 @@ int main() {
     //apply wall boundary condition
     //full top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        if (ib*dx > 1.0) {
-            ibound[ib] = 0;
+        if (ib*dx > -1.0) { ///////////////
+            ibound[ib] = 0; //bot surf
             if (ib*dx > 2.0) {
-                ibound[-ib + 2 * nx + ny - 3] = 0; //top surface
+                ibound[-ib + 2 * nx + ny - 3] = 3; //top surface
             }
         }
     }
