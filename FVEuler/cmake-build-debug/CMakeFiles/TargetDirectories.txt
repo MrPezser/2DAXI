@@ -1,3 +1,0 @@
-C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVEuler/cmake-build-debug/CMakeFiles/FVEuler.dir
-C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVEuler/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVEuler/cmake-build-debug/CMakeFiles/rebuild_cache.dir
