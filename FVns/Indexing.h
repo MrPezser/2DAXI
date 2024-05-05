@@ -12,6 +12,7 @@
 #define NVAR 4
 #define NDEGR 1
 #define NSP 1
+#define IVISC 0
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 #define ASSERT(cond, msg) if(!(cond)){printf("Failed Assert: %s:%u %s\n %s\n", __FILE__, __LINE__, #cond, msg); exit(0);}

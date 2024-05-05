@@ -62,15 +62,14 @@ void vec_copy(double n, double* a, double* b){
 
 int main() {
     //Read in setup file
-    double p0, mu, u0, tol, CFL, T0, v0, rho0;
+    double p0, u0, tol, CFL, T0, v0, rho0;
     int mxiter;
-    mu = 1e-5; // ~ 1/Re
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.8;
+    CFL = 1.0;//0.8;
     u0 = 1000;
-    T0 = 350;
-    rho0 = 1.0e-2;
+    T0 = 300;
+    rho0 = 1.0;
     v0 = 0.0;
 
     printf("==================== Loading Mesh ====================\n");
@@ -159,7 +158,7 @@ int main() {
         dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, mu, ElemVar, uFS, ibound, geoel, geofa, unk, res);
+        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, res);
         calculate_residual(nx, ny, res, ressum);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
@@ -205,11 +204,11 @@ int main() {
             if (res0[i] < 1e-10) res0[i] = ressum[i];
             restotal += ressum[i] / res0[i];
         }
-        if (iter%10 == 0) {
+        if (iter%100 == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
         }
-        if (iter > 0 and iter%100 == 0){
+        if (iter > 0 and iter%1000 == 0){
             printf("Saving current Solution\n");
             print_state("Final State", nx, ny, air, x, y, unk, geoel);
         }

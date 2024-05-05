@@ -12,11 +12,13 @@
 #include "StateVariables.h"
 
 
-void viscous(int nx, double mu, double normy, double normx, double* uLeft, double* uRight, double* dc, double* visc_contrib){
+void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
 
     // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
     double tau[4], Sij[4], st[4], rhoL, rhoR, dc2i, trace, vflux[2];
     double uL, vL, uR, vR;
+
+    double mu = 0.5*(varL.mu + varR.mu);
 
     dc2i = 1/(dc[0]*dc[0] + dc[1]*dc[1]);
 
@@ -60,7 +62,7 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     }
 }
 
-void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *uFS, int* ibound, double* geoel,
+void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
                double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
     double* rhsel;
@@ -191,7 +193,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
             //mirror the next interior cell to the boundary for that flux contrib
             dc[0] = geoel[IJK(i,j,1,nx-1,3)] - geoel[IJK(i-1,j,1,nx-1,3)];
             dc[1] = geoel[IJK(i,j,2,nx-1,3)] - geoel[IJK(i-1,j,2,nx-1,3)];
-            viscous(nx, mu, normy, normx, &(unk[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+            varL = ElemVar[ieL];
+            varR = ElemVar[ieR];
+            viscous(nx, normy, normx, &(unk[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL+1] += len * vflux[0];
@@ -239,7 +243,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
             //mirror the next interior cell to the boundary for that flux contrib
             dc[0] = geoel[IJK(i,j-1,1,nx-1,3)] - geoel[IJK(i,j,1,nx-1,3)];
             dc[1] = geoel[IJK(i,j-1,2,nx-1,3)] - geoel[IJK(i,j,2,nx-1,3)];
-            viscous(nx, mu, normy, normx, &(unk[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+            varL = ElemVar[ieL];
+            varR = ElemVar[ieR];
+            viscous(nx, normy, normx, &(unk[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL+1] += len * vflux[0];
@@ -287,7 +293,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(1,j,1,nx-1,3)] - geoel[IJK(0,j,1,nx-1,3)];
         dc[1] = geoel[IJK(1,j,2,nx-1,3)] - geoel[IJK(0,j,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(uGLeft[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR+1] -= len * vflux[3];
@@ -319,7 +327,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(nx-2,j,1,nx-1,3)] - geoel[IJK(nx-3,j,1,nx-1,3)];
         dc[1] = geoel[IJK(nx-2,j,2,nx-1,3)] - geoel[IJK(nx-3,j,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(unk[iuL]), &(uGRight[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL+1] += len * vflux[0];
@@ -363,7 +373,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(i,0,1,nx-1,3)] - geoel[IJK(i,1,1,nx-1,3)];
         dc[1] = geoel[IJK(i,0,2,nx-1,3)] - geoel[IJK(i,1,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(unk[iuL]), &(uGBot[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL+1] += len * vflux[0];
@@ -405,7 +417,9 @@ void calc_dudt(int nx, int ny, Thermo& air, double mu, State* ElemVar, double *u
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(i,ny-3,1,nx-1,3)] - geoel[IJK(i,ny-2,1,nx-1,3)];
         dc[1] = geoel[IJK(i,ny-3,2,nx-1,3)] - geoel[IJK(i,ny-2,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(uGTop[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR+1] -= len * vflux[3];

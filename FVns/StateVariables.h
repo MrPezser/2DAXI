@@ -25,29 +25,37 @@ private:
 
 
 public:
-    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{};
+    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
 
 
     State() = default;
 
     void Initialize(const double* u){
         unk = u;
+        // vars = [rho, u, v, T]
     }
 
     void UpdateState(Thermo& air ) {
         int isp = 0;
+        double T = unk[3];
 
         v2 = unk[1]*unk[1] + unk[2]*unk[2];
-        p = unk[0]*air.Rs[isp]*unk[3];
-        a = sqrt(air.gam*air.Rs[isp]*unk[3]);
-        h =air.CalcEnthalpy(unk[3]);
+        p = unk[0]*air.Rs[isp]*T;
+        a = sqrt(air.gam*air.Rs[isp]*T);
+        h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
-        Cp[0] = air.CalcCp(unk[3]);
+        Cp[0] = air.CalcCp(T);
         Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
 
-        ASSERT(!_isnan(p*a), "Error in finding pressure or wavespeed.")
+        //Sutherland's law for viscosity
+        double S, C1;
+        S = 110.4;
+        C1 = 1.458e-6;
+        mu = C1 * pow(T, 1.5) / (T + S);
+
         CHECKD(a > 0.0, "bad wave speed", a)
         CHECKD(p > 0.0, "bad pressure", p)
+        ASSERT(!_isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
     }
 
 };
