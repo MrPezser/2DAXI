@@ -67,7 +67,7 @@ int main() {
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 1.0;//0.8;
-    u0 = 1000;
+    u0 = 10;
     T0 = 300;
     rho0 = 1.0;
     v0 = 0.0;
@@ -94,9 +94,9 @@ int main() {
 
     printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
-    auto* unk    = (double*)malloc(NVAR*nelem*sizeof(double));
-    auto* res   = (double*)malloc(NVAR * nelem * sizeof(double));
-    auto* dv   = (double*)malloc(NVAR * nelem * sizeof(double));
+    auto* unk  = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* res  = (double*)malloc(NVAR*nelem * sizeof(double));
+    auto* dv   = (double*)malloc(NVAR*nelem * sizeof(double));
 
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
@@ -141,15 +141,15 @@ int main() {
         }
     }
     //Same memory to be used for each local matrix (chg this if making parallel)
-    auto D = (double**)malloc((NSP+3) * sizeof(double*));
-    for (int isp = 0; isp < NSP+3; isp++)
-        D[isp] = (double*)malloc( (NSP+3) * sizeof(double));
+    auto D = (double**)malloc((NVAR) * sizeof(double*));
+    for (int k = 0; k < NVAR; k++)
+        D[k] = (double*)malloc( (NVAR) * sizeof(double));
 
     printf("==================== Starting Solver ====================\n");
 
 
     double res0[NVAR]{};
-    double ressum[4], restotal;
+    double ressum[NVAR], restotal;
     int iter;
     for (iter=0; iter<mxiter; iter++){
         //Explicit Euler Time Integration
@@ -169,7 +169,7 @@ int main() {
                 double LUtol = 1e-16;
                 int iel = IJ(i,j,nx-1);
                 int N = NVAR;
-                int P[NVAR]{}; //permutation vector for pivoting
+                int P[NVAR+1]{}; //permutation vector for pivoting
 
                 //Evaluate the jacobian / Implicit matrix
                 BuildJacobian(dt, unkij, ElemVar[iel], D);

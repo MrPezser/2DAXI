@@ -5,6 +5,7 @@
 #include "LUtools.h"
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 
 
@@ -65,7 +66,7 @@ void LUPDecompose(double **A, int N, double Tol, int *P) {
         }
     }
 
-    return;  //decomposition done
+    //decomposition done
 }
 
 /* INPUT: A,P filled in LUPDecompose; b - rhs vector; N - dimension

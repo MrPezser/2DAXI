@@ -15,12 +15,12 @@
 void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
 
     // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-    double tau[4], Sij[4], st[4], rhoL, rhoR, dc2i, trace, vflux[2];
+    double tau[4], Sij[4], st[4], dc2i, trace, vflux[2];
     double uL, vL, uR, vR;
 
     double mu = 0.5*(varL.mu + varR.mu);
 
-    dc2i = 1/(dc[0]*dc[0] + dc[1]*dc[1]);
+    dc2i = 1.0/(dc[0]*dc[0] + dc[1]*dc[1]);
 
     uL = uLeft[1];
     vL = uLeft[2];
@@ -58,6 +58,9 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
     visc_contrib[5] = ((uR*tau[0] + vR*tau[2])*normx + (uR*tau[1] + vR*tau[3])*normy);
 
     for (int iv=0; iv<6; iv++){
+        if (_isnan(visc_contrib[iv])){
+            printf("asdfaed\n");
+        }
         ASSERT(!_isnan(visc_contrib[iv]),"Visc Flux NaN");
     }
 }

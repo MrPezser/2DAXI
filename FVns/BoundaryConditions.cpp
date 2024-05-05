@@ -66,7 +66,7 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
     //==========Find Normal Velocity
     rhoL = uLeft[0];
     uL = uLeft[1];
-    vL = uRight[2];
+    vL = uLeft[2];
     vDOTn = uL*normx + vL*normy;
 
     //Wall BC
