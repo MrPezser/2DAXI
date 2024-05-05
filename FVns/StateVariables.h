@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include "Indexing.h"
+#include "Thermo.h"
 // class for storing calculated properties in an element
 
 class State {
@@ -22,30 +23,39 @@ class State {
 private:
     const double* unk{};
 
+
 public:
-    double p{},a{NAN},h0{}, vx{}, vy{}, v2{};
+    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
+
 
     State() = default;
 
     void Initialize(const double* u){
         unk = u;
+        // vars = [rho, u, v, T]
     }
 
-    void UpdateState(double gam) {
-        p=0;
-        h0=0.0;
-        a=0.0;
-        vx = 0.0;
-        vy = 0.0;
+    void UpdateState(Thermo& air ) {
+        int isp = 0;
+        double T = unk[3];
 
-        vx = unk[1] / unk[0];
-        vy = unk[2] / unk[0];
+        v2 = unk[1]*unk[1] + unk[2]*unk[2];
+        p = unk[0]*air.Rs[isp]*T;
+        a = sqrt(air.gam*air.Rs[isp]*T);
+        h =air.CalcEnthalpy(T);
+        h0 = h + 0.5*v2;
+        Cp[0] = air.CalcCp(T);
+        Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
 
-        v2 = vx*vx + vy*vy;
-        p = (gam - 1) * (unk[3] - (0.5 * unk[0] * v2));
-        a = sqrt(gam*p / unk[0]);
+        //Sutherland's law for viscosity
+        double S, C1;
+        S = 110.4;
+        C1 = 1.458e-6;
+        mu = C1 * pow(T, 1.5) / (T + S);
 
-        ASSERT(!_isnan(p*a), "Error in finding pressure or wavespeed.")
+        CHECKD(a > 0.0, "bad wave speed", a)
+        CHECKD(p > 0.0, "bad pressure", p)
+        ASSERT(!_isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
     }
 
 };

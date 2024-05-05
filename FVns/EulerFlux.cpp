@@ -97,12 +97,12 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, State
     double fPlus[4],fMnus[4],MnL,MnR;
 
     //Calculate normal mach number
-    MnL = (varL.vx*normx + varL.vy*normy)/varL.a;
-    MnR = (varR.vx*normx + varR.vy*normy)/varR.a;
+    MnL = (uLeft[1]*normx + uLeft[2]*normy)/varL.a;
+    MnR = (uRight[1]*normx + uLeft[2]*normy)/varR.a;
 
     //Calculate positive and negative fluxes
-    LeerFluxPart(gam, varL.vx, varL.vy, normx, normy, MnL, uLeft[0], varL.a, &(fPlus[0]), 1);
-    LeerFluxPart(gam, varR.vx, varR.vy, normx, normy, MnR, uRight[0], varR.a, &(fMnus[0]), 0);
+    LeerFluxPart(gam, uLeft[1], uLeft[2], normx, normy, MnL, uLeft[0], varL.a, &(fPlus[0]), 1);
+    LeerFluxPart(gam, uRight[1],uRight[2],normx, normy, MnR, uRight[0],varR.a, &(fMnus[0]), 0);
 
     //Find the combined face flux
     fout[0] = fPlus[0] + fMnus[0];
@@ -110,22 +110,15 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, State
     fout[2] = fPlus[2] + fMnus[2];
     fout[3] = fPlus[3] + fMnus[3];
 
-    //ASSERT(!_isnan(fout[0]), "nan flux[0]")
-
+    ASSERT(!_isnan(fout[0]), "nan flux[0]")
     if (_isnan(fout[0]) or _isnan(fout[1]) or _isnan(fout[2]) or _isnan(fout[3])) {
-        printf("oeups (leerflux isnan)\n");
-    }
-    //if (fout[0]==0.0 or fout[1]==0.0 or fout[2]==0.0 or fout[3]==0.0) {
-    //    printf("oeups (leerflux iszero)\n");
-    //    exit(0);
-    // }
-    if (fabs(fout[0]) > 100) {
-        //printf("oeups (leerflux too large)\n");
+        printf("leerflux isnan\n");
+        exit(0);
     }
 }
 
 
-void LDFSS(const double gam, double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
+void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
            double* flux) {
 
 //--------------------------------------------------------------------
@@ -142,13 +135,13 @@ void LDFSS(const double gam, double normx, double normy, double* uLeft, State va
 //     res  - residual vector
 //     ev - interface flux vector
 // --------------------------------------------------------------------
-
+    //unk = [rho, u, v, T]
 
     double ahalf = 0.5 * (varL.a + varR.a);
 
     // Flux Calculation
-    double xml = (varL.vx*normx + varL.vy*normy)/ahalf;
-    double xmr = (varR.vx*normx + varR.vy*normy)/ahalf;
+    double xml = (uLeft[1] *normx +  uLeft[2]*normy)/ahalf;
+    double xmr = (uRight[1]*normx + uRight[2]*normy)/ahalf;
 
     double all = 0.5*(1.0 + sign(xml));
     double alr = 0.5*(1.0 - sign(xmr));
@@ -172,8 +165,8 @@ void LDFSS(const double gam, double normx, double normy, double* uLeft, State va
     double cep = cvlp - xmcp;
     double cem = cvlm + xmcm;
 
-    double fml = ahalf*cep;
-    double fmr = ahalf*cem;
+    double fml = uLeft[0]*ahalf*cep;
+    double fmr = uRight[0]*ahalf*cem;
 
     double ppl = 0.25*(xml+1.0)*(xml+1.0)*(2.0-xml);
     double ppr = 0.25*(xmr-1.0)*(xmr-1.0)*(2.0+xmr);
@@ -182,8 +175,8 @@ void LDFSS(const double gam, double normx, double normy, double* uLeft, State va
                 + (alr*(1.0+btr) - btr*ppr)*varR.p;
 
 
-    flux[0] = fml*uLeft[0] + fmr*uRight[0];                        //continuity
-    flux[1] = fml*uLeft[1] + fmr*uRight[1] + pnet*normx;       //momentum
-    flux[2] = fml*uLeft[2] + fmr*uRight[2] + pnet*normy;       //momentum
-    flux[3] = fml*(uLeft[3]+ pnet) + fmr*(uRight[3]+ pnet);                    //total energy
+    flux[0] = fml + fmr;                        //continuity
+    flux[1] = fml*uLeft[1] + fmr*uRight[1] + pnet*normx;       //x momentum
+    flux[2] = fml*uLeft[2] + fmr*uRight[2] + pnet*normy;       //x momentum
+    flux[3] = fml*varL.h0 + fmr*(varR.h0);                     //total energy
 }

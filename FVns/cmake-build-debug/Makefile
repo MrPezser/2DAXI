@@ -200,6 +200,54 @@ FileIO.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/FileIO.cpp.s
 .PHONY : FileIO.cpp.s
 
+Jacobian.obj: Jacobian.cpp.obj
+.PHONY : Jacobian.obj
+
+# target to build an object file
+Jacobian.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.obj
+.PHONY : Jacobian.cpp.obj
+
+Jacobian.i: Jacobian.cpp.i
+.PHONY : Jacobian.i
+
+# target to preprocess a source file
+Jacobian.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.i
+.PHONY : Jacobian.cpp.i
+
+Jacobian.s: Jacobian.cpp.s
+.PHONY : Jacobian.s
+
+# target to generate assembly for a file
+Jacobian.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Jacobian.cpp.s
+.PHONY : Jacobian.cpp.s
+
+LUtools.obj: LUtools.cpp.obj
+.PHONY : LUtools.obj
+
+# target to build an object file
+LUtools.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.obj
+.PHONY : LUtools.cpp.obj
+
+LUtools.i: LUtools.cpp.i
+.PHONY : LUtools.i
+
+# target to preprocess a source file
+LUtools.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.i
+.PHONY : LUtools.cpp.i
+
+LUtools.s: LUtools.cpp.s
+.PHONY : LUtools.s
+
+# target to generate assembly for a file
+LUtools.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.s
+.PHONY : LUtools.cpp.s
+
 MeshModule.obj: MeshModule.cpp.obj
 .PHONY : MeshModule.obj
 
@@ -248,6 +296,30 @@ SpatialDiscretization.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/SpatialDiscretization.cpp.s
 .PHONY : SpatialDiscretization.cpp.s
 
+Thermo.obj: Thermo.cpp.obj
+.PHONY : Thermo.obj
+
+# target to build an object file
+Thermo.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.obj
+.PHONY : Thermo.cpp.obj
+
+Thermo.i: Thermo.cpp.i
+.PHONY : Thermo.i
+
+# target to preprocess a source file
+Thermo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.i
+.PHONY : Thermo.cpp.i
+
+Thermo.s: Thermo.cpp.s
+.PHONY : Thermo.s
+
+# target to generate assembly for a file
+Thermo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/Thermo.cpp.s
+.PHONY : Thermo.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -290,12 +362,21 @@ help:
 	@echo ... FileIO.obj
 	@echo ... FileIO.i
 	@echo ... FileIO.s
+	@echo ... Jacobian.obj
+	@echo ... Jacobian.i
+	@echo ... Jacobian.s
+	@echo ... LUtools.obj
+	@echo ... LUtools.i
+	@echo ... LUtools.s
 	@echo ... MeshModule.obj
 	@echo ... MeshModule.i
 	@echo ... MeshModule.s
 	@echo ... SpatialDiscretization.obj
 	@echo ... SpatialDiscretization.i
 	@echo ... SpatialDiscretization.s
+	@echo ... Thermo.obj
+	@echo ... Thermo.i
+	@echo ... Thermo.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

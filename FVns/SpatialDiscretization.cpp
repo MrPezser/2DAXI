@@ -12,32 +12,32 @@
 #include "StateVariables.h"
 
 
-void viscous(int nx, double mu, double normy, double normx, double* uLeft, double* uRight, double* dc, double* visc_contrib){
+void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
 
     // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-    double tau[4], Sij[4], rst[4], rhoL, rhoR, dc2i, trace, vflux[2];
+    double tau[4], Sij[4], st[4], rhoL, rhoR, dc2i, trace, vflux[2];
     double uL, vL, uR, vR;
+
+    double mu = 0.5*(varL.mu + varR.mu);
 
     dc2i = 1/(dc[0]*dc[0] + dc[1]*dc[1]);
 
-    rhoL = uLeft[0];
-    rhoR = uRight[0];
-    uL = uLeft[1]/rhoL;
-    vL = uLeft[2]/rhoL;
-    uR = uRight[1]/rhoR;
-    vR = uRight[2]/rhoR;
-    //Reynolds stress tensor
-    rst[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
-    rst[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
-    rst[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
-    rst[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
-    trace = (1.0/3.0)*(rst[0] + rst[3]);
+    uL = uLeft[1];
+    vL = uLeft[2];
+    uR = uRight[1];
+    vR = uRight[2];
+    //stress tensor
+    st[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
+    st[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
+    st[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
+    st[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
+    trace = (1.0/3.0)*(st[0] + st[3]);
 
     // Viscous strain rate
-    Sij[0] = rst[0] - trace;                //S_1,1
-    Sij[1] = 0.5*(rst[1] + rst[2]);         //S_1,2
+    Sij[0] = st[0] - trace;                //S_1,1
+    Sij[1] = 0.5*(st[1] + st[2]);         //S_1,2
     Sij[2] = Sij[1];                        //S_2,1
-    Sij[3] = rst[1] - trace;                //S_2,2
+    Sij[3] = st[1] - trace;                //S_2,2
 
     //Viscous Stress  (Stoke's Law for Monoatoms)
     tau[0] = 2*mu*Sij[0];
@@ -58,18 +58,15 @@ void viscous(int nx, double mu, double normy, double normx, double* uLeft, doubl
     visc_contrib[5] = ((uR*tau[0] + vR*tau[2])*normx + (uR*tau[1] + vR*tau[3])*normy);
 
     for (int iv=0; iv<6; iv++){
-        if (_isnan(visc_contrib[iv])){
-            printf("visc flux nan\n");
-        }
+        ASSERT(!_isnan(visc_contrib[iv]),"Visc Flux NaN");
     }
 }
 
-void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uFS, double* uBP, int* ibound, double* geoel,
+void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
                double* geofa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
     double* rhsel;
     rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
-
     for(int i=0; i<NVAR*nelem; i++) {
         rhsel[i] = 0.0;
     }
@@ -91,11 +88,10 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
         BotVar[i].Initialize(&(uGBot[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGBot[IJ(0,i,NVAR)]));
-        BotVar[i].UpdateState(gam);
+        BotVar[i].UpdateState(air);
     }
-
     //right side of domain
     for (int j=0; j<(ny-1); j++){
         // left state = interior, right state = ghost
@@ -110,9 +106,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS,uBP,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
                        &(uGRight[IJ(0,j,NVAR)]));
-        RightVar[j].UpdateState(gam);
+        RightVar[j].UpdateState(air);
     }
 
     //top side of domain
@@ -130,9 +126,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
         TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGTop[IJ(0,i,NVAR)]));
-        TopVar[i].UpdateState(gam);
+        TopVar[i].UpdateState(air);
     }
 
     //left side of domain
@@ -150,9 +146,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
-        boundary_state(btype,gam,normx,normy,uFS, uBP, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
                        &(uGLeft[IJ(0,j,NVAR)]));
-        LeftVar[j].UpdateState(gam);
+        LeftVar[j].UpdateState(air);
     }
 
     //====================Evaluate Flux Contributions====================
@@ -178,7 +174,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+            LDFSS(normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -197,7 +193,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             //mirror the next interior cell to the boundary for that flux contrib
             dc[0] = geoel[IJK(i,j,1,nx-1,3)] - geoel[IJK(i-1,j,1,nx-1,3)];
             dc[1] = geoel[IJK(i,j,2,nx-1,3)] - geoel[IJK(i-1,j,2,nx-1,3)];
-            viscous(nx, mu, normy, normx, &(unk[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+            varL = ElemVar[ieL];
+            varR = ElemVar[ieR];
+            viscous(nx, normy, normx, &(unk[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL+1] += len * vflux[0];
@@ -207,53 +205,6 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             rhsel[iuR+1] -= len * vflux[3];
             rhsel[iuR+2] -= len * vflux[4];
             rhsel[iuR+3] -= len * vflux[5];
-
-            /*
-            // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-            double tau[4], Sij[4], rst[4], rhoL, rhoR, dc[2], dc2i, trace, vflux[2];
-            double uL, vL, uR, vR;
-
-            dc[0] = geoel[IJK(i,j,1,nx-1,3)] - geoel[IJK(i-1,j,1,nx-1,3)];
-            dc[1] = geoel[IJK(i,j,2,nx-1,3)] - geoel[IJK(i-1,j,2,nx-1,3)];
-            dc2i = 1 / (dc[0]*dc[0] + dc[1]*dc[1]); // 1 / (dist bet cell centers ^2)
-
-            rhoL = unk[iuL];
-            rhoR = unk[iuR];
-            uL = unk[iuL+1]/rhoL;
-            vL = unk[iuL+2]/rhoL;
-            uR = unk[iuR+1]/rhoR;
-            vR = unk[iuR+2]/rhoR;
-            //Reynolds stress tensor
-            rst[0] = (uR - uL) * dc[0] * dc2i ;//  du/dx
-            rst[1] = (uR - uL) * dc[1] * dc2i ;//  du/dy
-            rst[2] = (vR - vL) * dc[0] * dc2i ;//  dv/dx
-            rst[3] = (vR - vL) * dc[1] * dc2i ;//  dv/dy
-            trace = (1.0/3.0)*(rst[0] + rst[3]);
-
-            // Viscous strain rate
-            Sij[0] = rst[0] - trace;                //S_1,1
-            Sij[1] = 0.5*(rst[1] + rst[2]) - trace; //S_1,2
-            Sij[2] = Sij[1];                        //S_2,1
-            Sij[3] = rst[1] - trace;                //S_2,2
-
-            //Viscous Stress  (Stoke's Law for Monoatoms)
-            tau[0] = 2*mu*Sij[0];
-            tau[1] = 2*mu*Sij[1];
-            tau[2] = 2*mu*Sij[2];
-            tau[3] = 2*mu*Sij[3];
-
-            // Viscous Contributions to Flux
-            vflux[0] = tau[0]*normx + tau[2]*normy;
-            vflux[1] = tau[1]*normx + tau[3]*normy;
-
-            rhsel[iuL+1] += len * vflux[0];
-            rhsel[iuL+2] += len * vflux[1];
-            rhsel[iuL+3] += len * ((uL*tau[0] + vL*tau[2])*normx + (uL*tau[1] + vL*tau[3])*normy);
-
-            rhsel[iuR+1] -= len * vflux[0];
-            rhsel[iuR+2] -= len * vflux[1];
-            rhsel[iuR+3] -= len * ((uL*tau[0] + vL*tau[2])*normx + (uL*tau[1] + vL*tau[3])*normy);
-            */
         }
     }
 
@@ -274,7 +225,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             State varR = ElemVar[ieR];
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+            LDFSS(normx, normy, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= len * fflux[0];
@@ -292,7 +243,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
             //mirror the next interior cell to the boundary for that flux contrib
             dc[0] = geoel[IJK(i,j-1,1,nx-1,3)] - geoel[IJK(i,j,1,nx-1,3)];
             dc[1] = geoel[IJK(i,j-1,2,nx-1,3)] - geoel[IJK(i,j,2,nx-1,3)];
-            viscous(nx, mu, normy, normx, &(unk[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+            varL = ElemVar[ieL];
+            varR = ElemVar[ieR];
+            viscous(nx, normy, normx, &(unk[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
             //Add flux contribution to elements
             rhsel[iuL+1] += len * vflux[0];
@@ -327,7 +280,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         State varR = ElemVar[ieR];
 
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];
@@ -340,7 +293,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(1,j,1,nx-1,3)] - geoel[IJK(0,j,1,nx-1,3)];
         dc[1] = geoel[IJK(1,j,2,nx-1,3)] - geoel[IJK(0,j,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(uGLeft[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR+1] -= len * vflux[3];
@@ -360,7 +315,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         varL = ElemVar[ieL];
         varR = RightVar[ieR];
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL  ] -= len * fflux[0];
@@ -372,7 +327,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(nx-2,j,1,nx-1,3)] - geoel[IJK(nx-3,j,1,nx-1,3)];
         dc[1] = geoel[IJK(nx-2,j,2,nx-1,3)] - geoel[IJK(nx-3,j,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(unk[iuL]), &(uGRight[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL+1] += len * vflux[0];
@@ -403,7 +360,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL]     -= len * fflux[0];
@@ -416,7 +373,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(i,0,1,nx-1,3)] - geoel[IJK(i,1,1,nx-1,3)];
         dc[1] = geoel[IJK(i,0,2,nx-1,3)] - geoel[IJK(i,1,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(unk[iuL]), &(uGBot[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuL+1] += len * vflux[0];
@@ -446,7 +405,7 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(gam, normx, normy, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
+        LDFSS(normx, normy, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR  ] += len * fflux[0];
@@ -458,7 +417,9 @@ void calc_dudt(int nx, int ny, double gam, double mu, State* ElemVar, double *uF
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(i,ny-3,1,nx-1,3)] - geoel[IJK(i,ny-2,1,nx-1,3)];
         dc[1] = geoel[IJK(i,ny-3,2,nx-1,3)] - geoel[IJK(i,ny-2,2,nx-1,3)];
-        viscous(nx, mu, normy, normx, &(uGTop[iuL]), &(unk[iuR]), &(dc[0]), &(vflux[0]));
+        varL = ElemVar[ieL];
+        varR = ElemVar[ieR];
+        viscous(nx, normy, normx, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(dc[0]), &(vflux[0]));
 
         //Add flux contribution to elements
         rhsel[iuR+1] -= len * vflux[3];

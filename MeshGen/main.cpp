@@ -12,7 +12,7 @@
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
-    double l0 = 1.0;
+    double l0 = 0.5;//1.0;
     if(x < l0) {
         return 0;
     } else if( x > l0+L) {
@@ -52,7 +52,7 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
     for (int j=0; j<ny; j++) {
         for (int i=0; i<nx; i++) {
             int ip = IU(i,j,nx);
-            fprintf(fout, "%lf,\t%lf\n", x[ip], y[ip]);
+            fprintf(fout, "%20.16lf,%20.16lf\n", x[ip], y[ip]);
         }
     }
     fclose(fout);
@@ -64,7 +64,7 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
     for (int j=0; j<ny; j++) {
         for (int i=0; i<nx; i++) {
             int ip = IU(i,j,nx);
-            fprintf(fout2, "%lf \t%lf\n", x[ip], y[ip]);
+            fprintf(fout2, "%20.16lf %20.16lf\n", x[ip], y[ip]);
         }
     }
     //printing out boundary conditions
@@ -79,22 +79,22 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
 int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
-    int nx, ny;
-    height = 1.0;
-    length = 4.0;
-    nx = 401;
-    ny = 201;
+    int irefine, nx, ny, nyrefine{};
+    height = 0.5;
+    length = 1.0;//4.0;
+    nx = 101;
+    ny = 101;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
-
+    irefine = 1; //option to include a tanh distribution for boundary layoe on bottom surface
 
     /*
      * ==================== Geometry Input ====================
      * Need to represent bottom and top surfaces of geometry
      */
-    double ramp_height = 0.3;
-    double ramp_length = 1.0;
+    double ramp_height = 0.75;//0.3;
+    double ramp_length = 1.0;//1.0;
 
     /*
      * ==================== Mesh Generation ====================
@@ -112,54 +112,97 @@ int main() {
 
 
     //define coordinates
-    for (int i =0; i<nx; i++){
-
-        double xi = i*dx;
+    double factor = 2.0;
+    for (int i = 0; i < nx; i++) {
+        double xi = i * dx;
         ymax = height + y_offset;
-        ymin = ramp_surface(xi,ramp_height, ramp_length);
-        dy = (ymax - ymin) / ny;
+        ymin = 0.0; //ramp_surface(xi, ramp_height, ramp_length);
+        dy = (ymax - ymin) / (ny - 1);
 
-        for (int j=0; j<ny; j++){
-            int ip = IU(i,j,nx);
-            x[ip] = xi;
-            //y[ip] = j*dy + ymin; //equal spacing
-            double xi = (double)j/(ny-1);
-            double k=6;
-            double f = 1.0 / (1.0 + exp(-k*(xi-0.5)));//(cbrt(xi-0.5) + 2 - cbrt(0.5)) / (2.0);
-            double f1 = 1.0 / (1.0 + exp(-k*(1.0-0.5)));
-            y[ip] = (bias)*(f/f1)*dy*ny + (1.0-bias)*(j*dy) + ymin; //biased spacing
-            if (i==0) printf("y, %lf\n", y[ip]);
+        if (irefine==1) {
+            double delmin, del, etamin;
+            int iconv;
+            iconv = 0;
+            etamin = 0.05;
+            delmin = etamin*sqrt(1.789e-5 * 0.2 / 10.0 );//;1e-6; //adjust to get desired Y+ or eta value
+
+            while (iconv == 0 && i == 0) {
+                del = 0.0;
+                for (int j = 0; j < ny; j++) {
+                    //printf("j:%d \t del:%le\n",j,del);
+                    int ip = IU(i, j, nx);
+                    x[ip] = xi;
+                    if (j == 0) {
+                        y[ip] = ymin;
+                        del = delmin * pow(factor, j);
+                        continue;
+                    }
+                    y[ip] = y[IU(i, j-1, nx)] + del;
+                    //if (i == 0) printf("y, %le\n", y[ip]);
+
+                    del = delmin * pow(factor, j);
+                    if (y[ip] >= ymax) {
+                        factor = 0.99 * factor + 0.01 * 1.0;
+                        iconv = -1;
+                        printf("y failed max, %le\n", y[ip]);
+                        break;
+                    }
+                }
+
+                if (iconv == 0) printf("y final max, %lf\n", y[IU(i, ny - 1, nx)]);
+                printf("Growth Factor: %lf\n", factor);
+                iconv += 1;
+            }
+
+            if (i >= 1) {
+                for (int j = 0; j < ny; j++) {
+                    int ip = IU(i, j, nx);
+                    y[ip] = y[IU(i-1,j,nx)];
+                    x[ip] = xi;
+
+                }
+            }
+        } else {
+
+            for (int j = 0; j < ny; j++) {
+                int ip = IU(i, j, nx);
+                x[ip] = xi;
+                y[ip] = (j * dy) + ymin;
+                if (i == 0) printf("y, %lf\n", y[ip]);
+            }
         }
     }
 
 
     //   ==================== Boundary cells ====================
+    // 0 = viscous wall
+    // 1 = freestream
+    // 2 = backpressure (kinda not used)
+    // 3 = outflow / extrapolation
     //initialize with freestream
     for(int ib=0; ib<nbound; ib++)
         ibound[ib] = 1;
-    //hardcoded nosecone stagnation point finder - sucks
-    int istag=0;
-    for(int ix=0; ix<nx; ix++){
-        if(y[IU(ix,0,nx)] > 1e-10){
-            istag = ix-1;
-            break;
-        }
-    }
 
-    //apply wall boundary condition
-    //full top/bot surf
+    //top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        if (ib*dx > 1.0) {
-            ibound[ib] = 0;
-            if (ib*dx > 2.0) {
-                ibound[-ib + 2 * nx + ny - 3] = 0; //top surface
-            }
+        int itop = -ib + 2 * nx + ny - 3;
+        int ibot = ib;
+
+        if (ib*dx > 0.2) { ///////////////
+            ibound[ibot] = 0;       //bot surf
+        }
+
+        if (ib*dx > 2.0) {
+                //ibound[itop] = 3;   //top surface
         }
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){
-        ibound[ib] = 3;
-        //ibound[ib+nx+ny-2] = 0;
+        int iback = ib;
+        int ifront = ib+nx+ny-2;
+
+        ibound[iback] = 3;      //      right/exit
+        //ibound[ifront] = 0;
     }
 
 
