@@ -18,7 +18,7 @@ double Thermo::CalcEnthalpy(double T){
     T5 = T*T4;
 
     ASSERT(T > 200.0, "Temp below curve fit")
-    ASSERT(T < 10000.0, "Temp above curve fit")
+    CHECKD(T < 10000.0, "Temp above curve fit", T)
 
     if (T > 1000.0) {
         return (Rs[isp])*(Ah[isp]*T + Bh[isp]*T2*0.5 + Ch[isp]*T3/3.0 + Dh[isp]*T4*0.25 + Eh[isp]*T5*0.2 + Fh[isp]);

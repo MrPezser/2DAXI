@@ -200,6 +200,30 @@ FileIO.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/FileIO.cpp.s
 .PHONY : FileIO.cpp.s
 
+InexactNewtonCg.obj: InexactNewtonCg.cpp.obj
+.PHONY : InexactNewtonCg.obj
+
+# target to build an object file
+InexactNewtonCg.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj
+.PHONY : InexactNewtonCg.cpp.obj
+
+InexactNewtonCg.i: InexactNewtonCg.cpp.i
+.PHONY : InexactNewtonCg.i
+
+# target to preprocess a source file
+InexactNewtonCg.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/InexactNewtonCg.cpp.i
+.PHONY : InexactNewtonCg.cpp.i
+
+InexactNewtonCg.s: InexactNewtonCg.cpp.s
+.PHONY : InexactNewtonCg.s
+
+# target to generate assembly for a file
+InexactNewtonCg.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/InexactNewtonCg.cpp.s
+.PHONY : InexactNewtonCg.cpp.s
+
 Jacobian.obj: Jacobian.cpp.obj
 .PHONY : Jacobian.obj
 
@@ -247,6 +271,30 @@ LUtools.s: LUtools.cpp.s
 LUtools.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/LUtools.cpp.s
 .PHONY : LUtools.cpp.s
+
+MathTools.obj: MathTools.cpp.obj
+.PHONY : MathTools.obj
+
+# target to build an object file
+MathTools.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MathTools.cpp.obj
+.PHONY : MathTools.cpp.obj
+
+MathTools.i: MathTools.cpp.i
+.PHONY : MathTools.i
+
+# target to preprocess a source file
+MathTools.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MathTools.cpp.i
+.PHONY : MathTools.cpp.i
+
+MathTools.s: MathTools.cpp.s
+.PHONY : MathTools.s
+
+# target to generate assembly for a file
+MathTools.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVns.dir\build.make CMakeFiles/FVns.dir/MathTools.cpp.s
+.PHONY : MathTools.cpp.s
 
 MeshModule.obj: MeshModule.cpp.obj
 .PHONY : MeshModule.obj
@@ -362,12 +410,18 @@ help:
 	@echo ... FileIO.obj
 	@echo ... FileIO.i
 	@echo ... FileIO.s
+	@echo ... InexactNewtonCg.obj
+	@echo ... InexactNewtonCg.i
+	@echo ... InexactNewtonCg.s
 	@echo ... Jacobian.obj
 	@echo ... Jacobian.i
 	@echo ... Jacobian.s
 	@echo ... LUtools.obj
 	@echo ... LUtools.i
 	@echo ... LUtools.s
+	@echo ... MathTools.obj
+	@echo ... MathTools.i
+	@echo ... MathTools.s
 	@echo ... MeshModule.obj
 	@echo ... MeshModule.i
 	@echo ... MeshModule.s

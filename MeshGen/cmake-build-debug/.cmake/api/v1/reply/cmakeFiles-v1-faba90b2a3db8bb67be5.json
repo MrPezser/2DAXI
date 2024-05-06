@@ -797,8 +797,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug",
-		"source" : "C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns"
+		"build" : "C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/MeshGen/cmake-build-debug",
+		"source" : "C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/MeshGen"
 	},
 	"version" : 
 	{

@@ -194,6 +194,34 @@ CMakeFiles/FVns.dir/Thermo.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/Thermo.cpp.s"
 	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Thermo.cpp -o CMakeFiles\FVns.dir\Thermo.cpp.s
 
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj: CMakeFiles/FVns.dir/flags.make
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj: C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.cpp
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj: CMakeFiles/FVns.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj -MF CMakeFiles\FVns.dir\InexactNewtonCg.cpp.obj.d -o CMakeFiles\FVns.dir\InexactNewtonCg.cpp.obj -c C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\InexactNewtonCg.cpp
+
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/FVns.dir/InexactNewtonCg.cpp.i"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\InexactNewtonCg.cpp > CMakeFiles\FVns.dir\InexactNewtonCg.cpp.i
+
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/InexactNewtonCg.cpp.s"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\InexactNewtonCg.cpp -o CMakeFiles\FVns.dir\InexactNewtonCg.cpp.s
+
+CMakeFiles/FVns.dir/MathTools.cpp.obj: CMakeFiles/FVns.dir/flags.make
+CMakeFiles/FVns.dir/MathTools.cpp.obj: C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp
+CMakeFiles/FVns.dir/MathTools.cpp.obj: CMakeFiles/FVns.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/FVns.dir/MathTools.cpp.obj"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FVns.dir/MathTools.cpp.obj -MF CMakeFiles\FVns.dir\MathTools.cpp.obj.d -o CMakeFiles\FVns.dir\MathTools.cpp.obj -c C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MathTools.cpp
+
+CMakeFiles/FVns.dir/MathTools.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/FVns.dir/MathTools.cpp.i"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MathTools.cpp > CMakeFiles\FVns.dir\MathTools.cpp.i
+
+CMakeFiles/FVns.dir/MathTools.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/FVns.dir/MathTools.cpp.s"
+	C:\MinGW\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MathTools.cpp -o CMakeFiles\FVns.dir\MathTools.cpp.s
+
 # Object files for target FVns
 FVns_OBJECTS = \
 "CMakeFiles/FVns.dir/main.cpp.obj" \
@@ -204,7 +232,9 @@ FVns_OBJECTS = \
 "CMakeFiles/FVns.dir/MeshModule.cpp.obj" \
 "CMakeFiles/FVns.dir/LUtools.cpp.obj" \
 "CMakeFiles/FVns.dir/Jacobian.cpp.obj" \
-"CMakeFiles/FVns.dir/Thermo.cpp.obj"
+"CMakeFiles/FVns.dir/Thermo.cpp.obj" \
+"CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj" \
+"CMakeFiles/FVns.dir/MathTools.cpp.obj"
 
 # External object files for target FVns
 FVns_EXTERNAL_OBJECTS =
@@ -218,11 +248,13 @@ FVns.exe: CMakeFiles/FVns.dir/MeshModule.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/LUtools.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/Jacobian.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/Thermo.cpp.obj
+FVns.exe: CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj
+FVns.exe: CMakeFiles/FVns.dir/MathTools.cpp.obj
 FVns.exe: CMakeFiles/FVns.dir/build.make
 FVns.exe: CMakeFiles/FVns.dir/linkLibs.rsp
 FVns.exe: CMakeFiles/FVns.dir/objects1
 FVns.exe: CMakeFiles/FVns.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable FVns.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable FVns.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\FVns.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -25,7 +25,7 @@ private:
 
 
 public:
-    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
+    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{}, e{};
 
 
     State() = default;
@@ -44,6 +44,7 @@ public:
         a = sqrt(air.gam*air.Rs[isp]*T);
         h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
+        e = h - air.Rs[0]*T;
         Cp[0] = air.CalcCp(T);
         Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
 

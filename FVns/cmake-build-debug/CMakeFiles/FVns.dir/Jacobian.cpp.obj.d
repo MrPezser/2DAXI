@@ -18,4 +18,8 @@ CMakeFiles/FVns.dir/Jacobian.cpp.obj: \
  c:\mingw\lib\gcc\mingw32\6.3.0\include\stdarg.h \
  c:\mingw\lib\gcc\mingw32\6.3.0\include\c++\cstdlib \
  c:\mingw\include\stdlib.h \
- C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Thermo.h
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Thermo.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MathTools.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\BoundaryConditions.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\EulerFlux.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\SpatialDiscretization.h

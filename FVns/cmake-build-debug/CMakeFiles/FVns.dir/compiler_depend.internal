@@ -190,6 +190,38 @@ CMakeFiles/FVns.dir/FileIO.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h
 
+CMakeFiles/FVns.dir/InexactNewtonCg.cpp.obj
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.cpp
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdio
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/c++config.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/os_defines.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/cpu_defines.h
+ C:/MinGW/include/stdio.h
+ C:/MinGW/include/_mingw.h
+ C:/MinGW/include/msvcrtver.h
+ C:/MinGW/include/w32api.h
+ C:/MinGW/include/sdkddkver.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/stddef.h
+ C:/MinGW/include/sys/types.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/stdarg.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
+ C:/MinGW/include/stdlib.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cmath
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/bits/cpp_type_traits.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/ext/type_traits.h
+ C:/MinGW/include/math.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/FileIO.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h
+
 CMakeFiles/FVns.dir/Jacobian.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.cpp
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h
@@ -214,6 +246,10 @@ CMakeFiles/FVns.dir/Jacobian.cpp.obj
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
  C:/MinGW/include/stdlib.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h
 
 CMakeFiles/FVns.dir/LUtools.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.cpp
@@ -236,6 +272,29 @@ CMakeFiles/FVns.dir/LUtools.cpp.obj
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/stdarg.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
  C:/MinGW/include/stdlib.h
+
+CMakeFiles/FVns.dir/MathTools.cpp.obj
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdio
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/c++config.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/os_defines.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/cpu_defines.h
+ C:/MinGW/include/stdio.h
+ C:/MinGW/include/_mingw.h
+ C:/MinGW/include/msvcrtver.h
+ C:/MinGW/include/w32api.h
+ C:/MinGW/include/sdkddkver.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/stddef.h
+ C:/MinGW/include/sys/types.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/stdarg.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
+ C:/MinGW/include/stdlib.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cmath
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/bits/cpp_type_traits.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/ext/type_traits.h
+ C:/MinGW/include/math.h
 
 CMakeFiles/FVns.dir/MeshModule.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.cpp
@@ -262,30 +321,30 @@ CMakeFiles/FVns.dir/MeshModule.cpp.obj
 
 CMakeFiles/FVns.dir/SpatialDiscretization.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.cpp
- C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdio
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cmath
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/c++config.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/os_defines.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32/bits/cpu_defines.h
- C:/MinGW/include/stdio.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/bits/cpp_type_traits.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/ext/type_traits.h
+ C:/MinGW/include/math.h
  C:/MinGW/include/_mingw.h
  C:/MinGW/include/msvcrtver.h
  C:/MinGW/include/w32api.h
  C:/MinGW/include/sdkddkver.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdio
+ C:/MinGW/include/stdio.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/stddef.h
  C:/MinGW/include/sys/types.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/stdarg.h
- C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cmath
- C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/bits/cpp_type_traits.h
- C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/ext/type_traits.h
- C:/MinGW/include/math.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
  C:/MinGW/include/stdlib.h
- C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h
- C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h
- C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.h
- C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h
 
 CMakeFiles/FVns.dir/Thermo.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.cpp
@@ -305,6 +364,10 @@ CMakeFiles/FVns.dir/Thermo.cpp.obj
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/stdarg.h
  C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cstdlib
  C:/MinGW/include/stdlib.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/cmath
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/bits/cpp_type_traits.h
+ C:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/ext/type_traits.h
+ C:/MinGW/include/math.h
 
 CMakeFiles/FVns.dir/main.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/main.cpp
@@ -424,7 +487,11 @@ CMakeFiles/FVns.dir/main.cpp.obj
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h
  C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h
+ C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h
 

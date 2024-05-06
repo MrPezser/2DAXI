@@ -106,6 +106,10 @@ CMakeFiles/FVns.dir/main.cpp.obj: \
  C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Indexing.h \
  C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\SpatialDiscretization.h \
  C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\StateVariables.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\EulerFlux.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\BoundaryConditions.h \
  C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MeshModule.h \
  C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\LUtools.h \
- C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Jacobian.h
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\Jacobian.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\MathTools.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVns\InexactNewtonCg.h

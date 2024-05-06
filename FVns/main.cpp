@@ -12,47 +12,8 @@
 #include "LUtools.h"
 #include "Jacobian.h"
 #include "Thermo.h"
+#include "InexactNewtonCg.h"
 
-
-double find_dt(Thermo& air, int nx, int ny, double CFL, const double* uRef, State& var, double* geofa){
-    double vmax, dt, mindx;
-
-    //Max info speed = v+c
-    vmax = sqrt(var.v2) + var.a;
-
-    //Min grid spacing
-    mindx = 1.0;
-    for (int i=0; i<nx-1; i++){
-        for (int j=0; j<ny-1; j++){
-            mindx = fmin(mindx, geofa[IJK(i,j,0,nx,6)]);
-            mindx = fmin(mindx, geofa[IJK(i,j,3,nx,6)]);
-        }
-    }
-
-    dt = CFL * mindx / vmax;
-    ASSERT(!_isnan(dt), "NAN dt")
-    return dt;
-}
-
-void calculate_residual(int nx, int ny, double* res, double* ressum){
-    double res2[NVAR] = {0.0};
-
-    for (int i=0; i<nx-1; i++){
-        for (int j=0; j<ny-1; j++){
-            int iu = IJK(i,j,0,nx-1,NVAR);
-
-            for (int k=0; k<NVAR; k++){
-                ASSERT(!_isnan(res[iu+k]),"res NaN")
-                res2[k] += res[iu+k]*res[iu+k];
-            }
-        }
-    }
-
-    ressum[0] = sqrt(res2[0]);
-    ressum[1] = sqrt(res2[1]);
-    ressum[2] = sqrt(res2[2]);
-    ressum[3] = sqrt(res2[3]);
-}
 
 void vec_copy(double n, double* a, double* b){
     for (int i=0; i<n; i++){
@@ -67,10 +28,10 @@ int main() {
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 1.0;//0.8;
-    u0 = 10;
+    u0 = 100.0;
     T0 = 300;
     rho0 = 1.0;
-    v0 = 0.0;
+    v0 = -5.0;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -140,25 +101,36 @@ int main() {
             ElemVar[ie].UpdateState(air);
         }
     }
-    //Same memory to be used for each local matrix (chg this if making parallel)
-    auto D = (double**)malloc((NVAR) * sizeof(double*));
-    for (int k = 0; k < NVAR; k++)
-        D[k] = (double*)malloc( (NVAR) * sizeof(double));
+    //Same memory to be used for each local matrix (chg this if making parallel) (explicit only)
+    //auto D = (double**)malloc((NVAR) * sizeof(double*));
+    //for (int k = 0; k < NVAR; k++)
+    //    D[k] = (double*)malloc( (NVAR) * sizeof(double));
 
     printf("==================== Starting Solver ====================\n");
+    BC bound = BC(nx,ny);
 
+    int isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
+                       ibound, geoel, geofa, unk);
+    if (isolved==0){
+        printf("Failed to find satifactory solution\n");
+    }
 
+    /*
     double res0[NVAR]{};
     double ressum[NVAR], restotal;
     int iter;
+    BC bound = BC(nx,ny);
     for (iter=0; iter<mxiter; iter++){
         //Explicit Euler Time Integration
 
         //Find global timestep based off of CFl condition
         dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
+        //Calculate the ghost cell values
+        bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, unk);
+
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, res);
+        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, bound,res);
         calculate_residual(nx, ny, res, ressum);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
@@ -172,7 +144,7 @@ int main() {
                 int P[NVAR+1]{}; //permutation vector for pivoting
 
                 //Evaluate the jacobian / Implicit matrix
-                BuildJacobian(dt, unkij, ElemVar[iel], D);
+                RegularizationTerm(dt, unkij, ElemVar[iel], D);
 
                 //get the rhs block needed
                 double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
@@ -222,6 +194,7 @@ int main() {
 
 
     printf("Complete.");
+    */
 
     free(ElemVar);
     free(res);

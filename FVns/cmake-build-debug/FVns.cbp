@@ -101,6 +101,12 @@
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h">
 			<Option target="FVns"/>
 		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h">
+			<Option target="FVns"/>
+		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.cpp">
 			<Option target="FVns"/>
 		</Unit>
@@ -111,6 +117,12 @@
 			<Option target="FVns"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h">
 			<Option target="FVns"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.cpp">
