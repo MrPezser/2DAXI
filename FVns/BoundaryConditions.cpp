@@ -90,7 +90,7 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
         uRight[1] = uR;
         uRight[2] = vR;
 
-        if (_isnan(normx) or _isnan(normy)){
+        if (__isnan(normx) or __isnan(normy)){
             printf("Undef. Surface Normal!\n");
         }
     }

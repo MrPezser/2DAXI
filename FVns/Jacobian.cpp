@@ -31,7 +31,7 @@ void RegularizationTerm(double  dt,const double* unk, State& var,double** D) {
 
     //total energy derivatives
     for (int isp=0; isp<NSP; isp++){
-        D[NSP+2][isp] += dti * (var.e + 0.5*var.v2);               //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
+        D[NSP+2][isp] += dti * (var.e + 0.5*var.v2);//var.h0          //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
     }
     D[NSP+2][NSP]   += dti * unk[0]* unk[NSP];
     D[NSP+2][NSP+1] += dti * unk[0]* unk[NSP+1];
@@ -39,7 +39,7 @@ void RegularizationTerm(double  dt,const double* unk, State& var,double** D) {
 
     for (int i=0; i<NSP+3; i++){
         for (int j=0; j<NSP+3; j++){
-            ASSERT(!_isnan(D[i][j]), "NaN Jacobian")
+            ASSERT(!__isnan(D[i][j]), "NaN Jacobian")
             ASSERT(!std::isinf(D[i][j]), "INF Jacobian)")
         }
     }
@@ -95,6 +95,8 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
             unk = &(unkel[iunk]);
             var = ElemVar[ielm];
 
+            ElemVar[ielm].Initialize(&(uPerturb[iunk]));
+
             //Perturb element
             //each column is dF/d(var_c)
             for (int jvar=0; jvar<NVAR; jvar++) {
@@ -111,11 +113,13 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                 //regularization term
                 RegularizationTerm(dt, unk, var, D);
 
+
+                /*
                 //Perturb for finite difference solution
                 double delvar = 1e-8 * fabs(unk[jvar]);
                 if (delvar <= 1e-8) delvar = 1e-8;
-                delvar = 1e-8;
                 uPerturb[iunk + jvar] += delvar;
+                ElemVar[ielm].UpdateState(air);
 
                 //Find the new residual/RHS value
                 bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, uPerturb);
@@ -130,7 +134,7 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                     //same element
                     // dFi / dVj
                     D[ivar][jvar] -= (RHSPertu[iunk + ivar] - RHS[iunk + ivar]) / delvar;
-                    if (_isnan(D[ivar][jvar]) or std::isinf(D[ivar][jvar])){
+                    if (__isnan(D[ivar][jvar]) or std::isinf(D[ivar][jvar])){
                         //DUNG("bread")
                     }
 
@@ -160,7 +164,7 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                     }
 
                 }
-
+                */
                 iqin = iunk + jvar;  // index for the column being multiplied === element of vector to use
                 //Gather this component of the matrix multiply on RHS
                 for (int ivar = 0; ivar < NVAR; ivar++) {
@@ -201,12 +205,24 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
 
                 //reset perturbed variable
                 uPerturb[iunk + jvar] = unkel[iunk + jvar];
+                ElemVar[ielm].UpdateState(air);
             }
+
+            ElemVar[ielm].Initialize(unk);
+            ElemVar[ielm].UpdateState(air);
         }
     }
 
 
     free(uPerturb);
+    free(RHSPertu);
+    for (int k = 0; k < NVAR; k++) {
+        free(D[k]);
+        free(Jip[k]);
+        free(Jim[k]);
+        free(Jjp[k]);
+        free(Jjm[k]);
+    }
     free(D);
     free(Jip);
     free(Jim);

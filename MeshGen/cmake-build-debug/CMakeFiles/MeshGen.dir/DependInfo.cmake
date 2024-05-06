@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/MeshGen/main.cpp" "CMakeFiles/MeshGen.dir/main.cpp.obj" "gcc" "CMakeFiles/MeshGen.dir/main.cpp.obj.d"
+  "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/MeshGen/main.cpp" "CMakeFiles/MeshGen.dir/main.cpp.o" "gcc" "CMakeFiles/MeshGen.dir/main.cpp.o.d"
   )
 
 # Targets to which this target links.

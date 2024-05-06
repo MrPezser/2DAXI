@@ -80,20 +80,20 @@ int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int irefine, nx, ny, nyrefine{};
-    height = 0.5;
-    length = 1.0;//4.0;
+    height = 1.0;
+    length = 1.5;//4.0;
     nx = 51;
     ny = 51;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;
-    irefine = 1; //option to include a tanh distribution for boundary layoe on bottom surface
+    irefine = 0; //option to include a tanh distribution for boundary layoe on bottom surface
 
     /*
      * ==================== Geometry Input ====================
      * Need to represent bottom and top surfaces of geometry
      */
-    double ramp_height = 0.75;//0.3;
+    double ramp_height = 0.25;//0.3;
     double ramp_length = 1.0;//1.0;
 
     /*
@@ -116,7 +116,7 @@ int main() {
     for (int i = 0; i < nx; i++) {
         double xi = i * dx;
         ymax = height + y_offset;
-        ymin = 0.0; //ramp_surface(xi, ramp_height, ramp_length);
+        ymin = ramp_surface(xi, ramp_height, ramp_length);
         dy = (ymax - ymin) / (ny - 1);
 
         if (irefine==1) {
@@ -185,16 +185,15 @@ int main() {
 
     //top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        int itop = -ib + 2 * nx + ny - 3;
+        int itop = -ib + (2 * nx) + ny - 3 - 1;
         int ibot = ib;
 
         if (ib*dx > 0.2) { ///////////////
-            ibound[ibot] = 0;       //bot surf
+            ibound[ibot] = 4;       //bot surf
         }
 
-        if (ib*dx > 2.0) {
-                //ibound[itop] = 3;   //top surface
-        }
+        //ibound[itop] = 3;   //top surface
+
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){

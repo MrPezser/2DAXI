@@ -27,11 +27,11 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 1.0;//0.8;
+    CFL = 0.2;//0.8;
     u0 = 100.0;
     T0 = 300;
     rho0 = 1.0;
-    v0 = -5.0;
+    v0 = 0.0;
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -199,4 +199,10 @@ int main() {
     free(ElemVar);
     free(res);
     free(dv);
+    free(unk);
+    free(geoel);
+    free(geofa);
+    free(ibound);
+    free(x);
+    free(y);
 }

@@ -13,19 +13,22 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
     // b = -Right Hand Side
     // x = guess at a descent direction
     int n = (nx-1)*(ny-1)*NVAR;
-    double tol = 1e-15;
+    double tol = 1e-4;
     unsigned kmx = 20;//n;
     double r[n], s[n], omega[n], dummy[n];
+    vecinitialize(r,n);
 
-    veccopy(r, RHS, n);
-    //(void) vecscale(RHS, -1.0, n, r);
+    JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
+    for (int iu=0; iu<n; iu++){
+        r[iu] = RHS[iu] - r[iu];
+    }
     (void) veccopy(s, r, n);
 
     double rho0 = vecinner(r, r, n);
     double rhok = rho0;
     double rhokm1 = rho0;
 
-    printf("CG Start: %d \t |Res_0|: %e \t |PHI|: %lf\n", 0, sqrt(rhok), vecinner(x,x,n));
+    //printf("CG Start: %d \t\t |R0|: %e\t |PHI|: %le\n", 0, sqrt(rhok), vecinner(x,x,n));
 
     for (int k=1;k<=kmx;k++) {
 
@@ -35,7 +38,7 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
         double s_omega = vecinner(s, omega, n);
         //printf("s_omega = %e\n",s_omega);
         if( s_omega < 0.0) {
-            printf("CG failed\n");//, CGITER=%d\n", k);
+            printf("CG failed,%d\t",k);//, CGITER=%d\n", k);
             //ASSERT(k>1,"CG FAILED ON FIRST ITERATION, NO DESCENT DIRECTION FOUND")
             return 0;
         }
@@ -52,7 +55,7 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
         rhokm1 = rhok;
         rhok   = vecinner(r,r,n);
         if (k % 1 == 0) {
-            printf("CG Iteration: %d \t |Res|: %e \t |PHI|: %le\n", k, sqrt(rhokm1/rho0) , vecinner(x,x,n));
+            //printf("CG Iteration: %d \t |Res|: %e \t |PHI|: %le\n", k, sqrt(rhokm1/rho0) , vecinner(x,x,n));
         }
 
         if (sqrt(rhok/rho0) < tol) {
@@ -61,6 +64,16 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
         }
 
         double beta = rhok / rhokm1;
+
+        if ( beta > 1.0) {
+            for (int iu=0; iu<n; iu++){
+                x[iu] -= (alpha * s[iu]);
+            }
+            //printf("CG failed, Beta > 1, it:%d\n",k);
+            printf("%d\t",k);
+            return 0;
+        }
+
         for (int iu=0; iu<n; iu++){
             s[iu] = r[iu] +  (beta * s[iu]);
         }
@@ -135,6 +148,9 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
         }
         (void) veccopy(x, dv, nu);
         CGsolve(nx,ny,dt,air,ElemVar,bound,uFS,ibound,geoel,geofa,unkel,RHS,x);
+        for (int k=0; k<NVAR; k++){
+            free(D[k]);
+        }
         free(D);
 
         //Define sufficient descent
@@ -184,14 +200,20 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
             printf("\nIter:%7d\tdt:%7.4e\tiarm=%5d\tRelativeTotalResisual:  %8.5e\n\n", \
                     iter, dt,iarmijo, rnormnew/norm0);
         }
-        if (iter > 0 and iter%1 == 0){
-            printf("Saving current Solution\n\n");
+        if (iter > 0 and iter%100 == 0){
+            //printf("Saving current Solution\n\n");
             print_state("Final State", nx, ny, air, xgeo, ygeo, unknew, geoel);
         }
-        if (rnormnew < RESTOL) {
+        if (rnormnew/norm0 < RESTOL) {
             printf("==================== Solution Found ====================\n");
             printf("Saving Solution File..... \n");
             print_state("Final State", nx, ny, air, xgeo, ygeo, unknew, geoel);
+            free(ELVanew);
+            free(unknew);
+            free(RHSnew);
+            free(RHS);
+            free(x);
+            free(dv);
             return 1;
         }
 
@@ -206,5 +228,11 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
         rnorm = rnormnew;
 
     }
+    free(ELVanew);
+    free(unknew);
+    free(RHSnew);
+    free(RHS);
+    free(x);
+    free(dv);
     return 0;
 }

@@ -21,7 +21,7 @@
 class State {
 
 private:
-    const double* unk{};
+    double* unk{};
 
 
 public:
@@ -30,13 +30,15 @@ public:
 
     State() = default;
 
-    void Initialize(const double* u){
+    void Initialize(double* u){
         unk = u;
         // vars = [rho, u, v, T]
     }
 
     void UpdateState(Thermo& air ) {
         int isp = 0;
+        unk[3] = fmin(unk[3], 9999.0);
+        unk[3] = fmax(unk[3], 201.0);
         double T = unk[3];
 
         v2 = unk[1]*unk[1] + unk[2]*unk[2];
@@ -56,7 +58,7 @@ public:
 
         CHECKD(a > 0.0, "bad wave speed", a)
         CHECKD(p > 0.0, "bad pressure", p)
-        ASSERT(!_isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
+        ASSERT(!__isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
     }
 
 };

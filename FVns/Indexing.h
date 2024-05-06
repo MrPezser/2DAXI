@@ -14,7 +14,7 @@
 #define NSP 1
 #define IVISC 0
 #define MXITER 1e6
-#define ITGLOBAL 1e2
+#define ITGLOBAL 1e6
 #define RESTOL 1e-6
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))

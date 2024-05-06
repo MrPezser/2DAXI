@@ -1,10 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/MeshGen.dir/main.cpp.obj"
-  "CMakeFiles/MeshGen.dir/main.cpp.obj.d"
-  "MeshGen.exe"
-  "MeshGen.exe.manifest"
+  "CMakeFiles/MeshGen.dir/main.cpp.o"
+  "CMakeFiles/MeshGen.dir/main.cpp.o.d"
+  "MeshGen"
   "MeshGen.pdb"
-  "libMeshGen.dll.a"
 )
 
 # Per-language clean rules from dependency scanning.

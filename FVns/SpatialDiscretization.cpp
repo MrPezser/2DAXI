@@ -21,7 +21,7 @@ double find_dt(Thermo& air, int nx, int ny, double CFL, const double* uRef, Stat
     }
 
     dt = CFL * mindx / vmax;
-    ASSERT(!_isnan(dt), "NAN dt")
+    ASSERT(!__isnan(dt), "NAN dt")
     return dt;
 }
 
@@ -33,7 +33,7 @@ void calculate_residual(int nx, int ny, double* res, double* ressum){
             int iu = IJK(i,j,0,nx-1,NVAR);
 
             for (int k=0; k<NVAR; k++){
-                ASSERT(!_isnan(res[iu+k]),"res NaN")
+                ASSERT(!__isnan(res[iu+k]),"res NaN")
                 res2[k] += res[iu+k]*res[iu+k];
             }
         }
@@ -91,10 +91,10 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
         visc_contrib[5] = ((uR * tau[0] + vR * tau[2]) * normx + (uR * tau[1] + vR * tau[3]) * normy);
 
         for (int iv = 0; iv < 6; iv++) {
-            if (_isnan(visc_contrib[iv])) {
+            if (__isnan(visc_contrib[iv])) {
                 printf("asdfaed\n");
             }
-            ASSERT(!_isnan(visc_contrib[iv]), "Visc Flux NaN");
+            ASSERT(!__isnan(visc_contrib[iv]), "Visc Flux NaN");
         }
     } else {
         visc_contrib[0] = 0.0;
@@ -223,7 +223,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     }
 
     for (int iu=0; iu<nelem*NVAR; iu++){
-        if (_isnan(rhsel[iu])){
+        if (__isnan(rhsel[iu])){
             printf("NAN RHSEL\n");
         }
     }
@@ -402,7 +402,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             dudt[iu+2] = rhsel[iu+2] / vol;
             dudt[iu+3] = rhsel[iu+3] / vol;
 
-            if (_isnan(dudt[iu])) {
+            if (__isnan(dudt[iu])) {
                 printf("nan dudt\n");
             }
 
@@ -570,7 +570,7 @@ void calc_dudt_element(int iel, int jel, int nx, int ny, Thermo& air, State* Ele
     }
 
     for (int iu=0; iu<nelem*NVAR; iu++){
-        if (_isnan(rhsel[iu])){
+        if (__isnan(rhsel[iu])){
             printf("NAN RHSEL\n");
         }
     }
@@ -764,7 +764,7 @@ void calc_dudt_element(int iel, int jel, int nx, int ny, Thermo& air, State* Ele
             dudt[iu + 2] = rhsel[iu + 2] / vol;
             dudt[iu + 3] = rhsel[iu + 3] / vol;
 
-            if (_isnan(dudt[iu])) {
+            if (__isnan(dudt[iu])) {
                 printf("nan dudt\n");
             }
 

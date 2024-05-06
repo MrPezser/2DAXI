@@ -8,148 +8,150 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
+				<Option working_dir="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FVns">
-				<Option output="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/FVns.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
+				<Option output="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/FVns" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++/mingw32"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++/backward"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/../../../../include"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include-fixed"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 FVns"/>
-					<CompileFile command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 FVns"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FVns/fast">
-				<Option output="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/FVns.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
+				<Option output="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/FVns" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++/mingw32"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include/c++/backward"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/../../../../include"/>
-					<Add directory="c:\mingw\bin\../lib/gcc/mingw32/6.3.0/include-fixed"/>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 FVns/fast"/>
-					<CompileFile command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 FVns/fast"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
+				<Option working_dir="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
+				<Option working_dir="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="C:/MinGW/bin/mingw32-make.exe -f &quot;C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/BoundaryConditions.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/EulerFlux.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/FileIO.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/FileIO.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/FileIO.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/FileIO.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Indexing.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/StateVariables.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.h">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.h">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/main.cpp">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/main.cpp">
 			<Option target="FVns"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/CMakeLists.txt">
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>
