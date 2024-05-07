@@ -200,7 +200,7 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
             printf("\nIter:%7d\tdt:%7.4e\tiarm=%5d\tRelativeTotalResisual:  %8.5e\n\n", \
                     iter, dt,iarmijo, rnormnew/norm0);
         }
-        if (iter > 0 and iter%100 == 0){
+        if (iter > 0 and iter%1 == 0){
             //printf("Saving current Solution\n\n");
             print_state("Final State", nx, ny, air, xgeo, ygeo, unknew, geoel);
         }
