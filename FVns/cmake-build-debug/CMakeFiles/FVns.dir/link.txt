@@ -1,3 +1,1 @@
-"C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe" -E rm -f CMakeFiles\FVns.dir/objects.a
-C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\ar.exe qc CMakeFiles\FVns.dir/objects.a @CMakeFiles\FVns.dir\objects1
-C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\FVns.dir/objects.a -Wl,--no-whole-archive -o FVns.exe -Wl,--out-implib,libFVns.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\FVns.dir\linkLibs.rsp
+/usr/bin/c++ -g CMakeFiles/FVns.dir/main.cpp.o CMakeFiles/FVns.dir/EulerFlux.cpp.o CMakeFiles/FVns.dir/BoundaryConditions.cpp.o CMakeFiles/FVns.dir/FileIO.cpp.o CMakeFiles/FVns.dir/SpatialDiscretization.cpp.o CMakeFiles/FVns.dir/MeshModule.cpp.o CMakeFiles/FVns.dir/LUtools.cpp.o CMakeFiles/FVns.dir/Jacobian.cpp.o CMakeFiles/FVns.dir/Thermo.cpp.o CMakeFiles/FVns.dir/InexactNewtonCg.cpp.o CMakeFiles/FVns.dir/MathTools.cpp.o -o FVns 

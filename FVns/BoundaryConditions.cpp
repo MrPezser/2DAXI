@@ -110,11 +110,11 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
             uBound[2] = uBP[2];
             uBound[3] = uBP[3];
         } else if (btype==3){
-            uRight[0] = uLeft[0];
-            uRight[1] = uLeft[1];
-            uRight[2] = uLeft[2];
-            uRight[3] = uLeft[3];
-            return;
+            uBound[0] = uLeft[0];
+            uBound[1] = uLeft[1];
+            uBound[2] = uLeft[2];
+            uBound[3] = uLeft[3];
+            //return;
         }
 
 

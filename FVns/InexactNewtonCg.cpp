@@ -18,17 +18,19 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
     double r[n], s[n], omega[n], dummy[n];
     vecinitialize(r,n);
 
-    JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
-    for (int iu=0; iu<n; iu++){
-        r[iu] = RHS[iu] - r[iu];
-    }
+    //JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
+    //for (int iu=0; iu<n; iu++){
+    //    r[iu] = RHS[iu] - r[iu];
+    //}
+    vecinitialize(x,n);
+    (void) veccopy(r, RHS, n);
     (void) veccopy(s, r, n);
 
     double rho0 = vecinner(r, r, n);
     double rhok = rho0;
     double rhokm1 = rho0;
 
-    //printf("CG Start: %d \t\t |R0|: %e\t |PHI|: %le\n", 0, sqrt(rhok), vecinner(x,x,n));
+    printf("CG Start: %d \t\t |R0|: %e\t |PHI|: %le\n", 0, sqrt(rhok), vecinner(x,x,n));
 
     for (int k=1;k<=kmx;k++) {
 
@@ -55,7 +57,7 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
         rhokm1 = rhok;
         rhok   = vecinner(r,r,n);
         if (k % 1 == 0) {
-            //printf("CG Iteration: %d \t |Res|: %e \t |PHI|: %le\n", k, sqrt(rhokm1/rho0) , vecinner(x,x,n));
+            printf("CG Iteration: %d \t |Res|: %e \t |PHI|: %le\n", k, sqrt(rhok/rho0) , vecinner(x,x,n));
         }
 
         if (sqrt(rhok/rho0) < tol) {

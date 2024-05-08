@@ -31,7 +31,7 @@ void RegularizationTerm(double  dt,const double* unk, State& var,double** D) {
 
     //total energy derivatives
     for (int isp=0; isp<NSP; isp++){
-        D[NSP+2][isp] += dti * (var.e + 0.5*var.v2);//var.h0          //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
+        D[NSP+2][isp] += dti * (var.e + 0.5*var.v2);       //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
     }
     D[NSP+2][NSP]   += dti * unk[0]* unk[NSP];
     D[NSP+2][NSP+1] += dti * unk[0]* unk[NSP+1];
@@ -95,8 +95,6 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
             unk = &(unkel[iunk]);
             var = ElemVar[ielm];
 
-            ElemVar[ielm].Initialize(&(uPerturb[iunk]));
-
             //Perturb element
             //each column is dF/d(var_c)
             for (int jvar=0; jvar<NVAR; jvar++) {
@@ -114,11 +112,13 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                 RegularizationTerm(dt, unk, var, D);
 
 
-                /*
+
                 //Perturb for finite difference solution
                 double delvar = 1e-8 * fabs(unk[jvar]);
                 if (delvar <= 1e-8) delvar = 1e-8;
                 uPerturb[iunk + jvar] += delvar;
+
+                ElemVar[ielm].Initialize(&(uPerturb[iunk]));
                 ElemVar[ielm].UpdateState(air);
 
                 //Find the new residual/RHS value
@@ -133,7 +133,7 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                 for (int ivar = 0; ivar < NVAR; ivar++) {
                     //same element
                     // dFi / dVj
-                    D[ivar][jvar] += 0.5*(RHSPertu[iunk + ivar] - RHS[iunk + ivar]) / delvar;
+                    D[ivar][jvar] += -(RHSPertu[iunk + ivar] - RHS[iunk + ivar]) / delvar;
                     if (__isnan(D[ivar][jvar]) or std::isinf(D[ivar][jvar])){
                         //DUNG("bread")
                     }
@@ -142,29 +142,29 @@ void JacobianVectorMultiply(int nx, int ny, double dt, Thermo& air, State* ElemV
                     if (i > 0) {
                         //int ielmN = IJ(i-1, j, nx - 1);
                         int iunkN = IJK(i - 1, j, 0, nx - 1, NVAR);
-                        Jim[ivar][jvar] += 0.5*(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
+                        Jim[ivar][jvar] += -(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
                     }
                     //element neighbor above
                     if (i < nx - 2) {
                         //int ielmN = IJ(i+1, j, nx - 1);
                         int iunkN = IJK(i + 1, j, 0, nx - 1, NVAR);
-                        Jjp[ivar][jvar] += 0.5*(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
+                        Jip[ivar][jvar] += -(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
                     }
                     //element neighbor below
                     if (j > 0) {
                         //int ielmN = IJ(i, j-1, nx - 1);
                         int iunkN = IJK(i, j - 1, 0, nx - 1, NVAR);
-                        Jjm[ivar][jvar] += 0.5*(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
+                        Jjm[ivar][jvar] += -(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
                     }
                     //element neighbor above
                     if (j < ny - 2) {
                         //int ielmN = IJ(i, j+1, nx - 1);
                         int iunkN = IJK(i, j + 1, 0, nx - 1, NVAR);
-                        Jjp[ivar][jvar] += 0.5*(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
+                        Jjp[ivar][jvar] += -(RHSPertu[iunkN + ivar] - RHS[iunkN + ivar]) / delvar;
                     }
 
                 }
-                 */
+
                 iqin = iunk + jvar;  // index for the column being multiplied === element of vector to use
                 //Gather this component of the matrix multiply on RHS
                 for (int ivar = 0; ivar < NVAR; ivar++) {
