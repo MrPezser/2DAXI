@@ -35,7 +35,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
         Jac[k] = (double*)malloc( (nu) * sizeof(double));
 
     //save residual history
-    FILE* fres = fopen("res.tec", "w");
+    FILE* fres = fopen("../Outputs/res.tec", "w");
     if (fres == nullptr) {
         printf("~~~~~~~~~ Failed to save residual file, error:%d\n", errno);}
     else {
@@ -95,15 +95,17 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
             free(RHS);
             free(x);
             free(dv);
+            fclose(fres);
             return 1;
         }
         fprintf(fres, "%d,\t%le,\t%le\n",
                 iter+1, rnorm/norm0, CFL);
-        CFL = fmin(1.0e5, CFL0 * norm0/rnorm);
+        CFL = fmin(1.0e2, CFL0 * norm0/rnorm);
 
     }
     free(RHS);
     free(x);
     free(dv);
+    fclose(fres);
     return 0;
 }
