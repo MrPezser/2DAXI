@@ -13,6 +13,7 @@
 #include "Jacobian.h"
 #include "Thermo.h"
 #include "InexactNewtonCg.h"
+#include "NewtonLU.h"
 
 
 void vec_copy(double n, double* a, double* b){
@@ -27,8 +28,8 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 1.5;//0.8;
-    u0 = 1000.0;
+    CFL = 100.0;//0.8;
+    u0 = 10.0;
     T0 = 300;
     rho0 = 1.0;
     v0 = 0.0;
@@ -109,8 +110,10 @@ int main() {
     printf("==================== Starting Solver ====================\n");
     BC bound = BC(nx,ny);
 
-    int isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
-                       ibound, geoel, geofa, unk);
+    //int isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
+    //                   ibound, geoel, geofa, unk);
+    int isolved = NLU(x, y, nx, ny, CFL, air, ElemVar, bound, uFS, ibound, geoel, geofa, unk);
+
     if (isolved==0){
         printf("Failed to find satifactory solution\n");
     }

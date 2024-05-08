@@ -18,12 +18,12 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
     double r[n], s[n], omega[n], dummy[n];
     vecinitialize(r,n);
 
-    //JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
-    //for (int iu=0; iu<n; iu++){
-    //    r[iu] = RHS[iu] - r[iu];
-    //}
-    vecinitialize(x,n);
-    (void) veccopy(r, RHS, n);
+    JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
+    for (int iu=0; iu<n; iu++){
+        r[iu] = RHS[iu] - r[iu];
+    }
+    //vecinitialize(x,n);
+    //(void) veccopy(r, RHS, n);
     (void) veccopy(s, r, n);
 
     double rho0 = vecinner(r, r, n);
@@ -103,7 +103,7 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
 
     //Parameter defining sufficient decrease based off of the initial jacobian for each iteration
     ///Hijacked eta to be a relaxation of the requirement for early iterations
-    eta = 1.5;//0.5;
+    eta = 1.0;//0.5;
     //Starting stepsize for armijo line search, lowering for initial transients might help,
     // want to be ==1 in region of local convergence
     alp0 = 1.0;
@@ -118,7 +118,6 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
     calculate_residual(nx, ny, RHS, ressum);
     rnorm = norm2(ressum, NVAR);
     norm0 = rnorm;
-    alpha = alp0;
 
     for(iter=0; iter<MXITER; iter++) {
         //Calculate Pseudo-Timestep to be used for Jacobian
@@ -163,17 +162,19 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
 
         //First state guess
         vecinitialize(dv,nu);
+        alpha = alp0;
         (void) vecscale(x, alpha, nu, dv);
         (void) vecadd(unkel, dv, nu, unknew);
         for (int i=0; i<nx-1; i++){
             for (int j=0; j<ny-1; j++) {
                 int ie = IJ(i,j,nx-1);
-                ELVanew[ie].Initialize(unknew);
+                int iunk = IJK(i,j,0,nx-1,NVAR);
+                ELVanew[ie].Initialize(&(unknew[iunk]));
                 ELVanew[ie].UpdateState(air);
             }
         }
-        bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, unkel);
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unkel, bound,RHSnew);
+        bound.set_boundary_conditions(nx, ny, air, ELVanew, uFS, ibound, geofa, unknew);
+        calc_dudt(nx, ny, air, ELVanew, uFS, ibound, geoel, geofa, unknew, bound,RHSnew);
         calculate_residual(nx, ny, RHSnew, ressum);
         rnormnew = norm2(ressum, NVAR);
 
@@ -191,8 +192,8 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
                     ELVanew[ie].UpdateState(air);
                 }
             }
-            bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, unkel);
-            calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unkel, bound,RHSnew);
+            bound.set_boundary_conditions(nx, ny, air, ELVanew, uFS, ibound, geofa, unknew);
+            calc_dudt(nx, ny, air, ELVanew, uFS, ibound, geoel, geofa, unknew, bound,RHSnew);
             calculate_residual(nx, ny, RHSnew, ressum);
             rnormnew = norm2(ressum, NVAR);
         }

@@ -16,6 +16,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.cpp" "CMakeFiles/FVns.dir/LUtools.cpp.o" "gcc" "CMakeFiles/FVns.dir/LUtools.cpp.o.d"
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.cpp" "CMakeFiles/FVns.dir/MathTools.cpp.o" "gcc" "CMakeFiles/FVns.dir/MathTools.cpp.o.d"
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.cpp" "CMakeFiles/FVns.dir/MeshModule.cpp.o" "gcc" "CMakeFiles/FVns.dir/MeshModule.cpp.o.d"
+  "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/NewtonLU.cpp" "CMakeFiles/FVns.dir/NewtonLU.cpp.o" "gcc" "CMakeFiles/FVns.dir/NewtonLU.cpp.o.d"
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.cpp" "CMakeFiles/FVns.dir/SpatialDiscretization.cpp.o" "gcc" "CMakeFiles/FVns.dir/SpatialDiscretization.cpp.o.d"
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Thermo.cpp" "CMakeFiles/FVns.dir/Thermo.cpp.o" "gcc" "CMakeFiles/FVns.dir/Thermo.cpp.o.d"
   "/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/main.cpp" "CMakeFiles/FVns.dir/main.cpp.o" "gcc" "CMakeFiles/FVns.dir/main.cpp.o.d"

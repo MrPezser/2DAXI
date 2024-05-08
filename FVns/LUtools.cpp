@@ -28,6 +28,8 @@ void LUPDecompose(double **A, int N, double Tol, int *P) {
         P[i] = i; //Unit permutation matrix, P[N] initialized with N
 
     for (i = 0; i < N; i++) {
+        //printf("LUD i=%8d of %d\n",i,N);
+
         maxA = 0.0;
         imax = i;
 
@@ -59,10 +61,13 @@ void LUPDecompose(double **A, int N, double Tol, int *P) {
         }
 
         for (j = i + 1; j < N; j++) {
+            if (A[j][i] == 0) continue;
             A[j][i] /= A[i][i];
 
-            for (k = i + 1; k < N; k++)
+            for (k = i + 1; k < N; k++) {
+                if (A[i][k] == 0) continue;
                 A[j][k] -= A[j][i] * A[i][k];
+            }
         }
     }
 

@@ -170,4 +170,5 @@ CMakeFiles/FVns.dir/main.cpp.o: \
  /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/LUtools.h \
  /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/Jacobian.h \
  /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MathTools.h \
- /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h
+ /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/InexactNewtonCg.h \
+ /mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/NewtonLU.h

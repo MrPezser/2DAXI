@@ -188,7 +188,7 @@ int main() {
         int itop = -ib + (2 * nx) + ny - 3 - 1;
         int ibot = ib;
 
-        if (ib*dx > 0.2) { ///////////////
+        if (ib*dx > 0.5) { ///////////////
             ibound[ibot] = 4;       //bot surf
         }
 

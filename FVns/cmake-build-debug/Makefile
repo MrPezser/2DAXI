@@ -321,6 +321,30 @@ MeshModule.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/FVns.dir/build.make CMakeFiles/FVns.dir/MeshModule.cpp.s
 .PHONY : MeshModule.cpp.s
 
+NewtonLU.o: NewtonLU.cpp.o
+.PHONY : NewtonLU.o
+
+# target to build an object file
+NewtonLU.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FVns.dir/build.make CMakeFiles/FVns.dir/NewtonLU.cpp.o
+.PHONY : NewtonLU.cpp.o
+
+NewtonLU.i: NewtonLU.cpp.i
+.PHONY : NewtonLU.i
+
+# target to preprocess a source file
+NewtonLU.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FVns.dir/build.make CMakeFiles/FVns.dir/NewtonLU.cpp.i
+.PHONY : NewtonLU.cpp.i
+
+NewtonLU.s: NewtonLU.cpp.s
+.PHONY : NewtonLU.s
+
+# target to generate assembly for a file
+NewtonLU.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FVns.dir/build.make CMakeFiles/FVns.dir/NewtonLU.cpp.s
+.PHONY : NewtonLU.cpp.s
+
 SpatialDiscretization.o: SpatialDiscretization.cpp.o
 .PHONY : SpatialDiscretization.o
 
@@ -426,6 +450,9 @@ help:
 	@echo "... MeshModule.o"
 	@echo "... MeshModule.i"
 	@echo "... MeshModule.s"
+	@echo "... NewtonLU.o"
+	@echo "... NewtonLU.i"
+	@echo "... NewtonLU.s"
 	@echo "... SpatialDiscretization.o"
 	@echo "... SpatialDiscretization.i"
 	@echo "... SpatialDiscretization.s"

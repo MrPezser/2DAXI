@@ -12,7 +12,7 @@
 #define IJK(i, j, k, ni, nk)  ((((j)*(ni)) + (i))*(nk) + (k))
 #define NVAR 4
 #define NSP 1
-#define IVISC 0
+#define IVISC 1
 #define MXITER 1e6
 #define ITGLOBAL 1e6
 #define RESTOL 1e-6

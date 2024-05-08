@@ -133,6 +133,12 @@
 		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/MeshModule.h">
 			<Option target="FVns"/>
 		</Unit>
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/NewtonLU.cpp">
+			<Option target="FVns"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/NewtonLU.h">
+			<Option target="FVns"/>
+		</Unit>
 		<Unit filename="/mnt/c/Users/Tsail/OneDrive/Documents/Projects/CFD/2DAXI/FVns/SpatialDiscretization.cpp">
 			<Option target="FVns"/>
 		</Unit>
