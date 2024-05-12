@@ -59,7 +59,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
 
         //calculate LU decomposition
         DUNG("Before LU Decomp")
-        LUPDecompose(Jac, N, LUtol, P);
+        ILUPDecompose(Jac, N, LUtol, P);
 
         //Solve LU system
         DUNG("Before LUSOLVE")
@@ -81,7 +81,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
         rnorm = norm2(ressum, NVAR);
 
         if (iter%1 == 0) {
-            printf("\nIter:%7d\tCFL:%7.4e\tRelativeTotalResisual:  %8.5e\n\n", \
+            printf("Iter:%7d\tCFL:%7.4e\tRelativeTotalResisual:  %8.5e\n", \
                     iter, CFL, rnorm/norm0);
         }
         if (iter >= 0 and iter%1 == 0){
@@ -100,7 +100,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
         }
         fprintf(fres, "%d,\t%le,\t%le\n",
                 iter+1, rnorm/norm0, CFL);
-        CFL = fmin(1.0e2, CFL0 * norm0/rnorm);
+        CFL = fmin(1.0e5, CFL0 * 0.5 * (1.0 + norm0/rnorm));
 
     }
     free(RHS);

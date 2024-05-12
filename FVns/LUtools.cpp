@@ -95,3 +95,59 @@ void LUPSolve(double **A, int *P, double *b, int N, double *x) {
 }
 
 ///END CODE OBTAINED FROM WIKEPEDIA TO IMPLIMENT LU FACTORIZATION AND SYSTEM SOLVE
+
+void ILUPDecompose(double **A, int N, double Tol, int *P) {
+
+    int i, j, k, imax;
+    double maxA, *ptr, absA;
+
+    for (i = 0; i <= N; i++)
+        P[i] = i; //Unit permutation matrix, P[N] initialized with N
+
+    for (i = 0; i < N; i++) {
+        //printf("LUD i=%8d of %d\n",i,N);
+
+        maxA = 0.0;
+        imax = i;
+
+        for (k = i; k < N; k++)
+            if ((absA = fabs(A[k][i])) > maxA) {
+                maxA = absA;
+                imax = k;
+            }
+
+        if (maxA < Tol) {
+            printf("ILU Decomp Failed\n");
+            exit(0);
+            //return imax; //failure, matrix is degenerate
+        }
+
+        /*
+        if (imax != i) {
+            //pivoting P
+            j = P[i];
+            P[i] = P[imax];
+            P[imax] = j;
+
+            //pivoting rows of A
+            ptr = A[i];
+            A[i] = A[imax];
+            A[imax] = ptr;
+
+            //counting pivots starting from N (for determinant)
+            P[N]++;
+        }*/
+
+        for (j = i + 1; j < N; j++) {
+            if (A[j][i] == 0) continue;  //doesn't comprimise LU
+            A[j][i] /= A[i][i];
+
+            for (k = i + 1; k < N; k++) {
+                if (A[i][k] == 0 or A[j][k] == 0) continue;   //A[j][k] check turns LU to be ILU
+                A[j][k] -= A[j][i] * A[i][k];
+            }
+        }
+    }
+
+    //decomposition done
+}

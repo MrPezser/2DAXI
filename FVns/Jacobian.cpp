@@ -186,10 +186,10 @@ void BuildJacobian(int nx, int ny, double CFL, Thermo& air, State* ElemVar, doub
                 //Find the new residual/RHS value
                 bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, uPerturb);
 
-                //calc_dudt_element(i, j, nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, uPerturb,
-                //                  bound, RHSPertu);
-                calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, uPerturb,
-                          bound, RHSPertu);
+                calc_dudt_element(i, j, nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, uPerturb,
+                                  bound, RHSPertu);
+                //calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, uPerturb,
+                //          bound, RHSPertu);
 
                 //Find the derivatives with finite difference and gather to output vector
                 for (int ivar = 0; ivar < NVAR; ivar++) {
@@ -267,6 +267,7 @@ void BuildJacobian(int nx, int ny, double CFL, Thermo& air, State* ElemVar, doub
 
                 //reset perturbed variable
                 uPerturb[iunk + jvar] = unkel[iunk + jvar];
+                veccopy(RHSPertu, RHS, nu);
                 ElemVar[ielm].Initialize(unk);
                 ElemVar[ielm].UpdateState(air);
             }
