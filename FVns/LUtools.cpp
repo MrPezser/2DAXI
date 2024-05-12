@@ -82,13 +82,17 @@ void LUPSolve(double **A, int *P, double *b, int N, double *x) {
     for (int i = 0; i < N; i++) {
         x[i] = b[P[i]];
 
-        for (int k = 0; k < i; k++)
+        for (int k = 0; k < i; k++) {
+            if (A[i][k] == 0) continue;
             x[i] -= A[i][k] * x[k];
+        }
     }
 
     for (int i = N - 1; i >= 0; i--) {
-        for (int k = i + 1; k < N; k++)
+        for (int k = i + 1; k < N; k++) {
+            if (A[i][k] == 0) continue;
             x[i] -= A[i][k] * x[k];
+        }
 
         x[i] /= A[i][i];
     }

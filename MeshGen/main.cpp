@@ -12,6 +12,7 @@
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
+    /*
     double l0 = 0.5;//1.0;
     if(x < l0) {
         return 0;
@@ -19,6 +20,16 @@ double ramp_surface(double x, double h, double L) {
         return h;
     } else {
         return (h/L)*(x-l0);
+    }*/
+
+    //alternate geometry, converging diverging
+    double l0 = L;
+    if(x < l0) {
+        return (h/L)*(x);
+    } else if( x > l0+L) {
+        return h;
+    } else {
+        return h - (h/L)*(x-l0);
     }
 }
 
@@ -81,8 +92,8 @@ int main() {
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 1.0;
-    length = 1.5;//4.0;
-    nx = 51;
+    length = 2.0;//4.0;
+    nx = 101;
     ny = 51;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
@@ -192,7 +203,7 @@ int main() {
             ibound[ibot] = 4;       //bot surf
         }
 
-        //ibound[itop] = 3;   //top surface
+        ibound[itop] = 3;   //top surface
 
     }
     //Back Pressure (2) or outflow (3)

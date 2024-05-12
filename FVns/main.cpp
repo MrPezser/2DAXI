@@ -28,8 +28,8 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 10.0;//0.8;
-    u0 = 10.0;
+    CFL = 5.0;//0.8;
+    u0 = 1000.0;
     T0 = 300;
     rho0 = 1.0;
     v0 = 0.0;

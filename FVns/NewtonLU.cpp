@@ -10,7 +10,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
          double* geofa, double* unkel){
     // funciton for carrying out the inexact newton iterations with LU linear solve
     ///THIS METHOD IS VERY INEFFICIENT AND SHOULD ONLY BE USED TO TEST OTHER PARTS OF CODE SUCH AS JACOBIAN CALCULATIONS
-    double dt, ressum[NVAR]{}, rnorm, rnormnew, normmax, norm0, CFL0;
+    double dt, ressum[NVAR]{}, rnorm, rnormnew, norm0, CFL0;
     int nelem, iter, mxitarmijo, nu, iarmijo;
 
     nelem = (nx-1)*(ny-1);
@@ -20,6 +20,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
     auto RHS    = (double*)malloc(nu*sizeof(double));
 
     CFL0 = CFL;
+    int iJcalc = 5;
 
     // ==========  Initializing for Newton's method  ==========
     //Calculate the ghost cell values
@@ -100,7 +101,7 @@ int NLU(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Stat
         }
         fprintf(fres, "%d,\t%le,\t%le\n",
                 iter+1, rnorm/norm0, CFL);
-        CFL = fmin(1.0e5, CFL0 * 0.5 * (1.0 + norm0/rnorm));
+        CFL = fmin(10, CFL0 * (0.5 + 0.5*norm0/rnorm));
 
     }
     free(RHS);
