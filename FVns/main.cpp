@@ -28,7 +28,7 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 5.0;//0.8;
+    CFL = 0.8;
     u0 = 1000.0;
     T0 = 300;
     rho0 = 1.0;
@@ -113,9 +113,9 @@ int main() {
     if (IIMPLI)
     {
 
-        //int isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
-        //                   ibound, geoel, geofa, unk);
-        isolved = NLU(x, y, nx, ny, CFL, air, ElemVar, bound, uFS, ibound, geoel, geofa, unk);
+        isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
+                           ibound, geoel, geofa, unk);
+        //isolved = NLU(x, y, nx, ny, CFL, air, ElemVar, bound, uFS, ibound, geoel, geofa, unk);
     } else {
 
         double res0[NVAR]{};

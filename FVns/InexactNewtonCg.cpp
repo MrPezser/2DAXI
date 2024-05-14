@@ -6,7 +6,7 @@
 #include "InexactNewtonCg.h"
 #include "LUtools.h"
 
-int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, double *uFS, int* ibound, double* geoel,
+int CGsolve(int nx, int ny,double CFL, Thermo& air, State* ElemVar, BC& bound, double *uFS, int* ibound, double* geoel,
             double* geofa, double* unkel, double *RHS, double *x) {
     //Solves the Ax = b system using the conjugate gradient method
     // A = function to multiply a vector by the Jacobian of the RHS
@@ -18,12 +18,12 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
     double r[n], s[n], omega[n], dummy[n];
     vecinitialize(r,n);
 
-    JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
-    for (int iu=0; iu<n; iu++){
-        r[iu] = RHS[iu] - r[iu];
-    }
-    //vecinitialize(x,n);
-    //(void) veccopy(r, RHS, n);
+    //JacobianVectorMultiply(nx,ny,CFL,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,x,r);
+    //for (int iu=0; iu<n; iu++){
+    //    r[iu] = RHS[iu] - r[iu];
+    //}
+    vecinitialize(x,n);
+    (void) veccopy(r, RHS, n);
     (void) veccopy(s, r, n);
 
     double rho0 = vecinner(r, r, n);
@@ -35,7 +35,7 @@ int CGsolve(int nx, int ny,double dt, Thermo& air, State* ElemVar, BC& bound, do
     for (int k=1;k<=kmx;k++) {
 
         ///    matvec(A, s, n, omega);   //omega = As
-        JacobianVectorMultiply(nx,ny,dt,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,s,omega);
+        JacobianVectorMultiply(nx,ny,CFL,air,ElemVar,uFS,ibound,geoel,geofa,unkel,RHS,bound,s,omega);
 
         double s_omega = vecinner(s, omega, n);
         //printf("s_omega = %e\n",s_omega);
@@ -99,11 +99,11 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
     auto unknew = (double*)malloc(nu*sizeof(double));
     auto ELVanew= (State*)malloc(nelem*sizeof(State));
 
-
+    double CFLexp = 0.5;
 
     //Parameter defining sufficient decrease based off of the initial jacobian for each iteration
     ///Hijacked eta to be a relaxation of the requirement for early iterations
-    eta = 1.0;//0.5;
+    eta = 1.5;//0.5;
     //Starting stepsize for armijo line search, lowering for initial transients might help,
     // want to be ==1 in region of local convergence
     alp0 = 1.0;
@@ -121,7 +121,7 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
 
     for(iter=0; iter<MXITER; iter++) {
         //Calculate Pseudo-Timestep to be used for Jacobian
-        dt = find_dt(air, nx, ny, CFL, unkel, ElemVar[0], geofa);
+        //dt = find_dt(air, nx, ny, CFL, unkel, ElemVar[0], geofa);
 
         //Find a descent direction used conjugate gradient
         //(void) vecinitialize(x,nu); //start with x=0 guess, try using explicit step for start?
@@ -138,7 +138,10 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
                 int P[NVAR+1]{}; //permutation vector for pivoting
 
                 //Evaluate the jacobian / Implicit matrix
-                RegularizationTerm(dt, unkij, ElemVar[iel], D);
+                double dx[2];
+                dx[0] = geofa[IJK(i, j, 0, nx, 6)];
+                dx[1] = geofa[IJK(i, j, 3, nx, 6)];
+                RegularizationTerm(CFLexp, dx, unkij, ElemVar[iel], D);
 
                 //get the rhs block needed
                 double *b = &(RHS[IJK(i, j, 0, nx - 1, NVAR)]);
@@ -148,7 +151,7 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
             }
         }
         (void) veccopy(x, dv, nu);
-        CGsolve(nx,ny,dt,air,ElemVar,bound,uFS,ibound,geoel,geofa,unkel,RHS,x);
+        CGsolve(nx,ny,CFL,air,ElemVar,bound,uFS,ibound,geoel,geofa,unkel,RHS,x);
         for (int k=0; k<NVAR; k++){
             free(D[k]);
         }
@@ -200,8 +203,8 @@ int INCG(double* xgeo, double* ygeo, int nx, int ny,double CFL, Thermo& air, Sta
         //printf("Armijo Line Search Competed, iarm=%d\n", iarmijo);
 
         if (iter%1 == 0) {
-            printf("\nIter:%7d\tdt:%7.4e\tiarm=%5d\tRelativeTotalResisual:  %8.5e\n\n", \
-                    iter, dt,iarmijo, rnormnew/norm0);
+            printf("\nIter:%7d\tCFL:%7.4e\tiarm=%5d\tRelativeTotalResisual:  %8.5e\n\n", \
+                    iter, CFL,iarmijo, rnormnew/norm0);
         }
         if (iter > 0 and iter%1 == 0){
             //printf("Saving current Solution\n\n");

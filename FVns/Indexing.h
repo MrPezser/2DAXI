@@ -16,7 +16,7 @@
 #define MXITER 1e6
 #define ITGLOBAL 1e6
 #define RESTOL 1e-6
-#define IDUNG 1
+#define IDUNG 0
 #define IIMPLI 1
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
