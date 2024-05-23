@@ -1,0 +1,3 @@
+"C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe" -E rm -f CMakeFiles\FVns.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\FVns.dir/objects.a @CMakeFiles\FVns.dir\objects1
+C:\MinGW\bin\c++.exe -g -Wl,--whole-archive CMakeFiles\FVns.dir/objects.a -Wl,--no-whole-archive -o FVns.exe -Wl,--out-implib,libFVns.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\FVns.dir\linkLibs.rsp
