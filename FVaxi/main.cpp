@@ -66,8 +66,8 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 1.0;//0.8;
-    u0 = 10;
+    CFL = 0.8;
+    u0 = 1000;
     T0 = 300;
     rho0 = 1.0;
     v0 = 0.0;
@@ -79,6 +79,7 @@ int main() {
     int* ibound;
     double* geoel;
     double* geofa;
+    double* yfa;
 
     //read in mesh file
     printf("Reading Mesh File..... \n");
@@ -90,7 +91,7 @@ int main() {
 
     //Find elem volume and centroid, face len and normals
     printf("Calculating Grid Metrics..... \n");
-    calc_geoel_geofa(nx, ny, x, y, &geoel, &geofa);
+    calc_geoel_geofa(nx, ny, x, y, &geoel, &geofa, &yfa);
 
     printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
@@ -158,7 +159,7 @@ int main() {
         dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, res);
+        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, yfa, unk, res);
         calculate_residual(nx, ny, res, ressum);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
@@ -200,8 +201,8 @@ int main() {
         }
         restotal = 0.0;
         for (int i=0; i<NVAR; i++){
-            ASSERT(ressum[i] > 0.0, "Nonpositive Residual")
-            if (res0[i] < 1e-10) res0[i] = ressum[i];
+            ASSERT(ressum[i] >= 0.0, "Nonpositive Residual")
+            if (res0[i] < 1e-16) res0[i] = ressum[i];
             restotal += ressum[i] / res0[i];
         }
         if (iter%100 == 0) {

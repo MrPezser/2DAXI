@@ -118,8 +118,8 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, State
 }
 
 
-void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight, State varR,
-           double* flux) {
+void LDFSS(double normx, double normy, double len, double yface, double* uLeft, State varL, double* uRight, State varR,
+           double* flux, double* parr) {
 
 //--------------------------------------------------------------------
 //----- inviscid flux contribution (LDFSS)
@@ -165,8 +165,8 @@ void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight
     double cep = cvlp - xmcp;
     double cem = cvlm + xmcm;
 
-    double fml = uLeft[0]*ahalf*cep;
-    double fmr = uRight[0]*ahalf*cem;
+    double fml = len*uLeft[0]*ahalf*cep;
+    double fmr = len*uRight[0]*ahalf*cem;
 
     double ppl = 0.25*(xml+1.0)*(xml+1.0)*(2.0-xml);
     double ppr = 0.25*(xmr-1.0)*(xmr-1.0)*(2.0+xmr);
@@ -174,9 +174,10 @@ void LDFSS(double normx, double normy, double* uLeft, State varL, double* uRight
     double pnet = (all*(1.0+btl) - btl*ppl)*varL.p
                 + (alr*(1.0+btr) - btr*ppr)*varR.p;
 
+    parr[0] = pnet * normy;
 
-    flux[0] = fml + fmr;                        //continuity
-    flux[1] = fml*uLeft[1] + fmr*uRight[1] + pnet*normx;       //x momentum
-    flux[2] = fml*uLeft[2] + fmr*uRight[2] + pnet*normy;       //x momentum
-    flux[3] = fml*varL.h0 + fmr*(varR.h0);                     //total energy
+    flux[0] = yface*(fml + fmr);                                        //continuity
+    flux[1] = yface*(fml*uLeft[1] + fmr*uRight[1] + pnet*normx);        //x momentum
+    flux[2] = yface*(fml*uLeft[2] + fmr*uRight[2]);                     //y momentum w/o  "+pnet*normy"
+    flux[3] = yface*(fml*varL.h0  + fmr*(varR.h0));                     //total energy
 }

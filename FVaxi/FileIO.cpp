@@ -10,7 +10,7 @@
 void read_mesh(int* nx, int* ny, int** ibound, double** x, double** y){
     int  npoin, nb = {0};
     //==================== Read in mesh file ====================
-    FILE* fmsh = fopen("../../MeshGen/Outputs/mesh.dat","r");//fopen("../Case/mesh.dat","r");
+    FILE* fmsh = fopen("../Case/mesh.dat","r"); //fopen("../../MeshGen/Outputs/mesh.dat","r");
     fscanf(fmsh, "%d%d", nx, ny);
 
     npoin = (*nx) * (*ny);
