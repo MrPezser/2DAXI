@@ -66,11 +66,15 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.8;
-    u0 = 1000;
-    T0 = 300;
-    rho0 = 1.0;
+    CFL = 0.9;
+    u0 = 1532.9;
+    T0 = 1188.333;
+    rho0 = 0.04455;
     v0 = 0.0;
+    /*
+     * p0 = 15195 = rho0 * 287 * t0
+     * M0 = 2.32
+     */
 
     printf("==================== Loading Mesh ====================\n");
     //==================== Load Mesh ====================
@@ -146,6 +150,15 @@ int main() {
     for (int k = 0; k < NVAR; k++)
         D[k] = (double*)malloc( (NVAR) * sizeof(double));
 
+    //save residual history
+    FILE* fres = fopen("../Outputs/res.tec", "w");
+    if (fres == nullptr) {
+        printf("~~~~~~~~~ Failed to save residual file, error:%d\n", errno);}
+    else {
+        fprintf(fres, "Residual history\n");
+//        fprintf(fres, "%d,\t%le,\n",0,1.0);
+    }
+
     printf("==================== Starting Solver ====================\n");
 
 
@@ -189,6 +202,8 @@ int main() {
             unk[iu+1] += dv[iu + 1];
             unk[iu+2] += dv[iu + 2];
             unk[iu+3] += dv[iu + 3];
+
+            //unk[iu+3] = fmax(unk[iu+3], 201.0); //limit temperature
             ElemVar[ielem].UpdateState(air);
         }
 
@@ -205,16 +220,18 @@ int main() {
             if (res0[i] < 1e-16) res0[i] = ressum[i];
             restotal += ressum[i] / res0[i];
         }
+
+        fprintf(fres, "%d,\t%le\n", iter, restotal);
+
         if (iter%100 == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
         }
         if (iter > 0 and iter%1000 == 0){
-            printf("Saving current Solution\n");
+            //printf("Saving current Solution\n");
             print_state("Final State", nx, ny, air, x, y, unk, geoel);
         }
         if (restotal < tol) break;
-
     }
     printf("==================== Solution Found ====================\n");
     printf("Saving Solution File..... \n");

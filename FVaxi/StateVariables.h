@@ -21,22 +21,23 @@
 class State {
 
 private:
-    const double* unk{};
+    double* unk{};
 
 
 public:
-    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
+    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, e0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
 
 
     State() = default;
 
-    void Initialize(const double* u){
+    void Initialize(double* u){
         unk = u;
         // vars = [rho, u, v, T]
     }
 
     void UpdateState(Thermo& air ) {
         int isp = 0;
+        unk[3] = fmax(unk[3], 201.0);
         double T = unk[3];
 
         v2 = unk[1]*unk[1] + unk[2]*unk[2];
@@ -45,7 +46,8 @@ public:
         h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
         Cp[0] = air.CalcCp(T);
-        Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
+        Cv = Cp[0]/air.gam;//Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
+        e0 = h - air.Rs[isp]*T + 0.5*v2;
 
         //Sutherland's law for viscosity
         double S, C1;

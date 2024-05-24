@@ -32,7 +32,7 @@ void BuildJacobian(double  dt,const double* unk,State& var,double** D) {
 
     //total energy derivatives
     for (int isp=0; isp<NSP; isp++){
-        D[NSP+2][isp] = dti * var.h0;               //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
+        D[NSP+2][isp] = dti * var.e0;               //- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
     }
     D[NSP+2][NSP]   = dti * unk[0]* unk[NSP];
     D[NSP+2][NSP+1] = dti * unk[0]* unk[NSP+1];

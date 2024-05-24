@@ -6,6 +6,10 @@
  */
 #include <iostream>
 #include <cmath>
+#include <errno.h>
+#include <string.h>
+
+#define IN2M (0.0254)
 
 #define IU(i, j, ni)  (((j)*(ni)) + (i))
 
@@ -41,7 +45,7 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
     int nb = 2*(nx-1) + 2*(ny-1);
 
     FILE* fout = fopen("../Outputs/grid.tec", "w");
-    if (fout == nullptr) printf("oeups\n");
+    if (fout == nullptr) printf("Unable to open grid file.\n%s\n", strerror(errno));
 
     //printf("\nDisplaying Grid Header\n");
     fprintf(fout, "TITLE = \"%s\"\n", title);
@@ -76,18 +80,83 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
     fclose(fout2);
 }
 
+void get_nozzle(const int nx, const double* x, double* y){
+    // Uses a given nozzle contour to find the maximum y values fr the given set of x points
+
+    FILE* fcont = fopen("../axicontour.dat","r");
+    if (fcont == nullptr) printf("Couldn't open nozzle contour file");
+    int ncon;
+    fscanf(fcont, " %d",&ncon);
+
+    auto z = (double*)malloc(ncon*sizeof(double));
+    auto r = (double*)malloc(ncon*sizeof(double));
+
+    for (int icon=0; icon<ncon; icon++){
+        fscanf(fcont,"%lf %lf",&z[icon],&r[icon]);
+    }
+
+
+    for (int ipoin=0; ipoin<nx; ipoin++){
+        y[ipoin] = 0.0; //initialize
+        //printf("Interpolating to point %d\n",ipoin);
+
+        //find closest point on the left
+        double mindel = 999.0;
+        int ileft = -1;
+        for (int j=0; j<ncon; j++) {
+            if (x[ipoin]-z[j] < 0.0) continue;
+
+            mindel = fmin(mindel, x[ipoin]-z[j]);
+            if (mindel == x[ipoin]-z[j]) ileft = j;
+        }
+
+        if (ileft == -1){
+            printf("Filed to find closest neightbor\n");
+            exit(0);
+        }
+
+        //interpolate to point
+        double drdz, dz;
+        drdz = (r[ileft+1] - r[ileft]) / (z[ileft+1] - z[ileft]);
+        dz = x[ipoin] - z[ileft];
+
+        y[ipoin] = IN2M * (r[ileft] + (drdz*dz));
+
+        /*
+         * //Use lagrange polynomial to interpolate, be wary of spurious oscilations
+         *
+        for (int j=0; j<ncon; j++){
+            double l = 1.0;
+
+            for (int m=0; m<ncon; m++){
+                if (j==m) continue;
+
+                l *= (x[ipoin] - z[m]) / (z[j] - z[m]);
+
+            }
+
+            y[ipoin] += r[j] * l;
+        }
+         */
+
+    }
+
+    fclose(fcont);
+
+}
+
 int main() {
     // ========== Input Parameters (change to file input) ==========
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
-    length = 1.0;//4.0;
+    length = 16.3*IN2M;//1.0;//4.0;
     nx = 101;
-    ny = 101;
+    ny = 51;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
-    y_offset = 0.0;
-    irefine = 1; //option to include a tanh distribution for boundary layoe on bottom surface
+    y_offset = 0.0;//0.001;
+    irefine = 0; //option to include a tanh distribution for boundary layoe on bottom surface
 
     /*
      * ==================== Geometry Input ====================
@@ -106,17 +175,22 @@ int main() {
     double dx, dy, ymin, ymax;
     auto* x = (double*)malloc(npoin*sizeof(double));
     auto* y = (double*)malloc(npoin*sizeof(double));
+    auto* z = (double*)malloc(nx*sizeof(double));
+    auto* r = (double*)malloc(nx*sizeof(double));
     auto* ibound = (int*)malloc(nbound*sizeof(int));
 
     dx = length / (nx-1);
 
+    //Read in nozzle geometry
+    for (int i=0; i<nx; i++) z[i] = i*dx;
+    get_nozzle(nx, z, r);
 
     //define coordinates
     double factor = 2.0;
     for (int i = 0; i < nx; i++) {
         double xi = i * dx;
-        ymax = height + y_offset;
-        ymin = 0.0; //ramp_surface(xi, ramp_height, ramp_length);
+        ymax = r[i];//height + y_offset;
+        ymin = y_offset; //ramp_surface(xi, ramp_height, ramp_length);
         dy = (ymax - ymin) / (ny - 1);
 
         if (irefine==1) {
@@ -168,7 +242,7 @@ int main() {
                 int ip = IU(i, j, nx);
                 x[ip] = xi;
                 y[ip] = (j * dy) + ymin;
-                if (i == 0) printf("y, %lf\n", y[ip]);
+                if (i == nx-1) printf("y, %lf\n", y[ip]);
             }
         }
     }
@@ -185,16 +259,14 @@ int main() {
 
     //top/bot surf
     for (int ib = 0; ib < nx-1; ib++) {
-        int itop = -ib + 2 * nx + ny - 3;
+        int itop = -ib + 2 * nx + ny - 4;
         int ibot = ib;
 
-        if (ib*dx > 0.2) { ///////////////
-            ibound[ibot] = 0;       //bot surf
-        }
+        //if (ib*dx > 0.2) ibound[ibot] = 4;       //bot surf
+        ibound[ibot] = 4;
 
-        if (ib*dx > 2.0) {
-                //ibound[itop] = 3;   //top surface
-        }
+        //if (ib*dx > 2.0) ibound[itop] = 3;   //top surface
+        ibound[itop] = 4;
     }
     //Back Pressure (2) or outflow (3)
     for (int ib = nx-1; ib<nx+ny-2; ib++){

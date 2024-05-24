@@ -21,7 +21,7 @@ private:
         //get molecular weight from first line
         //fscanf(ftherm, "%*18s %*6c %*1c%*f%*1c %*f %*f %*2f %*s %*f %*f %lf %*d", &(Mw[isp]));
         fscanf(ftherm,"%*[^\n]\n"); //skip 1st line
-        Mw[isp] = 28.96;
+        Mw[isp] = 28.9;
         //get curve fits
         fscanf(ftherm, "%15lE%15lE%15lE%15lE%15lE%*d",&(Ah[isp]),&(Bh[isp]),&(Ch[isp]),&(Dh[isp]),&(Eh[isp]));
         fscanf(ftherm, "%15lE%15lE%15lE%15lE%15lE%*d",&(Fh[isp]),&(Gh[isp]),&(Al[isp]),&(Bl[isp]),&(Cl[isp]));
@@ -34,7 +34,7 @@ private:
 
 public:
     double Ruv = 8314.34;
-    double gam = 1.4;
+    double gam = 1.28;//1.4;
     double Mw[NSP]{}, Rs[NSP]{};
     double CalcEnthalpy(double T);
     double CalcCp(double T);
