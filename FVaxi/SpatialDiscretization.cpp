@@ -79,9 +79,8 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
 void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
                double* geofa, double* yfa, double* unk, double* dudt) {
     int nelem = (nx-1)*(ny-1);
-    double *rhsel, *parr;
+    double *rhsel, parr;
     rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
-    parr = (double*)malloc(2*nx*ny*sizeof(double));
     for(int i=0; i<NVAR*nelem; i++) {
         rhsel[i] = 0.0;
     }
@@ -188,25 +187,23 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             State varL = ElemVar[ieL];
             State varR = ElemVar[ieR];
 
-            double* parrface = &(parr[IJK(i,j,1,nx,2)]);
-
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), parrface);
+            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
 
             //Add pressure term in
-            double yc = geoel[IJK(i, j, 2, nx-1, 3)];
-            fflux[2] += yc * parrface
+            double ycL = geoel[IJK(i-1, j, 2, nx-1, 3)];
+            double ycR = geoel[IJK(i,   j, 2, nx-1, 3)];
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= fflux[0];
             rhsel[iuL+1] -= fflux[1];
-            rhsel[iuL+2] -= fflux[2];
+            rhsel[iuL+2] -=(fflux[2] + (ycL*parr));
             rhsel[iuL+3] -= fflux[3];
 
             rhsel[iuR  ] += fflux[0];
             rhsel[iuR+1] += fflux[1];
-            rhsel[iuR+2] += fflux[2];
+            rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
 
 
@@ -247,21 +244,23 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             State varL = ElemVar[ieL];
             State varR = ElemVar[ieR];
 
-            double* parrface = &(parr[IJK(i,j,0,nx,2)]);
-
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), parrface);
+            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+
+            //Add pressure term in
+            double ycL = geoel[IJK(i, j,   2, nx-1, 3)];
+            double ycR = geoel[IJK(i, j-1, 2, nx-1, 3)];
 
             //Add flux contribution to elements
             rhsel[iuL  ] -= fflux[0];
             rhsel[iuL+1] -= fflux[1];
-            rhsel[iuL+2] -= fflux[2];
+            rhsel[iuL+2] -=(fflux[2] + (ycL*parr));
             rhsel[iuL+3] -= fflux[3];
 
             rhsel[iuR  ] += fflux[0];
             rhsel[iuR+1] += fflux[1];
-            rhsel[iuR+2] += fflux[2];
+            rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
 
             // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -306,15 +305,16 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         State varL = ElemVar[ieL];
         State varR = ElemVar[ieR];
 
-        double* parrface = &(parr[IJK(0,j,1,nx,2)]);
-
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), parrface);
+        LDFSS(normx, normy, len, yface, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+
+        //double ycL = 2.0 * geoel[IJK(0, j, 2, nx-1, 3)] - geoel[IJK(0, j+1, 2, nx-1, 3)]; //extrapolate to get gost y coord
+        double ycR = geoel[IJK(0, j, 2, nx-1, 3)];
 
         //Add flux contribution to elements
         rhsel[iuR  ] += fflux[0];
         rhsel[iuR+1] += fflux[1];
-        rhsel[iuR+2] += fflux[2];
+        rhsel[iuR+2] += (fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
 
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -344,14 +344,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         ieR = j;
         varL = ElemVar[ieL];
         varR = RightVar[ieR];
-        parrface = &(parr[IJK(nx-1,j,1,nx,2)]);
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]), parrface);
+        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]), &parr);
+
+        double ycL = geoel[IJK(nx-2, j, 2, nx-1, 3)];
 
         //Add flux contribution to elements
         rhsel[iuL  ] -= fflux[0];
         rhsel[iuL+1] -= fflux[1];
-        rhsel[iuL+2] -= fflux[2];
+        rhsel[iuL+2] -= (fflux[2] + (ycL*parr));
         rhsel[iuL+3] -= fflux[3];
 
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -390,16 +391,16 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             printf("wut\n");
         }
 
-        double* parrface = &(parr[IJK(i,0,0,nx,2)]);
-
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]), parrface);
+        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]), &parr);
+
+        double ycL = geoel[IJK(i, 0, 2, nx-1, 3)];
 
         //Add flux contribution to elements
         rhsel[iuL]     -= fflux[0];
         rhsel[iuL + 1] -= fflux[1];
-        rhsel[iuL + 2] -= fflux[2];
+        rhsel[iuL + 2] -=(fflux[2] + ycL*parr);
         rhsel[iuL + 3] -= fflux[3];
 
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -437,16 +438,17 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         if ((iuR > nelem*NVAR) or (iuL > nelem*NVAR)){
             printf("wut\n");
         }
-        parrface = &(parr[IJK(i,ny-1,0,nx,2)]);
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), parrface);
+        LDFSS(normx, normy, len, yface, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+
+        double ycR = geoel[IJK(i, ny-2, 2, nx-1, 3)];
 
         //Add flux contribution to elements
         rhsel[iuR  ] += fflux[0];
         rhsel[iuR+1] += fflux[1];
-        rhsel[iuR+2] += fflux[2];
+        rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
 
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -481,5 +483,4 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         }
     }
     free(rhsel);
-    free(parr);
 }

@@ -174,10 +174,10 @@ void LDFSS(double normx, double normy, double len, double yface, double* uLeft, 
     double pnet = (all*(1.0+btl) - btl*ppl)*varL.p
                 + (alr*(1.0+btr) - btr*ppr)*varR.p;
 
-    parr[0] = pnet * normy;
+    parr[0] = len * pnet * normy;
 
     flux[0] = yface*(fml + fmr);                                        //continuity
-    flux[1] = yface*(fml*uLeft[1] + fmr*uRight[1] + pnet*normx);        //x momentum
+    flux[1] = yface*(fml*uLeft[1] + fmr*uRight[1] + len*pnet*normx);        //x momentum
     flux[2] = yface*(fml*uLeft[2] + fmr*uRight[2]);                     //y momentum w/o  "+pnet*normy"
     flux[3] = yface*(fml*varL.h0  + fmr*(varR.h0));                     //total energy
 }
