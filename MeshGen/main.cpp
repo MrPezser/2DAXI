@@ -182,7 +182,7 @@ int main() {
     dx = length / (nx-1);
 
     //Read in nozzle geometry
-    for (int i=0; i<nx; i++) z[i] = i*dx;
+    for (int i=0; i<nx; i++) z[i] = i*dx/IN2M;
     get_nozzle(nx, z, r);
 
     //define coordinates
