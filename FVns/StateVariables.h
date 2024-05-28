@@ -21,22 +21,24 @@
 class State {
 
 private:
-    const double* unk{};
+    double* unk{};
 
 
 public:
-    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
+    double p{NAN},a{NAN}, h{NAN}, h0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{}, e{};
 
 
     State() = default;
 
-    void Initialize(const double* u){
+    void Initialize(double* u){
         unk = u;
         // vars = [rho, u, v, T]
     }
 
     void UpdateState(Thermo& air ) {
         int isp = 0;
+        unk[3] = fmin(unk[3], 9999.0);
+        unk[3] = fmax(unk[3], 201.0);
         double T = unk[3];
 
         v2 = unk[1]*unk[1] + unk[2]*unk[2];
@@ -44,6 +46,7 @@ public:
         a = sqrt(air.gam*air.Rs[isp]*T);
         h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
+        e = h - air.Rs[0]*T;
         Cp[0] = air.CalcCp(T);
         Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
 
@@ -55,7 +58,7 @@ public:
 
         CHECKD(a > 0.0, "bad wave speed", a)
         CHECKD(p > 0.0, "bad pressure", p)
-        ASSERT(!_isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
+        ASSERT(!__isnan(p*a*T), "Error in finding pressure or wavespeed or temperature.")
     }
 
 };

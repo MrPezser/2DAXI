@@ -110,8 +110,8 @@ void LeerFlux(const double gam, double normx, double normy, double* uLeft, State
     fout[2] = fPlus[2] + fMnus[2];
     fout[3] = fPlus[3] + fMnus[3];
 
-    ASSERT(!_isnan(fout[0]), "nan flux[0]")
-    if (_isnan(fout[0]) or _isnan(fout[1]) or _isnan(fout[2]) or _isnan(fout[3])) {
+    ASSERT(!__isnan(fout[0]), "nan flux[0]")
+    if (__isnan(fout[0]) or __isnan(fout[1]) or __isnan(fout[2]) or __isnan(fout[3])) {
         printf("leerflux isnan\n");
         exit(0);
     }

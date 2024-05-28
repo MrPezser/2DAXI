@@ -12,47 +12,9 @@
 #include "LUtools.h"
 #include "Jacobian.h"
 #include "Thermo.h"
+#include "InexactNewtonCg.h"
+#include "NewtonLU.h"
 
-
-double find_dt(Thermo& air, int nx, int ny, double CFL, const double* uRef, State& var, double* geofa){
-    double vmax, dt, mindx;
-
-    //Max info speed = v+c
-    vmax = sqrt(var.v2) + var.a;
-
-    //Min grid spacing
-    mindx = 1.0;
-    for (int i=0; i<nx-1; i++){
-        for (int j=0; j<ny-1; j++){
-            mindx = fmin(mindx, geofa[IJK(i,j,0,nx,6)]);
-            mindx = fmin(mindx, geofa[IJK(i,j,3,nx,6)]);
-        }
-    }
-
-    dt = CFL * mindx / vmax;
-    ASSERT(!_isnan(dt), "NAN dt")
-    return dt;
-}
-
-void calculate_residual(int nx, int ny, double* res, double* ressum){
-    double res2[NVAR] = {0.0};
-
-    for (int i=0; i<nx-1; i++){
-        for (int j=0; j<ny-1; j++){
-            int iu = IJK(i,j,0,nx-1,NVAR);
-
-            for (int k=0; k<NVAR; k++){
-                ASSERT(!_isnan(res[iu+k]),"res NaN")
-                res2[k] += res[iu+k]*res[iu+k];
-            }
-        }
-    }
-
-    ressum[0] = sqrt(res2[0]);
-    ressum[1] = sqrt(res2[1]);
-    ressum[2] = sqrt(res2[2]);
-    ressum[3] = sqrt(res2[3]);
-}
 
 void vec_copy(double n, double* a, double* b){
     for (int i=0; i<n; i++){
@@ -66,8 +28,8 @@ int main() {
     int mxiter;
     tol = 1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 1.0;//0.8;
-    u0 = 10;
+    CFL = 5.0;//0.8;
+    u0 = 1000.0;
     T0 = 300;
     rho0 = 1.0;
     v0 = 0.0;
@@ -140,90 +102,119 @@ int main() {
             ElemVar[ie].UpdateState(air);
         }
     }
-    //Same memory to be used for each local matrix (chg this if making parallel)
-    auto D = (double**)malloc((NVAR) * sizeof(double*));
-    for (int k = 0; k < NVAR; k++)
-        D[k] = (double*)malloc( (NVAR) * sizeof(double));
+    //Same memory to be used for each local matrix (chg this if making parallel) (explicit only)
+    //auto D = (double**)malloc((NVAR) * sizeof(double*));
+    //for (int k = 0; k < NVAR; k++)
+    //    D[k] = (double*)malloc( (NVAR) * sizeof(double));
 
     printf("==================== Starting Solver ====================\n");
+    BC bound = BC(nx,ny);
+    int isolved = 0;
+    if (IIMPLI)
+    {
 
+        //isolved = INCG(x, y, nx, ny, CFL, air, ElemVar, bound, uFS,
+        //                   ibound, geoel, geofa, unk);
+        isolved = NLU(x, y, nx, ny, CFL, air, ElemVar, bound, uFS, ibound, geoel, geofa, unk);
+    } else {
 
-    double res0[NVAR]{};
-    double ressum[NVAR], restotal;
-    int iter;
-    for (iter=0; iter<mxiter; iter++){
-        //Explicit Euler Time Integration
+        double res0[NVAR]{};
+        double ressum[NVAR], restotal;
+        int iter;
+        BC bound = BC(nx, ny);
+        auto D = (double**)malloc((NVAR) * sizeof(double*));
+        for (int k = 0; k < NVAR; k++)
+            D[k] = (double*)malloc( (NVAR) * sizeof(double));
+        for (iter = 0; iter < mxiter; iter++) {
+            //Explicit Euler Time Integration
 
-        //Find global timestep based off of CFl condition
-        dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
+            //Find global timestep based off of CFl condition
+            dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
-        //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, res);
-        calculate_residual(nx, ny, res, ressum);
+            //Calculate the ghost cell values
+            bound.set_boundary_conditions(nx, ny, air, ElemVar, uFS, ibound, geofa, unk);
 
-        //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
-        int flg = 0;
-        for (int i=0; i<nx-1; i++) {
-            for (int j=0; j<ny-1; j++) {
-                double *unkij = &(unk[IJK(i, j, 0, nx-1, NVAR)]);
-                double LUtol = 1e-16;
-                int iel = IJ(i,j,nx-1);
-                int N = NVAR;
-                int P[NVAR+1]{}; //permutation vector for pivoting
+            //calculate the right hand side residual term (change of conserved quantities)
+            calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, unk, bound, res);
+            calculate_residual(nx, ny, res, ressum);
 
-                //Evaluate the jacobian / Implicit matrix
-                BuildJacobian(dt, unkij, ElemVar[iel], D);
+            //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
+            int flg = 0;
+            for (int i = 0; i < nx - 1; i++) {
+                for (int j = 0; j < ny - 1; j++) {
+                    double *unkij = &(unk[IJK(i, j, 0, nx - 1, NVAR)]);
+                    double LUtol = 1e-16;
+                    int iel = IJ(i, j, nx - 1);
+                    int N = NVAR;
+                    int P[NVAR + 1]{}; //permutation vector for pivoting
 
-                //get the rhs block needed
-                double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
-                double *xLU = &(dv[ IJK(i, j, 0, nx - 1, NVAR)]);
-                LUPDecompose(D, N, LUtol, P);
-                LUPSolve(D, P, b, N, xLU);
+                    //Evaluate the jacobian / Implicit matrix
+                    RegularizationTerm(dt, unkij, ElemVar[iel], D);
+
+                    //get the rhs block needed
+                    double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
+                    double *xLU = &(dv[IJK(i, j, 0, nx - 1, NVAR)]);
+                    LUPDecompose(D, N, LUtol, P);
+                    LUPSolve(D, P, b, N, xLU);
+                }
             }
-        }
-        //perform iteration
-        for (int ielem=0; ielem<nelem; ielem++){
-            int iu = NVAR*ielem;
-            unk[iu  ] += dv[iu  ];
-            unk[iu+1] += dv[iu + 1];
-            unk[iu+2] += dv[iu + 2];
-            unk[iu+3] += dv[iu + 3];
-            ElemVar[ielem].UpdateState(air);
-        }
-
-
-
-        if (iter==0) {
-            for (int i=0; i<NVAR; i++){
-                res0[i] = ressum[i];
+            //perform iteration
+            for (int ielem = 0; ielem < nelem; ielem++) {
+                int iu = NVAR * ielem;
+                unk[iu] += dv[iu];
+                unk[iu + 1] += dv[iu + 1];
+                unk[iu + 2] += dv[iu + 2];
+                unk[iu + 3] += dv[iu + 3];
+                ElemVar[ielem].UpdateState(air);
             }
-        }
-        restotal = 0.0;
-        for (int i=0; i<NVAR; i++){
-            ASSERT(ressum[i] > 0.0, "Nonpositive Residual")
-            if (res0[i] < 1e-10) res0[i] = ressum[i];
-            restotal += ressum[i] / res0[i];
-        }
-        if (iter%100 == 0) {
-            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
+
+
+            if (iter == 0) {
+                for (int i = 0; i < NVAR; i++) {
+                    res0[i] = ressum[i];
+                }
+            }
+            restotal = 0.0;
+            for (int i = 0; i < NVAR; i++) {
+                ASSERT(ressum[i] > 0.0, "Nonpositive Residual")
+                if (res0[i] < 1e-10) res0[i] = ressum[i];
+                restotal += ressum[i] / res0[i];
+            }
+            if (iter % 100 == 0) {
+                printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
-        }
-        if (iter > 0 and iter%1000 == 0){
-            printf("Saving current Solution\n");
-            print_state("Final State", nx, ny, air, x, y, unk, geoel);
-        }
-        if (restotal < tol) break;
+            }
+            if (iter > 0 and iter % 1000 == 0) {
+                printf("Saving current Solution\n");
+                print_state("Final State", nx, ny, air, x, y, unk, geoel);
+            }
+            if (restotal < tol) {
+                isolved = 1;
+                printf("Satisfactory Solution Found\n");
+                break;
+            }
 
+        }
+        printf("==================== Iterations Halted ====================\n");
+        printf("Saving Solution File..... \n");
+
+        print_state("Final State", nx, ny, air, x, y, unk, geoel);
+
+
+        printf("Complete.");
+
+
+        free(ElemVar);
+        free(res);
+        free(dv);
+        free(unk);
+        free(geoel);
+        free(geofa);
+        free(ibound);
+        free(x);
+        free(y);
     }
-    printf("==================== Solution Found ====================\n");
-    printf("Saving Solution File..... \n");
-
-    print_state("Final State", nx, ny, air, x, y, unk, geoel);
-
-
-    printf("Complete.");
-
-    free(ElemVar);
-    free(res);
-    free(dv);
+    if (isolved==0){
+        printf("Failed to find satifactory solution\n");
+    }
 }
