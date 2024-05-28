@@ -46,14 +46,14 @@ public:
         h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
         Cp[0] = air.CalcCp(T);
-        Cv = Cp[0]/air.gam;//Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
+        Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
         e0 = h - air.Rs[isp]*T + 0.5*v2;
 
         //Sutherland's law for viscosity
         double S, C1;
         S = 110.4;
         C1 = 1.458e-6;
-        mu = C1 * pow(T, 1.5) / (T + S);
+        mu = (double)(IVISC) * C1 * pow(T, 1.5) / (T + S);
 
         CHECKD(a > 0.0, "bad wave speed", a)
         CHECKD(p > 0.0, "bad pressure", p)

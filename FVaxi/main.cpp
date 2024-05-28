@@ -64,7 +64,7 @@ int main() {
     //Read in setup file
     double p0, u0, tol, CFL, T0, v0, rho0;
     int mxiter;
-    tol = 1e-6;
+    tol = 1e-9;//1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 0.9;
     u0 = 1532.9;
@@ -193,6 +193,11 @@ int main() {
                 double *xLU = &(dv[ IJK(i, j, 0, nx - 1, NVAR)]);
                 LUPDecompose(D, N, LUtol, P);
                 LUPSolve(D, P, b, N, xLU);
+                //axi modification
+                double ycc = geoel[IJK(i,j,2,nx-1, 3)];
+                for (int k=0; k<NVAR; k++){
+                    xLU[k] *= (1.0/ycc);
+                }
             }
         }
         //perform iteration

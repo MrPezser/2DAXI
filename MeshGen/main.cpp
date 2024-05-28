@@ -13,6 +13,14 @@
 
 #define IU(i, j, ni)  (((j)*(ni)) + (i))
 
+double array_max(size_t n, double* a){
+    double maxelem = a[0];
+    for (int i=0; i<n; i++){
+        maxelem = fmax(maxelem, a[i]);
+    }
+    return maxelem;
+}
+
 //test ramp geometry for now
 double ramp_surface(double x, double h, double L) {
     //test geometry: straight - ramp - straight
@@ -184,6 +192,20 @@ int main() {
     //Read in nozzle geometry
     for (int i=0; i<nx; i++) z[i] = i*dx/IN2M;
     get_nozzle(nx, z, r);
+    y_offset = 0.0 ;//0.05 * array_max(nx, r);
+    /*
+    //Modify upper surface to maintain the same area
+    for (int i=0; i<nx; i++){
+        double yoff2 = sqrt(r[i]*r[i] + y_offset*y_offset) - r[i];
+        if (yoff2 < 0){
+            printf("Upper surface modification negative\n");
+            exit(0);
+        }
+
+        r[i] += yoff2;
+
+    }
+     */
 
     //define coordinates
     double factor = 2.0;

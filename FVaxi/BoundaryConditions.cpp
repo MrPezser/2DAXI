@@ -94,6 +94,7 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
         if (_isnan(normx) or _isnan(normy)){
             printf("Undef. Surface Normal!\n");
         }
+        return;
     }
 
     //Freestream, Back Pressure, and Outflow BC
