@@ -121,7 +121,7 @@ CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=C:/Users/tskoepli/Documents/GitHub/2DAXI
 CMAKE_GNUtoMS:BOOL=OFF
 
 //Install path prefix, prepended onto install directories.
-CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/FVns
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/FVaxi
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=C:/Program Files/JetBrains/CLion 2023.1.3/bin/mingw/bin/ld.exe
@@ -255,15 +255,6 @@ FVaxi_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 FVaxi_SOURCE_DIR:STATIC=C:/Users/tskoepli/Documents/GitHub/2DAXI/FVaxi
-
-//Value Computed by CMake
-FVns_BINARY_DIR:STATIC=C:/Users/tskoepli/Documents/GitHub/2DAXI/FVaxi/cmake-build-debug
-
-//Value Computed by CMake
-FVns_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-FVns_SOURCE_DIR:STATIC=C:/Users/tskoepli/Documents/GitHub/2DAXI/FVaxi
 
 
 ########################

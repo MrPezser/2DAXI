@@ -93,3 +93,50 @@ void print_state(const char *title, int nx, int ny, Thermo& air, double* x, doub
     }
     fclose(fout);
 }
+
+void print_state_axi(const char *title, int nx, int ny, Thermo& air, double* x, double* y, double* unk, double* geoel ) {
+    //Makes a tecplot file of the grid and a setup file for the solver
+    //int nb = 2*nx + 2*ny;
+    int nelem = nx * ny;
+    int nrad = 50;
+
+    FILE *fout = fopen("../Outputs/solution3D.tec", "w");
+    if (fout == nullptr) printf("oeups\n");
+
+    //printf("\nDisplaying Grid Header\n");
+    fprintf(fout, "TITLE = \"%s\"\n", title);
+    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"Z\",\"rho\", \"u\", \"v\", \"w\", \"T\", \"p\", \"c\", \"M\"\n");
+    fprintf(fout, "ZONE I=%d, J=%d, K=%d DATAPACKING=POINT\n", nx-1, ny-1, nrad);
+
+    //printf("Printing Coordinate Information\n");
+    for (int j=0; j < (ny-1); j++) {
+        for (int i=0; i< (nx-1); i++) {
+            for (int k=0; k<nrad; k++) {
+                double xp, yp, zp, rho, u, v, w, T, M, psi;
+                xp = geoel[IJK(i, j, 1, nx - 1, 3)];
+                yp = geoel[IJK(i, j, 2, nx - 1, 3)];
+
+                psi = 2.0 * M_PI * k / nrad;
+
+                zp = yp * sin(psi);
+                yp = yp * cos(psi);
+
+                State var;
+                var.Initialize(&(unk[IJK(i, j, 0, nx - 1, NVAR)]));
+                var.UpdateState(air);
+
+                rho = unk[IJK(i, j, 0, nx - 1, NVAR)];
+                u = unk[IJK(i, j, 1, nx - 1, NVAR)];
+                v = unk[IJK(i, j, 2, nx - 1, NVAR)];
+                w = v * sin(psi);
+                v = v * cos(psi);
+                T = unk[IJK(i, j, 3, nx - 1, NVAR)];
+                M = sqrt(var.v2) / var.a;
+
+                fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
+                        xp, yp, zp, rho, u, v, w, T, var.p, var.a, M);
+            }
+        }
+    }
+    fclose(fout);
+}

@@ -108,6 +108,9 @@ void get_nozzle(const int nx, const double* x, double* y){
         y[ipoin] = 0.0; //initialize
         //printf("Interpolating to point %d\n",ipoin);
 
+        if (x[ipoin] >= z[ncon-1]) {y[ipoin] = IN2M * r[ncon-1];continue;}
+
+
         //find closest point on the left
         double mindel = 999.0;
         int ileft = -1;
@@ -159,8 +162,8 @@ int main() {
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
     length = 16.3*IN2M;//1.0;//4.0;
-    nx = 101;
-    ny = 51;
+    nx = 501;
+    ny = 201;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;//0.001;
