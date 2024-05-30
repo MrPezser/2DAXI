@@ -10,6 +10,7 @@
 #include "BoundaryConditions.h"
 #include "EulerFlux.h"
 #include "StateVariables.h"
+#include "DGP1Tools.h"
 
 
 void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
@@ -17,6 +18,8 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
     if (IVISC) {
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
         ///Need to make axisymmatric modification and add extra termsnn/JE
+        printf("Need to update viscous fluxes for axisymmetric and DP higher order\n");
+        exit(0);
         double tau[4], Sij[4], st[4], dc2i, trace, vflux[2];
         double uL, vL, uR, vR;
 
@@ -77,9 +80,11 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
 }
 
 void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
-               double* geofa, double* yfa, double* unk, double* dudt) {
+               double* geofa, double* yfa, double* unk, double* ux, double* uy, double* dudt) {
     int nelem = (nx-1)*(ny-1);
     double *rhsel, parr;
+    double unkelij[NVAR];
+    State varij = State();
     rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
     for(int i=0; i<NVAR*nelem; i++) {
         rhsel[i] = 0.0;
@@ -96,13 +101,21 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iint = IJK(i,0,0, nx-1, 4);
         int iel = IJ(i, 0, nx-1);
 
+        //DG extension
+        double xsi, eta;
+        xsi = 0.0;
+        eta = -1.0;
+        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
         //==========Face Normal
         double normx, normy;
         normx = geofa[IJK(i, 0, 1,nx,6)];
         normy = geofa[IJK(i, 0, 2,nx,6)];
         //==========Ghost State
         BotVar[i].Initialize(&(uGBot[IJ(0,i,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
                        &(uGBot[IJ(0,i,NVAR)]));
         BotVar[i].UpdateState(air);
     }
@@ -114,13 +127,21 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iint = IJK(nx-2,j,0, nx-1, NVAR);
         int iel = IJ(nx-2, j, nx-1);
 
+        //DG extension
+        double xsi, eta;
+        xsi = 1.0;
+        eta = 0.0;
+        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
         //==========Face Normal
         double normx, normy;
         normx = geofa[IJK(0, j, 4,nx,6)];
         normy = geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS,&(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
                        &(uGRight[IJ(0,j,NVAR)]));
         RightVar[j].UpdateState(air);
     }
@@ -134,13 +155,21 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iint = IJK(i,ny-2,0, nx-1, NVAR);
         int iel = IJ(i, ny-2, nx-1);
 
+        //DG extension
+        double xsi, eta;
+        xsi = 0.0;
+        eta = 1.0;
+        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
         //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(i, ny-1, 1,nx,6)];
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
         //==========Ghost State
         TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
                        &(uGTop[IJ(0,i,NVAR)]));
         TopVar[i].UpdateState(air);
     }
@@ -154,13 +183,21 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iint = IJK(0,j,0, nx-1, 4);
         int iel = IJ(0, j, nx-1);
 
+        //DG extension
+        double xsi, eta;
+        xsi = -1.0;
+        eta =  0.0;
+        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
         //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(0, j, 4,nx,6)];
         normy = -geofa[IJK(0, j, 5,nx,6)];
         //==========Ghost State
         LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS, &(unk[iint]), ElemVar[iel],
+        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
                        &(uGLeft[IJ(0,j,NVAR)]));
         LeftVar[j].UpdateState(air);
     }
@@ -174,7 +211,9 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         for (int j=0; j<ny-1; j++){
             // ~~~~~~~~~~ Inviscid fluxes ~~~~~~~~~~
             //face above point i,j
-            double len, normx, normy, fflux[4], yface;
+            double len, normx, normy, fflux[NVAR], yface, uLeft[NVAR], uRight[NVAR];
+            State varL = State();
+            State varR = State();
             len = geofa[IJK(i,j,3,nx,6)];
             normx = geofa[IJK(i,j,4,nx,6)];
             normy = geofa[IJK(i,j,5,nx,6)];
@@ -184,12 +223,23 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             int iuR = IJK(i  ,j,0,nx-1,NVAR);
             int ieL = IJ(i-1, j, nx-1);
             int ieR = IJ(i,   j, nx-1);
-            State varL = ElemVar[ieL];
-            State varR = ElemVar[ieR];
+
+            //DG extension (xsi flux on vertical face)
+            double xsi, eta;
+            xsi = 1.0;
+            eta = 0.0;
+            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+            varL.Initialize(uLeft);
+            varL.UpdateState(air);
+            xsi = -1.0;
+            eta = 0.0;
+            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+            varR.Initialize(uRight);
+            varR.UpdateState(air);
 
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+            LDFSS(normx, normy, len, yface, uLeft, varL, uRight, varR, fflux, &parr);
 
             //Add pressure term in
             double ycL = geoel[IJK(i-1, j, 2, nx-1, 3)];
@@ -206,7 +256,9 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
 
+            ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
+            /*
             // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
             double vflux[6], dc[2];
             //mirror the next interior cell to the boundary for that flux contrib
@@ -224,6 +276,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+1] -= len * vflux[3];
             rhsel[iuR+2] -= len * vflux[4];
             rhsel[iuR+3] -= len * vflux[5];
+             */
         }
     }
 
@@ -231,7 +284,9 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     for (int i=0; i<nx-1; i++){
         for (int j=1; j<ny-1; j++){
             //faces to the left/above point i,j
-            double len, normx, normy, yface, fflux[4];
+            double len, normx, normy, fflux[NVAR], yface, uLeft[NVAR], uRight[NVAR];
+            State varL = State();
+            State varR = State();
             len = geofa[IJK(i,j,0,nx,6)];
             normx = geofa[IJK(i,j,1,nx,6)];
             normy = geofa[IJK(i,j,2,nx,6)];
@@ -241,12 +296,23 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             int iuR = IJK(i,j-1,0,nx-1,NVAR);
             int ieL = IJ(i, j  , nx-1);
             int ieR = IJ(i, j-1, nx-1);
-            State varL = ElemVar[ieL];
-            State varR = ElemVar[ieR];
+
+            //DG extension (eta flux on 'horizontal' face)
+            double xsi, eta;
+            xsi =  0.0;
+            eta = -1.0;
+            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+            varL.Initialize(uLeft);
+            varL.UpdateState(air);
+            xsi = 0.0;
+            eta = 1.0;
+            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+            varR.Initialize(uRight);
+            varR.UpdateState(air);
 
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-            LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+            LDFSS(normx, normy, len, yface, uLeft, varL, uRight, varR, fflux, &parr);
 
             //Add pressure term in
             double ycL = geoel[IJK(i, j,   2, nx-1, 3)];
@@ -263,6 +329,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
 
+            ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
+
+
+            /*
             // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
             double vflux[6], dc[2];
             //mirror the next interior cell to the boundary for that flux contrib
@@ -280,6 +350,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+1] -= len * vflux[3];
             rhsel[iuR+2] -= len * vflux[4];
             rhsel[iuR+3] -= len * vflux[5];
+             */
         }
     }
 
@@ -290,7 +361,9 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     }
 
     //==========Boundary faces
-    double len, normx, normy, fflux[4], yface;
+    double len, normx, normy, fflux[NVAR], yface, uRight[NVAR], uLeft[NVAR];
+    State varL = State();
+    State varR = State();
     // I|xi fluxes
     for (int j=0; j<ny-1; j++){
         //--------------------  LEFT BOUNDARY
@@ -302,11 +375,23 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iuR =IJK(0,j,0,nx-1,NVAR);
         int ieL = IJ(0, j, nx-1);
         int ieR = IJ(0, j, nx-1);
-        State varL = ElemVar[ieL];
-        State varR = ElemVar[ieR];
 
+        //DG extension (xsi flux on vertical face)
+        double xsi, eta;
+        //xsi = 1.0;
+        //eta = 0.0;
+        //get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        //varL.Initialize(uLeft);
+        //varL.UpdateState(air);
+        xsi = -1.0;
+        eta = 0.0;
+        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        varR.Initialize(uRight);
+        varR.UpdateState(air);
+
+        //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(uGLeft[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+        LDFSS(normx, normy, len, yface, &(uGLeft[iuL]), LeftVar[j], uRight, varR, fflux, &parr);
 
         //double ycL = 2.0 * geoel[IJK(0, j, 2, nx-1, 3)] - geoel[IJK(0, j+1, 2, nx-1, 3)]; //extrapolate to get gost y coord
         double ycR = geoel[IJK(0, j, 2, nx-1, 3)];
@@ -317,8 +402,9 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+2] += (fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
 
+        /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-        double dc[2], vflux[6];
+        double dc[2], vflux[6]{};
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(1,j,1,nx-1,3)] - geoel[IJK(0,j,1,nx-1,3)];
         dc[1] = geoel[IJK(1,j,2,nx-1,3)] - geoel[IJK(0,j,2,nx-1,3)];
@@ -330,6 +416,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+1] -= len * vflux[3];
         rhsel[iuR+2] -= len * vflux[4];
         rhsel[iuR+3] -= len * vflux[5];
+         */
 
 
 
@@ -342,10 +429,22 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         iuR = IJ(0,j,NVAR);
         ieL = IJ(nx-2,j, nx-1);
         ieR = j;
-        varL = ElemVar[ieL];
-        varR = RightVar[ieR];
+
+        //DG extension (xsi flux on vertical face)
+        xsi = 1.0;
+        eta = 0.0;
+        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        varL.Initialize(uLeft);
+        varL.UpdateState(air);
+        //xsi = -1.0;
+        //eta = 0.0;
+        //get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        //varR.Initialize(uRight);
+        //varR.UpdateState(air);
+
+        //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGRight[iuR]), varR, &(fflux[0]), &parr);
+        LDFSS(normx, normy, len, yface, uLeft, varL, &(uGRight[iuR]), RightVar[j], fflux, &parr);
 
         double ycL = geoel[IJK(nx-2, j, 2, nx-1, 3)];
 
@@ -355,6 +454,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL+2] -= (fflux[2] + (ycL*parr));
         rhsel[iuL+3] -= fflux[3];
 
+        /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(nx-2,j,1,nx-1,3)] - geoel[IJK(nx-3,j,1,nx-1,3)];
@@ -367,6 +467,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL+1] += len * vflux[0];
         rhsel[iuL+2] += len * vflux[1];
         rhsel[iuL+3] += len * vflux[2];
+         */
     }
 
     // J|eta fluxes
@@ -381,19 +482,26 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int iuR = IJ(0,i,NVAR);
         int ieL = IJ(i,0,nx-1);
         int ieR = i;
-        State varL = ElemVar[ieL];
-        State varR = BotVar[ieR];
+        //State varL = ElemVar[ieL];
+        //State varR = BotVar[ieR];
 
-        if (iuR<0 or iuL < 0){
-            printf("wut\n");
-        }
-        if ((iuR > nelem*NVAR) or (iuL > nelem*NVAR)){
-            printf("wut\n");
-        }
+        //DG extension (eta flux on 'horizontal' face)
+        double xsi, eta;
+        xsi =  0.0;
+        eta = -1.0;
+        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        varL.Initialize(uLeft);
+        varL.UpdateState(air);
+        //xsi = 0.0;
+        //eta = 1.0;
+        //get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        //varR.Initialize(uRight);
+        //varR.UpdateState(air);
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(unk[iuL]), varL, &(uGBot[iuR]), varR, &(fflux[0]), &parr);
+        LDFSS(normx, normy, len, yface, uLeft, varL, &(uGBot[iuR]), BotVar[i], fflux, &parr);
+
 
         double ycL = geoel[IJK(i, 0, 2, nx-1, 3)];
 
@@ -403,6 +511,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL + 2] -=(fflux[2] + ycL*parr);
         rhsel[iuL + 3] -= fflux[3];
 
+        /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
         double dc[2], vflux[6];
         //mirror the next interior cell to the boundary for that flux contrib
@@ -416,6 +525,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL+1] += len * vflux[0];
         rhsel[iuL+2] += len * vflux[1];
         rhsel[iuL+3] += len * vflux[2];
+         */
 
 
 
@@ -429,19 +539,24 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         iuR = IJK(i,ny-2,0,nx-1,NVAR);
         ieL = i;
         ieR = IJ(i, ny-2, nx-1);
-        varL = TopVar[ieL];
-        varR = ElemVar[ieR];
+        //varL = TopVar[ieL];
+        //varR = ElemVar[ieR];
 
-        if (iuR<0 or iuL < 0){
-            printf("wut\n");
-        }
-        if ((iuR > nelem*NVAR) or (iuL > nelem*NVAR)){
-            printf("wut\n");
-        }
+        //DG extension (eta flux on 'horizontal' face)
+        //xsi =  0.0;
+        //eta = -1.0;
+        //get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        //varL.Initialize(uLeft);
+        //varL.UpdateState(air);
+        xsi = 0.0;
+        eta = 1.0;
+        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        varR.Initialize(uRight);
+        varR.UpdateState(air);
 
         //Find interface flux
         //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
-        LDFSS(normx, normy, len, yface, &(uGTop[iuL]), varL, &(unk[iuR]), varR, &(fflux[0]), &parr);
+        LDFSS(normx, normy, len, yface, &(uGTop[iuL]), TopVar[i], uRight, varR, fflux, &parr);
 
         double ycR = geoel[IJK(i, ny-2, 2, nx-1, 3)];
 
@@ -451,6 +566,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
 
+        /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
         //mirror the next interior cell to the boundary for that flux contrib
         dc[0] = geoel[IJK(i,ny-3,1,nx-1,3)] - geoel[IJK(i,ny-2,1,nx-1,3)];
@@ -463,6 +579,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+1] -= len * vflux[3];
         rhsel[iuR+2] -= len * vflux[4];
         rhsel[iuR+3] -= len * vflux[5];
+         */
     }
 
     //====================Combine to Find du/dt====================
@@ -477,8 +594,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             dudt[iu+3] = rhsel[iu+3] / vol;
 
             if (_isnan(dudt[iu])) {
-                printf("nan dudt\n");
+                printf("dug\n");
             }
+
+            ASSERT(!_isnan(dudt[iu]), "NaN Encounterd in Flux formulation")
 
         }
     }

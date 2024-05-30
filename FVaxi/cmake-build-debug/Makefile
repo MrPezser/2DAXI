@@ -56,10 +56,10 @@ RM = "C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe"
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\tskoepli\Documents\GitHub\2DAXI\FVaxi
+CMAKE_SOURCE_DIR = C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\tskoepli\Documents\GitHub\2DAXI\FVaxi\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -86,9 +86,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tskoepli\Documents\GitHub\2DAXI\FVaxi\cmake-build-debug\CMakeFiles C:\Users\tskoepli\Documents\GitHub\2DAXI\FVaxi\cmake-build-debug\\CMakeFiles\progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\cmake-build-debug\CMakeFiles C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\cmake-build-debug\\CMakeFiles\progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tskoepli\Documents\GitHub\2DAXI\FVaxi\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\cmake-build-debug\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -151,6 +151,30 @@ BoundaryConditions.s: BoundaryConditions.cpp.s
 BoundaryConditions.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVaxi.dir\build.make CMakeFiles/FVaxi.dir/BoundaryConditions.cpp.s
 .PHONY : BoundaryConditions.cpp.s
+
+DGP1Tools.obj: DGP1Tools.cpp.obj
+.PHONY : DGP1Tools.obj
+
+# target to build an object file
+DGP1Tools.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVaxi.dir\build.make CMakeFiles/FVaxi.dir/DGP1Tools.cpp.obj
+.PHONY : DGP1Tools.cpp.obj
+
+DGP1Tools.i: DGP1Tools.cpp.i
+.PHONY : DGP1Tools.i
+
+# target to preprocess a source file
+DGP1Tools.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVaxi.dir\build.make CMakeFiles/FVaxi.dir/DGP1Tools.cpp.i
+.PHONY : DGP1Tools.cpp.i
+
+DGP1Tools.s: DGP1Tools.cpp.s
+.PHONY : DGP1Tools.s
+
+# target to generate assembly for a file
+DGP1Tools.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FVaxi.dir\build.make CMakeFiles/FVaxi.dir/DGP1Tools.cpp.s
+.PHONY : DGP1Tools.cpp.s
 
 EulerFlux.obj: EulerFlux.cpp.obj
 .PHONY : EulerFlux.obj
@@ -356,6 +380,9 @@ help:
 	@echo ... BoundaryConditions.obj
 	@echo ... BoundaryConditions.i
 	@echo ... BoundaryConditions.s
+	@echo ... DGP1Tools.obj
+	@echo ... DGP1Tools.i
+	@echo ... DGP1Tools.s
 	@echo ... EulerFlux.obj
 	@echo ... EulerFlux.i
 	@echo ... EulerFlux.s

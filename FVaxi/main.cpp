@@ -100,6 +100,8 @@ int main() {
     printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
     auto* unk  = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* ux   = (double*)malloc(NVAR*nelem*sizeof(double));    //xi  derivative
+    auto* uy   = (double*)malloc(NVAR*nelem*sizeof(double));    //eta derivative
     auto* res  = (double*)malloc(NVAR*nelem * sizeof(double));
     auto* dv   = (double*)malloc(NVAR*nelem * sizeof(double));
 
@@ -118,6 +120,16 @@ int main() {
         unk[NVAR*ielem+1] = uFS[1];
         unk[NVAR*ielem+2] = uFS[2];
         unk[NVAR*ielem+3] = uFS[3];
+
+        ux[NVAR*ielem]   = 0.0;
+        ux[NVAR*ielem+1] = 0.0;
+        ux[NVAR*ielem+2] = 0.0;
+        ux[NVAR*ielem+3] = 0.0;
+
+        uy[NVAR*ielem]   = 0.0;
+        uy[NVAR*ielem+1] = 0.0;
+        uy[NVAR*ielem+2] = 0.0;
+        uy[NVAR*ielem+3] = 0.0;
     }
 
     Thermo air = Thermo();
@@ -172,7 +184,7 @@ int main() {
         dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, yfa, unk, res);
+        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, yfa, unk, ux, uy, res);
         calculate_residual(nx, ny, res, ressum);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
