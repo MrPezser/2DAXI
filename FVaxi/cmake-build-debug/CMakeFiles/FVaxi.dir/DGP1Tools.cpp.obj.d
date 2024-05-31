@@ -13,4 +13,10 @@ CMakeFiles/FVaxi.dir/DGP1Tools.cpp.obj: \
  c:\mingw\include\sys/types.h \
  c:\mingw\lib\gcc\mingw32\6.3.0\include\stdarg.h \
  c:\mingw\lib\gcc\mingw32\6.3.0\include\c++\cstdlib \
- c:\mingw\include\stdlib.h
+ c:\mingw\include\stdlib.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\StateVariables.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\c++\cmath \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\c++\bits\cpp_type_traits.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\c++\ext\type_traits.h \
+ c:\mingw\include\math.h \
+ C:\Users\Tsail\OneDrive\Documents\Projects\CFD\2DAXI\FVaxi\Thermo.h

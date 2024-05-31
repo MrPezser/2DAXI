@@ -8,6 +8,6 @@
 #include "StateVariables.h"
 
 void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
-               double* geofa, double* yfa, double* unk, double* ux, double* uy, double* dudt);
+               double* geofa, double* yfa, double* xfa, double* unk, double* ux, double* uy, double* dudt, double* duxdt, double* duydt);
 
 #endif //FVEULER_SPATIALDISCRETIZATION_H

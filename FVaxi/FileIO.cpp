@@ -6,6 +6,7 @@
 #include "FileIO.h"
 #include "Indexing.h"
 #include "StateVariables.h"
+#include "DGP1Tools.h"
 
 void read_mesh(int* nx, int* ny, int** ibound, double** x, double** y){
     int  npoin, nb = {0};
@@ -85,6 +86,99 @@ void print_state(const char *title, int nx, int ny, Thermo& air, double* x, doub
             u   = unk[IJK(i,j,1,nx-1,NVAR)];
             v   = unk[IJK(i,j,2,nx-1,NVAR)];
             T   = unk[IJK(i,j,3,nx-1,NVAR)];
+            M = sqrt(var.v2) / var.a;
+
+            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
+                    xp, yp, rho, u, v, T, var.p, var.a, M);
+        }
+    }
+    fclose(fout);
+}
+void print_state_DGP1(const char *title, int nx, int ny, Thermo& air, double* x, double* y, double* unk, double* ux, double* uy, double* geoel ) {
+    //Makes a tecplot file of the grid and a setup file for the solver
+    //int nb = 2*nx + 2*ny;
+    int nelem = nx * ny;
+
+    FILE *fout = fopen("../Outputs/solution.tec", "w");
+    if (fout == nullptr) printf("oeups\n");
+
+    //printf("\nDisplaying Grid Header\n");
+    fprintf(fout, "TITLE = \"%s\"\n", title);
+    fprintf(fout, "VARIABLES = \"X\", \"Y\", \"rho\", \"u\", \"v\", \"T\", \"p\", \"c\", \"M\"\n");
+    fprintf(fout, "ZONE I=%d, J=%d, DATAPACKING=POINT\n", nx, ny);
+
+    //printf("Printing Coordinate Information\n");
+    for (int j=0; j < ny; j++) {
+        for (int i=0; i< nx; i++) {
+            double xp, yp, rho, u, v, T, M;
+            xp = x[IJ(i,j,nx)];
+            yp = y[IJ(i,j,nx)];
+
+            //Average out contributions from adjacent cells
+            double *upp, *ump, *umm, *upm, unkout[NVAR];
+            int iupp, iump, iumm, iupm;
+            iupp = IJK(i,j,0,nx-1,NVAR);
+            iump = IJK(i-1,j,0,nx-1,NVAR);
+            iumm = IJK(i-1,j-1,0,nx-1,NVAR);
+            iupm = IJK(i,j-1,0,nx-1,NVAR);
+            upp = &(unk[iupp]);
+            ump = &(unk[iump]);
+            umm = &(unk[iumm]);
+            upm = &(unk[iupm]);
+            if (i==0 and j==0){
+                //BL corner
+                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unkout);
+            } else if (i==0 and j==ny-1) {
+                //TL corner
+                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unkout);
+            } else if (i==nx-1 and j==0) {
+                //BR corner
+                get_u_val(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unkout);
+            } else if (i==nx-1 and j==ny-1){
+                //TR corner
+                get_u_val(umm, &(ux[iumm]), &(uy[iumm]), 1.0, 1.0, unkout);
+            } else if (j==0){
+                //bottom boundary
+                double unk1[4], unk2[4];
+                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk2);
+                for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
+            } else if (j==ny-1){
+                //top boundary
+                double unk1[4], unk2[4];
+                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unk1);
+                get_u_val(umm, &(ux[iumm]), &(uy[iumm]),  1.0, 1.0, unk2);
+                for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
+            } else if (i==0){
+                //left boundary
+                double unk1[4], unk2[4];
+                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
+                for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
+            } else if (i==nx-1){
+                //right boundary
+                double unk1[4], unk2[4];
+                get_u_val(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unk1);
+                get_u_val(umm, &(ux[iumm]), &(uy[iumm]), 1.0,  1.0, unk2);
+                for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
+            } else {
+                //internal
+                double unk1[4], unk2[4], unk3[4], unk4[4];
+                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
+                get_u_val(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk3);
+                get_u_val(umm, &(ux[iumm]), &(uy[iumm]),  1.0,  1.0, unk4);
+                for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.25*(unk1[kvar] + unk2[kvar] + unk3[kvar] + unk4[kvar]);
+            }
+
+            State var;
+            var.Initialize(unkout);
+            var.UpdateState(air);
+
+            rho = unkout[0];//unk[IJK(i,j,0,nx-1,NVAR)];
+            u   = unkout[1];//unk[IJK(i,j,1,nx-1,NVAR)];
+            v   = unkout[2];//unk[IJK(i,j,2,nx-1,NVAR)];
+            T   = unkout[3];//unk[IJK(i,j,3,nx-1,NVAR)];
             M = sqrt(var.v2) / var.a;
 
             fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",

@@ -26,7 +26,7 @@ private:
 
 public:
     double p{NAN},a{NAN}, h{NAN}, h0{NAN}, e0{NAN}, v2{NAN}, Cp[NSP]{}, Cv{}, mu{};
-
+    double e{NAN};
 
     State() = default;
 
@@ -42,11 +42,13 @@ public:
 
         v2 = unk[1]*unk[1] + unk[2]*unk[2];
         p = unk[0]*air.Rs[isp]*T;
+        p = fmax(p, 1.0);
         a = sqrt(air.gam*air.Rs[isp]*T);
         h =air.CalcEnthalpy(T);
         h0 = h + 0.5*v2;
         Cp[0] = air.CalcCp(T);
         Cv = Cp[0] - air.Rs[isp]; //total cv, not species.... not that it matters now
+        e = h - air.Rs[isp]*T;
         e0 = h - air.Rs[isp]*T + 0.5*v2;
 
         //Sutherland's law for viscosity

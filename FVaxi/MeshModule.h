@@ -6,6 +6,6 @@
 #define FVNS_MESHMODULE_H
 
 void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
-            double** geoel, double** geofa, double** yfa);
+            double** geoel, double** geofa, double** yfa, double** xfa);
 
 #endif //FVNS_MESHMODULE_H

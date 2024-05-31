@@ -8,7 +8,7 @@
 #include "Indexing.h"
 
 void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
-            double** geoel, double** geofa, double** yfa) {
+            double** geoel, double** geofa, double** yfa, double** xfa) {
     int nelem, nfac, npoin;
     nelem = (nx-1)*(ny-1);
     npoin = nx*ny;
@@ -16,6 +16,7 @@ void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
     (*geoel) = (double*)malloc(3*nelem*sizeof(double));
     (*geofa) = (double*)malloc(3*2*npoin*sizeof(double));
     (*yfa) = (double*)malloc(2*npoin*sizeof(double));
+    (*xfa) = (double*)malloc(2*npoin*sizeof(double));
 
     //Calculate mesh stats
     //element stats
@@ -46,7 +47,7 @@ void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
             double len, normx, normy;
 
             if (i<nx-1) {
-                //          Horizontal face 0,1,2
+                // Horizontal face 0,1,2
                 int iph = IJ(i+1,j,nx);
                 //length
                 len = sqrt(((x[iph] - x[ip0]) * (x[iph] - x[ip0])) + ((y[iph] - y[ip0]) * (y[iph] - y[ip0])));
@@ -60,6 +61,7 @@ void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
 
                 // Average y value / radius of face
                 (*yfa)[IJK(i,j,0,nx,2)] = 0.5 * (y[iph] + y[ip0]);
+                (*xfa)[IJK(i,j,0,nx,2)] = 0.5 * (x[iph] + x[ip0]);
             }
 
             if (j<ny-1) {
@@ -77,6 +79,7 @@ void calc_geoel_geofa(const int nx, const int ny, double* x, double* y, \
 
                 // Average y value / radius of face
                 (*yfa)[IJK(i,j,1,nx,2)] = 0.5 * (y[ipv] + y[ip0]);
+                (*xfa)[IJK(i,j,1,nx,2)] = 0.5 * (x[ipv] + x[ip0]);
             }
         }
     }

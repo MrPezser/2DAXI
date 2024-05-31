@@ -80,14 +80,18 @@ void viscous(int nx, double normy, double normx, double* uLeft, State& varL, dou
 }
 
 void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
-               double* geofa, double* yfa, double* unk, double* ux, double* uy, double* dudt) {
+               double* geofa, double* yfa, double* xfa, double* unk, double* ux, double* uy, double* dudt, double* duxdt, double* duydt) {
     int nelem = (nx-1)*(ny-1);
-    double *rhsel, parr;
+    double *rhsel, *rhselx, *rhsely, parr;
     double unkelij[NVAR];
     State varij = State();
-    rhsel = (double*)malloc(NVAR*nelem*sizeof(double));
+    rhsel  = (double*)malloc(NVAR*nelem*sizeof(double));
+    rhselx = (double*)malloc(NVAR*nelem*sizeof(double));
+    rhsely = (double*)malloc(NVAR*nelem*sizeof(double));
     for(int i=0; i<NVAR*nelem; i++) {
-        rhsel[i] = 0.0;
+        rhsel[i]  = 0.0;
+        rhselx[i] = 0.0;
+        rhsely[i] = 0.0;
     }
 
     //Calculate boundary cell state (ghost state)
@@ -225,15 +229,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             int ieR = IJ(i,   j, nx-1);
 
             //DG extension (xsi flux on vertical face)
-            double xsi, eta;
-            xsi = 1.0;
-            eta = 0.0;
-            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+            double xsiL, etaL, xsiR, etaR;
+            xsiL = 1.0;
+            etaL = 0.0;
+            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
             varL.Initialize(uLeft);
             varL.UpdateState(air);
-            xsi = -1.0;
-            eta = 0.0;
-            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+            xsiR = -1.0;
+            etaR = 0.0;
+            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
             varR.Initialize(uRight);
             varR.UpdateState(air);
 
@@ -255,6 +259,30 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+1] += fflux[1];
             rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
+
+
+
+            if (ACCUR == 1){
+                rhselx[iuL  ] -= (fflux[0]) * xsiL;
+                rhselx[iuL+1] -= (fflux[1]) * xsiL;
+                rhselx[iuL+2] -= (fflux[2] + (ycL*parr)) * xsiL;
+                rhselx[iuL+3] -= (fflux[3]) * xsiL;
+
+                rhselx[iuR  ] += (fflux[0]) * xsiR;
+                rhselx[iuR+1] += (fflux[1]) * xsiR;
+                rhselx[iuR+2] += (fflux[2] + (ycR*parr)) * xsiR;
+                rhselx[iuR+3] += (fflux[3]) * xsiR;
+
+                //rhsely[iuL  ] -= (fflux[0]) * etaL;
+                //rhsely[iuL+1] -= (fflux[1]) * etaL;
+                //rhsely[iuL+2] -= (fflux[2] + (ycL*parr)) * etaL;
+                //rhsely[iuL+3] -= (fflux[3]) * etaL;
+
+                //rhsely[iuR  ] += (fflux[0]) * etaR;
+                //rhsely[iuR+1] += (fflux[1]) * etaR;
+                //rhsely[iuR+2] += (fflux[2] + (ycR*parr)) * etaR;
+                //rhsely[iuR+3] += (fflux[3]) * etaR;
+            }
 
             ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
@@ -298,15 +326,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             int ieR = IJ(i, j-1, nx-1);
 
             //DG extension (eta flux on 'horizontal' face)
-            double xsi, eta;
-            xsi =  0.0;
-            eta = -1.0;
-            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+            double xsiL, etaL, xsiR, etaR;
+            xsiL =  0.0;
+            etaL = -1.0;
+            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
             varL.Initialize(uLeft);
             varL.UpdateState(air);
-            xsi = 0.0;
-            eta = 1.0;
-            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+            xsiR = 0.0;
+            etaR = 1.0;
+            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
             varR.Initialize(uRight);
             varR.UpdateState(air);
 
@@ -328,6 +356,28 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             rhsel[iuR+1] += fflux[1];
             rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
             rhsel[iuR+3] += fflux[3];
+
+            if (ACCUR == 1){
+                //rhselx[iuL  ] -= (fflux[0]) * xsiL;
+                //rhselx[iuL+1] -= (fflux[1]) * xsiL;
+                //rhselx[iuL+2] -= (fflux[2] + (ycL*parr)) * xsiL;
+                //rhselx[iuL+3] -= (fflux[3]) * xsiL;
+
+                //rhselx[iuR  ] += (fflux[0]) * xsiR;
+                //rhselx[iuR+1] += (fflux[1]) * xsiR;
+                //rhselx[iuR+2] += (fflux[2] + (ycR*parr)) * xsiR;
+                //rhselx[iuR+3] += (fflux[3]) * xsiR;
+
+                rhsely[iuL  ] -= (fflux[0]) * etaL;
+                rhsely[iuL+1] -= (fflux[1]) * etaL;
+                rhsely[iuL+2] -= (fflux[2] + (ycL*parr)) * etaL;
+                rhsely[iuL+3] -= (fflux[3]) * etaL;
+
+                rhsely[iuR  ] += (fflux[0]) * etaR;
+                rhsely[iuR+1] += (fflux[1]) * etaR;
+                rhsely[iuR+2] += (fflux[2] + (ycR*parr)) * etaR;
+                rhsely[iuR+3] += (fflux[3]) * etaR;
+            }
 
             ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
@@ -377,15 +427,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         int ieR = IJ(0, j, nx-1);
 
         //DG extension (xsi flux on vertical face)
-        double xsi, eta;
+        double xsiR, etaR;
         //xsi = 1.0;
         //eta = 0.0;
         //get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
         //varL.Initialize(uLeft);
         //varL.UpdateState(air);
-        xsi = -1.0;
-        eta = 0.0;
-        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        xsiR = -1.0;
+        etaR = 0.0;
+        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
         varR.Initialize(uRight);
         varR.UpdateState(air);
 
@@ -401,6 +451,19 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+1] += fflux[1];
         rhsel[iuR+2] += (fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
+
+        if (ACCUR == 1){
+
+            rhselx[iuR  ] += (fflux[0]) * xsiR;
+            rhselx[iuR+1] += (fflux[1]) * xsiR;
+            rhselx[iuR+2] += (fflux[2] + (ycR*parr)) * xsiR;
+            rhselx[iuR+3] += (fflux[3]) * xsiR;
+
+            //rhsely[iuR  ] += (fflux[0]) * etaR;
+            //rhsely[iuR+1] += (fflux[1]) * etaR;
+            //rhsely[iuR+2] += (fflux[2] + (ycR*parr)) * etaR;
+            //rhsely[iuR+3] += (fflux[3]) * etaR;
+        }
 
         /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -431,9 +494,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         ieR = j;
 
         //DG extension (xsi flux on vertical face)
-        xsi = 1.0;
-        eta = 0.0;
-        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        double xsiL, etaL;
+        xsiL = 1.0;
+        etaL = 0.0;
+        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
         varL.Initialize(uLeft);
         varL.UpdateState(air);
         //xsi = -1.0;
@@ -453,6 +517,18 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL+1] -= fflux[1];
         rhsel[iuL+2] -= (fflux[2] + (ycL*parr));
         rhsel[iuL+3] -= fflux[3];
+
+        if (ACCUR == 1){
+            rhselx[iuL  ] -= (fflux[0]) * xsiL;
+            rhselx[iuL+1] -= (fflux[1]) * xsiL;
+            rhselx[iuL+2] -= (fflux[2] + (ycL*parr)) * xsiL;
+            rhselx[iuL+3] -= (fflux[3]) * xsiL;
+
+            //rhsely[iuL  ] -= (fflux[0]) * etaL;
+            //rhsely[iuL+1] -= (fflux[1]) * etaL;
+            //rhsely[iuL+2] -= (fflux[2] + (ycL*parr)) * etaL;
+            //rhsely[iuL+3] -= (fflux[3]) * etaL;
+        }
 
         /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -486,10 +562,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         //State varR = BotVar[ieR];
 
         //DG extension (eta flux on 'horizontal' face)
-        double xsi, eta;
-        xsi =  0.0;
-        eta = -1.0;
-        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
+        double xsiL, etaL;
+        xsiL =  0.0;
+        etaL = -1.0;
+        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
         varL.Initialize(uLeft);
         varL.UpdateState(air);
         //xsi = 0.0;
@@ -510,6 +586,18 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuL + 1] -= fflux[1];
         rhsel[iuL + 2] -=(fflux[2] + ycL*parr);
         rhsel[iuL + 3] -= fflux[3];
+
+        if (ACCUR == 1){
+            //rhselx[iuL  ] -= (fflux[0]) * xsiL;
+            //rhselx[iuL+1] -= (fflux[1]) * xsiL;
+            //rhselx[iuL+2] -= (fflux[2] + (ycL*parr)) * xsiL;
+            //rhselx[iuL+3] -= (fflux[3]) * xsiL;
+
+            rhsely[iuL  ] -= (fflux[0]) * etaL;
+            rhsely[iuL+1] -= (fflux[1]) * etaL;
+            rhsely[iuL+2] -= (fflux[2] + (ycL*parr)) * etaL;
+            rhsely[iuL+3] -= (fflux[3]) * etaL;
+        }
 
         /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -548,9 +636,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         //get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsi, eta, uLeft);
         //varL.Initialize(uLeft);
         //varL.UpdateState(air);
-        xsi = 0.0;
-        eta = 1.0;
-        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsi, eta, uRight);
+        double xsiR, etaR;
+        xsiR = 0.0;
+        etaR = 1.0;
+        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
         varR.Initialize(uRight);
         varR.UpdateState(air);
 
@@ -565,6 +654,18 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         rhsel[iuR+1] += fflux[1];
         rhsel[iuR+2] +=(fflux[2] + (ycR*parr));
         rhsel[iuR+3] += fflux[3];
+
+        if (ACCUR == 1){
+            //rhselx[iuR  ] += (fflux[0]) * xsiR;
+            //rhselx[iuR+1] += (fflux[1]) * xsiR;
+            //rhselx[iuR+2] += (fflux[2] + (ycR*parr)) * xsiR;
+            //rhselx[iuR+3] += (fflux[3]) * xsiR;
+
+            rhsely[iuR  ] += (fflux[0]) * etaR;
+            rhsely[iuR+1] += (fflux[1]) * etaR;
+            rhsely[iuR+2] += (fflux[2] + (ycR*parr)) * etaR;
+            rhsely[iuR+3] += (fflux[3]) * etaR;
+        }
 
         /*
         // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -593,7 +694,19 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             dudt[iu+2] = rhsel[iu+2] / vol;
             dudt[iu+3] = rhsel[iu+3] / vol;
 
-            if (_isnan(dudt[iu])) {
+            if (ACCUR==1) {
+                duxdt[iu]     = 3.0 * rhselx[iu]     / vol;
+                duxdt[iu + 1] = 3.0 * rhselx[iu + 1] / vol;
+                duxdt[iu + 2] = 3.0 * rhselx[iu + 2] / vol;
+                duxdt[iu + 3] = 3.0 * rhselx[iu + 3] / vol;
+
+                duydt[iu]     = 3.0 * rhsely[iu]     / vol;
+                duydt[iu + 1] = 3.0 * rhsely[iu + 1] / vol;
+                duydt[iu + 2] = 3.0 * rhsely[iu + 2] / vol;
+                duydt[iu + 3] = 3.0 * rhsely[iu + 3] / vol;
+            }
+
+            if (_isnan(dudt[iu]) or _isnan(dudt[iu+1]) or _isnan(dudt[iu+2]) or _isnan(dudt[iu+3])) {
                 printf("dug\n");
             }
 
@@ -601,5 +714,10 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
 
         }
     }
+    /// SINCE M IS DIAGONAL MATRIX, THE BELOW ALREADY INCLUDES THE MULTIPLE 3/VOL FROM ITS INVERSION
+    DGP1_volume_integral(nx, ny, 1.0, xfa, yfa, geoel, unk, ElemVar, duxdt, duydt);
+
     free(rhsel);
+    free(rhselx);
+    free(rhsely);
 }

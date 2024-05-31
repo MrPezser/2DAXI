@@ -66,7 +66,7 @@ int main() {
     int mxiter;
     tol = 1e-7;//1e-6;
     mxiter = 1e6; //maximum number of iteration before stopping
-    CFL = 0.9;
+    CFL = 0.3;
     u0 = 1532.9;
     T0 = 1188.333;
     rho0 = 0.04455;
@@ -84,6 +84,7 @@ int main() {
     double* geoel;
     double* geofa;
     double* yfa;
+    double* xfa;
 
     //read in mesh file
     printf("Reading Mesh File..... \n");
@@ -95,15 +96,20 @@ int main() {
 
     //Find elem volume and centroid, face len and normals
     printf("Calculating Grid Metrics..... \n");
-    calc_geoel_geofa(nx, ny, x, y, &geoel, &geofa, &yfa);
+    calc_geoel_geofa(nx, ny, x, y, &geoel, &geofa, &yfa, &xfa);
 
     printf("==================== Initializing ====================\n");
     //==================== Setup for Sim ====================
     auto* unk  = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* res  = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* dv   = (double*)malloc(NVAR*nelem*sizeof(double));
+
     auto* ux   = (double*)malloc(NVAR*nelem*sizeof(double));    //xi  derivative
     auto* uy   = (double*)malloc(NVAR*nelem*sizeof(double));    //eta derivative
-    auto* res  = (double*)malloc(NVAR*nelem * sizeof(double));
-    auto* dv   = (double*)malloc(NVAR*nelem * sizeof(double));
+    auto* resx = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* resy = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* dvx  = (double*)malloc(NVAR*nelem*sizeof(double));
+    auto* dvy  = (double*)malloc(NVAR*nelem*sizeof(double));
 
     //initialize solution on mesh (zero aoa)
     double uFS[4], uBP[4];
@@ -136,7 +142,11 @@ int main() {
 
     printf("===== Generating Mesh and Initial State Tecplot Files ====\n");
     print_elem_stats("MeshVolumeStats", nx, ny, geoel);
-    print_state("Initial State", nx, ny, air, x, y, unk, geoel);
+    if (ACCUR==1){
+        print_state_DGP1("Initial State", nx, ny, air, x, y, unk, ux, uy, geoel);
+    } else {
+        print_state("Initial State", nx, ny, air, x, y, unk, geoel);
+    }
 
     //Find timestep based off of CFL limit for initial condition (dt = CFL dx / c )
     double dt;
@@ -148,10 +158,10 @@ int main() {
             int ie = IJ(i,j,nx-1);
             double* unkel = &(unk[IJK(i,j,0,nx-1,NVAR)]);
 
-            unkel[0] = uFS[0];
-            unkel[1] = uFS[1];
-            unkel[2] = uFS[2];
-            unkel[3] = uFS[3];
+            //unkel[0] = uFS[0];
+            //unkel[1] = uFS[1];
+            //unkel[2] = uFS[2];
+            //unkel[3] = uFS[3];
 
             ElemVar[ie].Initialize(unkel);
             ElemVar[ie].UpdateState(air);
@@ -175,7 +185,7 @@ int main() {
 
 
     double res0[NVAR]{};
-    double ressum[NVAR], restotal;
+    double ressum[NVAR], ressumx[NVAR], ressumy[NVAR], restotal;
     int iter;
     for (iter=0; iter<mxiter; iter++){
         //Explicit Euler Time Integration
@@ -184,8 +194,10 @@ int main() {
         dt = find_dt(air, nx, ny, CFL, unk, ElemVar[0], geofa);
 
         //calculate the right hand side residual term (change of conserved quantities)
-        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, yfa, unk, ux, uy, res);
+        calc_dudt(nx, ny, air, ElemVar, uFS, ibound, geoel, geofa, yfa, xfa, unk, ux, uy, res, resx, resy);
         calculate_residual(nx, ny, res, ressum);
+        calculate_residual(nx, ny, resx, ressumx);
+        calculate_residual(nx, ny, resy, ressumy);
 
         //========== Solve linear system on each element (turns chg in conservatives to change in solution variables)
         int flg = 0;
@@ -197,18 +209,35 @@ int main() {
                 int N = NVAR;
                 int P[NVAR+1]{}; //permutation vector for pivoting
 
-                //Evaluate the jacobian / Implicit matrix
-                BuildJacobian(dt, unkij, ElemVar[iel], D);
-
                 //get the rhs block needed
                 double *b = &(res[IJK(i, j, 0, nx - 1, NVAR)]);
                 double *xLU = &(dv[ IJK(i, j, 0, nx - 1, NVAR)]);
+
+                //Evaluate the jacobian / Implicit matrix
+                BuildJacobian(dt, unkij, ElemVar[iel], D);
                 LUPDecompose(D, N, LUtol, P);
                 LUPSolve(D, P, b, N, xLU);
+
                 //axi modification
                 double ycc = geoel[IJK(i,j,2,nx-1, 3)];
                 for (int k=0; k<NVAR; k++){
-                    xLU[k] *= (1.0/ycc);
+                    xLU[k]  *= (1.0/ycc);
+                }
+
+                if (ACCUR == 1) {
+                    ////  CURRENTLY USING THE CELL CENTERED JACOBIAN VALUE FOR THE 1ST ORDER MODES
+                    double *bx = &(resx[IJK(i, j, 0, nx - 1, NVAR)]);
+                    double *by = &(resy[IJK(i, j, 0, nx - 1, NVAR)]);
+                    double *xLUx = &(dvx[IJK(i, j, 0, nx - 1, NVAR)]);
+                    double *xLUy = &(dvy[IJK(i, j, 0, nx - 1, NVAR)]);
+                    LUPSolve(D, P, bx, N, xLUx);
+                    LUPSolve(D, P, by, N, xLUy);
+
+                    //axi modification
+                    for (int k = 0; k < NVAR; k++) {
+                        xLUx[k] *= (1.0 / ycc);
+                        xLUy[k] *= (1.0 / ycc);
+                    }
                 }
             }
         }
@@ -222,9 +251,63 @@ int main() {
 
             //unk[iu+3] = fmax(unk[iu+3], 201.0); //limit temperature
             ElemVar[ielem].UpdateState(air);
+
+            if (ACCUR ==1) {
+                double damp = 1.0/3.0;
+                ux[iu  ] += damp * dvx[iu  ];
+                ux[iu+1] += damp * dvx[iu + 1];
+                ux[iu+2] += damp * dvx[iu + 2];
+                ux[iu+3] += damp * dvx[iu + 3];
+
+                uy[iu  ] += damp * dvy[iu  ];
+                uy[iu+1] += damp * dvy[iu + 1];
+                uy[iu+2] += damp * dvy[iu + 2];
+                uy[iu+3] += damp * dvy[iu + 3];
+
+                //Slope limiting
+                int iuim, iuip, iujm, iujp;
+                iuim = iu - IJK(1,0,0,nx-1,NVAR);
+                iuip = iu + IJK(1,0,0,nx-1,NVAR);
+                iujm = iu - IJK(0,1,0,nx-1,NVAR);
+                iujp = iu + IJK(0,1,0,nx-1,NVAR);
+                for (int kvar=0;kvar<NVAR;kvar++){
+                    double du=0.0;
+                    int nu = nelem*NVAR;
+                    if (iuip < nu-1  and iuim >= 0.0) {
+                       du = ((unk[iuip + kvar] - unk[iuim + kvar]) / 2.0);
+                       ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
+                    } else if (iuim < 0.0) {
+                        //bottom boundary
+                        du = ((unk[iuip + kvar] - unk[iu + kvar]) / 1.0);
+                        ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
+                    } else {
+                        //top boundary
+                        du = ((unk[iu + kvar] - unk[iuim + kvar]) / 1.0);
+                        ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
+                    }
+
+                    if (iujp <= nu-1 and iujm >= 0) {
+                        du = ((unk[iujp + kvar] - unk[iujm + kvar]) / 2.0);
+                        uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
+                    } else if (iujm < 0.0) {
+                        //bottom boundary
+                        du = ((unk[iujp + kvar] - unk[iu + kvar]) / 1.0);
+                        uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
+                    } else {
+                        //top boundary
+                        du = ((unk[iu + kvar] - unk[iujm + kvar]) / 1.0);
+                        uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
+                    }
+                }
+
+            }
         }
 
-
+        if (ACCUR ==1){
+            for (int i=0; i<NVAR; i++) {
+                ressum[i] += ressumx[i] + ressumy[i];
+            }
+        }
 
         if (iter==0) {
             for (int i=0; i<NVAR; i++){
@@ -244,9 +327,13 @@ int main() {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
         }
-        if (iter > 0 and iter%1000 == 0){
+        if (iter > 0 and iter%100 == 0){
             //printf("Saving current Solution\n");
-            print_state("Final State", nx, ny, air, x, y, unk, geoel);
+            if (ACCUR==1){
+                print_state_DGP1("Final State", nx, ny, air, x, y, unk, ux, uy, geoel);
+            } else {
+                print_state("Final State", nx, ny, air, x, y, unk, geoel);
+            }
         }
         if (restotal < tol) break;
     }
@@ -260,6 +347,11 @@ int main() {
     printf("Complete.");
 
     free(ElemVar);
+    free(unk);
+    free(ux);
+    free(uy);
     free(res);
+    free(resx);
+    free(resy);
     free(dv);
 }
