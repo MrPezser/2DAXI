@@ -127,47 +127,47 @@ void print_state_DGP1(const char *title, int nx, int ny, Thermo& air, double* x,
             upm = &(unk[iupm]);
             if (i==0 and j==0){
                 //BL corner
-                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unkout);
+                get_u_val_standardrecon(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unkout);
             } else if (i==0 and j==ny-1) {
                 //TL corner
-                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unkout);
+                get_u_val_standardrecon(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unkout);
             } else if (i==nx-1 and j==0) {
                 //BR corner
-                get_u_val(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unkout);
+                get_u_val_standardrecon(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unkout);
             } else if (i==nx-1 and j==ny-1){
                 //TR corner
-                get_u_val(umm, &(ux[iumm]), &(uy[iumm]), 1.0, 1.0, unkout);
+                get_u_val_standardrecon(umm, &(ux[iumm]), &(uy[iumm]), 1.0, 1.0, unkout);
             } else if (j==0){
                 //bottom boundary
                 double unk1[4], unk2[4];
-                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
-                get_u_val(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk2);
+                get_u_val_standardrecon(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val_standardrecon(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk2);
                 for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
             } else if (j==ny-1){
                 //top boundary
                 double unk1[4], unk2[4];
-                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unk1);
-                get_u_val(umm, &(ux[iumm]), &(uy[iumm]),  1.0, 1.0, unk2);
+                get_u_val_standardrecon(upm, &(ux[iupm]), &(uy[iupm]), -1.0, 1.0, unk1);
+                get_u_val_standardrecon(umm, &(ux[iumm]), &(uy[iumm]),  1.0, 1.0, unk2);
                 for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
             } else if (i==0){
                 //left boundary
                 double unk1[4], unk2[4];
-                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
-                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
+                get_u_val_standardrecon(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val_standardrecon(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
                 for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
             } else if (i==nx-1){
                 //right boundary
                 double unk1[4], unk2[4];
-                get_u_val(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unk1);
-                get_u_val(umm, &(ux[iumm]), &(uy[iumm]), 1.0,  1.0, unk2);
+                get_u_val_standardrecon(ump, &(ux[iump]), &(uy[iump]), 1.0, -1.0, unk1);
+                get_u_val_standardrecon(umm, &(ux[iumm]), &(uy[iumm]), 1.0,  1.0, unk2);
                 for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.5*(unk1[kvar] + unk2[kvar]);
             } else {
                 //internal
                 double unk1[4], unk2[4], unk3[4], unk4[4];
-                get_u_val(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
-                get_u_val(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
-                get_u_val(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk3);
-                get_u_val(umm, &(ux[iumm]), &(uy[iumm]),  1.0,  1.0, unk4);
+                get_u_val_standardrecon(upp, &(ux[iupp]), &(uy[iupp]), -1.0, -1.0, unk1);
+                get_u_val_standardrecon(upm, &(ux[iupm]), &(uy[iupm]), -1.0,  1.0, unk2);
+                get_u_val_standardrecon(ump, &(ux[iump]), &(uy[iump]),  1.0, -1.0, unk3);
+                get_u_val_standardrecon(umm, &(ux[iumm]), &(uy[iumm]),  1.0,  1.0, unk4);
                 for (int kvar=0;kvar<NVAR;kvar++) unkout[kvar] = 0.25*(unk1[kvar] + unk2[kvar] + unk3[kvar] + unk4[kvar]);
             }
 

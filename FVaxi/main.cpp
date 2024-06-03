@@ -249,11 +249,13 @@ int main() {
             unk[iu+2] += dv[iu + 2];
             unk[iu+3] += dv[iu + 3];
 
+            ASSERT(unk[iu] > 0.0, "Nonpositive density")
+
             //unk[iu+3] = fmax(unk[iu+3], 201.0); //limit temperature
             ElemVar[ielem].UpdateState(air);
 
             if (ACCUR ==1) {
-                double damp = 1.0/3.0;
+                double damp = 1.0;///3.0;
                 ux[iu  ] += damp * dvx[iu  ];
                 ux[iu+1] += damp * dvx[iu + 1];
                 ux[iu+2] += damp * dvx[iu + 2];
@@ -323,11 +325,13 @@ int main() {
 
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
-        if (iter%100 == 0) {
+        int printiter = 100;
+        int saveiter = 100;
+        if (iter%printiter == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
         }
-        if (iter > 0 and iter%100 == 0){
+        if (iter > 0 and iter%saveiter == 0){
             //printf("Saving current Solution\n");
             if (ACCUR==1){
                 print_state_DGP1("Final State", nx, ny, air, x, y, unk, ux, uy, geoel);

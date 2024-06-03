@@ -109,7 +109,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsi, eta;
         xsi = 0.0;
         eta = -1.0;
-        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
         varij.Initialize(unkelij);
         varij.UpdateState(air);
 
@@ -135,7 +135,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsi, eta;
         xsi = 1.0;
         eta = 0.0;
-        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
         varij.Initialize(unkelij);
         varij.UpdateState(air);
 
@@ -163,7 +163,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsi, eta;
         xsi = 0.0;
         eta = 1.0;
-        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
         varij.Initialize(unkelij);
         varij.UpdateState(air);
 
@@ -191,7 +191,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsi, eta;
         xsi = -1.0;
         eta =  0.0;
-        get_u_val(&(unk[iint]), &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
         varij.Initialize(unkelij);
         varij.UpdateState(air);
 
@@ -215,29 +215,36 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         for (int j=0; j<ny-1; j++){
             // ~~~~~~~~~~ Inviscid fluxes ~~~~~~~~~~
             //face above point i,j
-            double len, normx, normy, fflux[NVAR], yface, uLeft[NVAR], uRight[NVAR];
+            double len, fNormal[2], fflux[NVAR], rFace, uLeft[NVAR], uRight[NVAR], yCenter[2];
             State varL = State();
             State varR = State();
             len = geofa[IJK(i,j,3,nx,6)];
-            normx = geofa[IJK(i,j,4,nx,6)];
-            normy = geofa[IJK(i,j,5,nx,6)];
-            yface = yfa[IJK(i,j,1,nx,2)];
+            fNormal[0] = geofa[IJK(i,j,4,nx,6)];
+            fNormal[1] = geofa[IJK(i,j,5,nx,6)];
+            rFace = yfa[IJK(i,j,1,nx,2)];
 
             int iuL = IJK(i-1,j,0,nx-1,NVAR);
             int iuR = IJK(i  ,j,0,nx-1,NVAR);
             int ieL = IJ(i-1, j, nx-1);
             int ieR = IJ(i,   j, nx-1);
 
+            yCenter[0] = geoel[IJK(i-1, j, 2, nx-1, 3)];
+            yCenter[1] = geoel[IJK(i,   j, 2, nx-1, 3)];
+
+            DGP1_xsi_face_integral(ieL, ieR, iuL, iuR, unk, ElemVar, ux, uy, yCenter, air,
+                                   rFace, fNormal, len, rhsel, rhselx, rhsely);
+
+            /*
             //DG extension (xsi flux on vertical face)
             double xsiL, etaL, xsiR, etaR;
             xsiL = 1.0;
             etaL = 0.0;
-            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
+            get_u_val(&(unk[iuL]), ElemVar[ieL], air, &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
             varL.Initialize(uLeft);
             varL.UpdateState(air);
             xsiR = -1.0;
             etaR = 0.0;
-            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
+            get_u_val(&(unk[iuR]), ElemVar[ieR], air, &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
             varR.Initialize(uRight);
             varR.UpdateState(air);
 
@@ -285,7 +292,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             }
 
             ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
-
+            */
             /*
             // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
             double vflux[6], dc[2];
@@ -312,34 +319,44 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     for (int i=0; i<nx-1; i++){
         for (int j=1; j<ny-1; j++){
             //faces to the left/above point i,j
-            double len, normx, normy, fflux[NVAR], yface, uLeft[NVAR], uRight[NVAR];
+            double len, fNormal[2], fflux[NVAR], rFace, uLeft[NVAR], uRight[NVAR], yCenter[2];
             State varL = State();
             State varR = State();
             len = geofa[IJK(i,j,0,nx,6)];
-            normx = geofa[IJK(i,j,1,nx,6)];
-            normy = geofa[IJK(i,j,2,nx,6)];
-            yface = yfa[IJK(i,j,0,nx,2)];
+            fNormal[0] = geofa[IJK(i,j,1,nx,6)];
+            fNormal[1] = geofa[IJK(i,j,2,nx,6)];
+            rFace = yfa[IJK(i,j,0,nx,2)];
 
             int iuL = IJK(i,j  ,0,nx-1,NVAR);
             int iuR = IJK(i,j-1,0,nx-1,NVAR);
             int ieL = IJ(i, j  , nx-1);
             int ieR = IJ(i, j-1, nx-1);
 
+            yCenter[0] = geoel[IJK(i, j,   2, nx-1, 3)];
+            yCenter[1] = geoel[IJK(i, j-1, 2, nx-1, 3)];
+
+            DGP1_eta_face_integral(ieL, ieR, iuL, iuR, unk, ElemVar, ux, uy, yCenter, air,
+                                   rFace, fNormal, len, rhsel, rhselx, rhsely);
+
+            /*
             //DG extension (eta flux on 'horizontal' face)
             double xsiL, etaL, xsiR, etaR;
             xsiL =  0.0;
             etaL = -1.0;
-            get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
+            get_u_val(&(unk[iuL]), ElemVar[ieL], air, &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
             varL.Initialize(uLeft);
             varL.UpdateState(air);
             xsiR = 0.0;
             etaR = 1.0;
-            get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
+            get_u_val(&(unk[iuR]), ElemVar[ieR], air, &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
             varR.Initialize(uRight);
             varR.UpdateState(air);
 
             //Find interface flux
             //ASSERT(varR.a*varL.a > 0.0, "nonpositive wave speed")
+            double normx = fNormal[0];
+            double normy = fNormal[1];
+            double yface = rFace;
             LDFSS(normx, normy, len, yface, uLeft, varL, uRight, varR, fflux, &parr);
 
             //Add pressure term in
@@ -380,7 +397,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             }
 
             ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
-
+            */
 
             /*
             // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
@@ -435,7 +452,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         //varL.UpdateState(air);
         xsiR = -1.0;
         etaR = 0.0;
-        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
+        get_u_val(&(unk[iuR]), ElemVar[ieR], air, &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
         varR.Initialize(uRight);
         varR.UpdateState(air);
 
@@ -497,7 +514,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsiL, etaL;
         xsiL = 1.0;
         etaL = 0.0;
-        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
+        get_u_val(&(unk[iuL]), ElemVar[ieL], air, &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
         varL.Initialize(uLeft);
         varL.UpdateState(air);
         //xsi = -1.0;
@@ -565,7 +582,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsiL, etaL;
         xsiL =  0.0;
         etaL = -1.0;
-        get_u_val(&(unk[iuL]), &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
+        get_u_val(&(unk[iuL]), ElemVar[ieL], air, &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLeft);
         varL.Initialize(uLeft);
         varL.UpdateState(air);
         //xsi = 0.0;
@@ -639,7 +656,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double xsiR, etaR;
         xsiR = 0.0;
         etaR = 1.0;
-        get_u_val(&(unk[iuR]), &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
+        get_u_val(&(unk[iuR]), ElemVar[ieR], air, &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRight);
         varR.Initialize(uRight);
         varR.UpdateState(air);
 

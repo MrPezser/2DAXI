@@ -38,7 +38,7 @@ void LUPDecompose(double **A, int N, double Tol, int *P) {
             }
 
         if (maxA < Tol) {
-            printf("LU Decomp Failed\n");
+            printf("LU Decomp Failed, Row: %d, Diagonal: %f\n", i, A[i][i]);
             exit(0);
             //return imax; //failure, matrix is degenerate
         }

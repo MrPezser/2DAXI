@@ -2,7 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "FVns"
+			"path" : "FVns.exe"
+		},
+		{
+			"path" : "FVns.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -38,7 +41,7 @@
 					"fragment" : "-g -fdiagnostics-color=always"
 				},
 				{
-					"fragment" : "-std=gnu++17"
+					"fragment" : "-std=gnu++1z"
 				}
 			],
 			"language" : "CXX",
@@ -79,12 +82,16 @@
 			{
 				"fragment" : "",
 				"role" : "flags"
+			},
+			{
+				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
+				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
 	"name" : "FVns",
-	"nameOnDisk" : "FVns",
+	"nameOnDisk" : "FVns.exe",
 	"paths" : 
 	{
 		"build" : ".",
