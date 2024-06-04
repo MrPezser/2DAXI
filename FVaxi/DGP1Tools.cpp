@@ -304,47 +304,65 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     State varIn = State();
     State varEx = EVExt[ieEx];
     varIn.Initialize(uInFace);
-    varEx.Initialize(uExFace);
-    varEx.UpdateState(air);
+    //varEx.Initialize(uExFace);
+    //varEx.UpdateState(air);
 
     //Cell centers used for adding in pressure term
     double ycIn = yCenter;
 
     //Stuff for the type of face
-    double sideMult; //multiplier to correct for is the face is a right face or a left face according to convention.
+    double sideMult{0.0}; //multiplier to correct for is the face is a right face or a left face according to convention.
     switch (iFaceType) {
-        case 1 : //horizontal face - bottom boundary
+        case 1 : {//horizontal face - bottom boundary
             sideMult = -1.0;
-        case 2 : //vertical face - right boundary
+            break;
+        }
+        case 2 : {//vertical face - right boundary
             sideMult = -1.0;
-        case 3 : //horizontal face - top boundary
+            break;
+        }
+        case 3 : {//horizontal face - top boundary
             sideMult = 1.0;
-        case 4 : //vertical face - left boundary
+            break;
+        }
+        case 4 : {//vertical face - left boundary
             sideMult = 1.0;
-        default:
-            printf("No Boundary Face Type Specified\n");
+            break;
+        }
+        default: {
+            ASSERT(fabs(sideMult) > 0.0, "Invalid Face Type")
+        }
     }
 
     //DG extension (xsi flux on vertical face)
     double weight = 0.5;
-    double xsi, eta;
+    double xsi{}, eta{};
 
     //1st point
     switch (iFaceType) {
-        case 1 : //horizontal face - bottom boundary
+        case 1 : {//horizontal face - bottom boundary
             xsi = 1.0 / sqrt(3.0);
             eta = -1.0;
-        case 2 : //vertical face - right boundary
+            break;
+        }
+        case 2 : {//vertical face - right boundary
             xsi = 1.0;
             eta = 1.0 / sqrt(3.0);
-        case 3 : //horizontal face - top boundary
+            break;
+        }
+        case 3 : {//horizontal face - top boundary
             xsi = 1.0 / sqrt(3.0);
             eta = 1.0;
-        case 4 : //vertical face - left boundary
+            break;
+        }
+        case 4 : {//vertical face - left boundary
             xsi = -1.0;
             eta = 1.0 / sqrt(3.0);
-        default:
-            printf("No Boundary Face Type Specified\n");
+            break;
+        }
+        default: {
+            ASSERT(iFaceType >= 1 and iFaceType <= 4, "Invalid Face Type")
+        }
     }
 
     //Get the interior values at the quadrature point
@@ -370,21 +388,38 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
     //2nd point
+    ieEx += IJ(1,0,2);
+    iuEx += IJK(1,0,0,2,NVAR);
+
+    uExFace = &(unkExt[iuEx]);
+    varEx = EVExt[ieEx];
+    //varEx.Initialize(uExFace);
+    //varEx.UpdateState(air);
+
     switch (iFaceType) {
-        case 1 : //horizontal face - bottom boundary
+        case 1 : {//horizontal face - bottom boundary
             xsi = -1.0 / sqrt(3.0);
             eta = -1.0;
-        case 2 : //vertical face - right boundary
+            break;
+        }
+        case 2 : {//vertical face - right boundary
             xsi = 1.0;
             eta = -1.0 / sqrt(3.0);
-        case 3 : //horizontal face - top boundary
+            break;
+        }
+        case 3 : {//horizontal face - top boundary
             xsi = -1.0 / sqrt(3.0);
             eta = 1.0;
-        case 4 : //vertical face - left boundary
+            break;
+        }
+        case 4 : { //vertical face - left boundary
             xsi = -1.0;
             eta = -1.0 / sqrt(3.0);
-        default:
-            printf("No Boundary Face Type Specified\n");
+            break;
+        }
+        default: {
+            ASSERT(iFaceType >= 1 and iFaceType <= 4, "Invalid Face Type")
+        }
     }
 
     //Get the interior values at the quadrature point
@@ -411,20 +446,21 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
 }
 
-/*
-case 1 : //horizontal face - bottom boundary
-xsi = 1.0 / sqrt(3.0);
-eta = -1.0;
-case 2 : //vertical face - right boundary
-xsi = 1.0;
-eta = 1.0 / sqrt(3.0);
-case 3 : //horizontal face - top boundary
-xsi = 1.0 / sqrt(3.0);
-eta = 1.0;
-case 4 : //vertical face - left boundary
-xsi = -1.0;
-eta = 1.0 / sqrt(3.0);
-*/
+void get_boundary_point(int btype, double normx, double normy, double* uFS, double* unkiint, State EViel, Thermo air,
+                        double* uxiint, double* uyiint, double xsi, double eta, State& ElemVarieex, double* uGiuex){
+    double unkelij[NVAR];
+    State varij = State();
+
+    get_u_val(unkiint, EViel, air, uxiint, uyiint, xsi, eta, unkelij);
+    varij.Initialize(unkelij);
+    varij.UpdateState(air);
+    //==========Ghost State
+    boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
+                   uGiuex);
+    ElemVarieex.Initialize(uGiuex);
+    ElemVarieex.UpdateState(air);
+}
+
 void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* uy, State* ElemVar, Thermo air, int* ibound,
                                double* geofa, double* uFS, double* uGBot, double* uGTop, double* uGLeft, double* uGRight,
                                State* BotVar, State* TopVar, State* LeftVar, State* RightVar){
@@ -436,39 +472,31 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         // left state = interior, right state = ghost
         int btype;
         btype = ibound[i];
-        int iint = IJK(i,0,0, nx-1, 4);
+        int iint = IJK(i,0,0, nx-1, NVAR);
         int iel = IJ(i, 0, nx-1);
+        int iuEx = IJK(0,i,0,2,NVAR);
+        int ieEx = IJ(0,i,2);
+
+        //==========Face Normal
+        double normx, normy;
+        normx = geofa[IJK(i, 0, 1,nx,6)];
+        normy = geofa[IJK(i, 0, 2,nx,6)];
 
         //DG extension
         double xsi, eta;
         //point 1
         xsi = 1.0 / sqrt(3.0);
         eta = -1.0;
-        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
-        varij.Initialize(unkelij);
-        varij.UpdateState(air);
-
-        //==========Face Normal
-        double normx, normy;
-        normx = geofa[IJK(i, 0, 1,nx,6)];
-        normy = geofa[IJK(i, 0, 2,nx,6)];
-        //==========Ghost State
-        BotVar[2*i].Initialize(&(uGBot[2*IJ(0,i,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
-                       &(uGBot[2*IJ(0,i,NVAR)]));
-        BotVar[2*i].UpdateState(air);
-
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
         //point 2
+        iuEx = IJK(1,i,0,2,NVAR);
+        ieEx =  IJ(1,i,2);
+
         xsi = -1.0 / sqrt(3.0);
         eta = -1.0;
-        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
-        varij.Initialize(unkelij);
-        varij.UpdateState(air);
-        //==========Ghost State
-        BotVar[1+(2*i)].Initialize(&(uGBot[1+(2*IJ(0,i,NVAR))]));
-        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
-                       &(uGBot[1+(2*IJ(0,i,NVAR))]));
-        BotVar[1+(2*i)].UpdateState(air);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
     }
     //right side of domain
     for (int j=0; j<(ny-1); j++){
@@ -477,24 +505,28 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         btype = ibound[j+ nx-1];
         int iint = IJK(nx-2,j,0, nx-1, NVAR);
         int iel = IJ(nx-2, j, nx-1);
-
-        //DG extension
-        double xsi, eta;
-        xsi = 1.0;
-        eta = 0.0;
-        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
-        varij.Initialize(unkelij);
-        varij.UpdateState(air);
+        int iuEx = IJK(0,j,0,2,NVAR);
+        int ieEx = IJ(0,j,2);
 
         //==========Face Normal
         double normx, normy;
         normx = geofa[IJK(0, j, 4,nx,6)];
         normy = geofa[IJK(0, j, 5,nx,6)];
-        //==========Ghost State
-        RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
-                       &(uGRight[IJ(0,j,NVAR)]));
-        RightVar[j].UpdateState(air);
+
+        //DG extension
+        double xsi, eta;
+        //point 1
+        xsi = 1.0;
+        eta = 1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
+        //point 2
+        iuEx = IJK(1,j,0,2,NVAR);
+        ieEx = IJ(1,j,2);
+        xsi = 1.0;
+        eta = -1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
     }
 
     //top side of domain
@@ -505,24 +537,27 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         btype = ibound[ib+nx+ny-2];
         int iint = IJK(i,ny-2,0, nx-1, NVAR);
         int iel = IJ(i, ny-2, nx-1);
+        int iuEx = IJK(0,i,0,2,NVAR);
+        int ieEx = IJ(0,i,2);
 
-        //DG extension
-        double xsi, eta;
-        xsi = 0.0;
-        eta = 1.0;
-        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
-        varij.Initialize(unkelij);
-        varij.UpdateState(air);
-
-        //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(i, ny-1, 1,nx,6)];
         normy = -geofa[IJK(i, ny-1, 2,nx,6)];
-        //==========Ghost State
-        TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
-                       &(uGTop[IJ(0,i,NVAR)]));
-        TopVar[i].UpdateState(air);
+
+        //DG extension
+        double xsi, eta;
+        //point 1
+        xsi = 1.0 / sqrt(3.0);
+        eta = 1.0;
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
+        //point 2
+        iuEx = IJK(1,i,0,2,NVAR);
+        ieEx =  IJ(1,i,2);
+        xsi = -1.0 / sqrt(3.0);
+        eta = 1.0;
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
     }
 
     //left side of domain
@@ -533,23 +568,29 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         btype = ibound[jb+(2*nx)+ny-3];
         int iint = IJK(0,j,0, nx-1, 4);
         int iel = IJ(0, j, nx-1);
-
-        //DG extension
-        double xsi, eta;
-        xsi = -1.0;
-        eta =  0.0;
-        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
-        varij.Initialize(unkelij);
-        varij.UpdateState(air);
+        int iuEx = IJK(0,j,0,2,NVAR);
+        int ieEx = IJ(0,j,2);
 
         //==========Face Normal
         double normx, normy;
         normx = -geofa[IJK(0, j, 4,nx,6)];
         normy = -geofa[IJK(0, j, 5,nx,6)];
-        //==========Ghost State
-        LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
-        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
-                       &(uGLeft[IJ(0,j,NVAR)]));
-        LeftVar[j].UpdateState(air);
+
+        //DG extension
+        double xsi, eta;
+        //point 1
+        xsi = -1.0;
+        eta = 1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
+        //point 2
+        iuEx = IJK(1,j,0,2,NVAR);
+        ieEx = IJ(1,j,2);
+        xsi = -1.0;
+        eta = -1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
+                           &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
     }
 }
+
+

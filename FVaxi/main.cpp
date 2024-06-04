@@ -241,6 +241,8 @@ int main() {
                 }
             }
         }
+
+
         //perform iteration
         for (int ielem=0; ielem<nelem; ielem++){
             int iu = NVAR*ielem;
@@ -265,6 +267,19 @@ int main() {
                 uy[iu+1] += damp * dvy[iu + 1];
                 uy[iu+2] += damp * dvy[iu + 2];
                 uy[iu+3] += damp * dvy[iu + 3];
+
+                /* dumb idea
+                double damp2 = 0.9;
+                ux[iu  ] = damp2 * ux[iu  ];
+                ux[iu+1] = damp2 * ux[iu + 1];
+                ux[iu+2] = damp2 * ux[iu + 2];
+                ux[iu+3] = damp2 * ux[iu + 3];
+
+                uy[iu  ] = damp2 * uy[iu  ];
+                uy[iu+1] = damp2 * uy[iu + 1];
+                uy[iu+2] = damp2 * uy[iu + 2];
+                uy[iu+3] = damp2 * uy[iu + 3];
+                 */
 
                 //Slope limiting
                 int iuim, iuip, iujm, iujp;
@@ -319,14 +334,14 @@ int main() {
         restotal = 0.0;
         for (int i=0; i<NVAR; i++){
             ASSERT(ressum[i] >= 0.0, "Nonpositive Residual")
-            if (res0[i] < 1e-16) res0[i] = ressum[i];
+            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-8);
             restotal += ressum[i] / res0[i];
         }
 
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
-        int printiter = 100;
-        int saveiter = 100;
+        int printiter = 1;
+        int saveiter = 1;
         if (iter%printiter == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);
@@ -344,7 +359,11 @@ int main() {
     printf("==================== Solution Found ====================\n");
     printf("Saving Solution File..... \n");
 
-    print_state("Final State", nx, ny, air, x, y, unk, geoel);
+    if (ACCUR==1){
+        print_state_DGP1("Final State", nx, ny, air, x, y, unk, ux, uy, geoel);
+    } else {
+        print_state("Final State", nx, ny, air, x, y, unk, geoel);
+    }
     print_state_axi("Final State", nx, ny, air, x, y, unk, geoel);
 
 
