@@ -5,6 +5,7 @@
 
 #include "DGP1Tools.h"
 #include "EulerFlux.h"
+#include "BoundaryConditions.h"
 
 void get_u_val(const double* unk, State var, Thermo air,const double* ux, const double* uy, double xsi, double eta, double* uout){
     if (ACCUR == 1) {
@@ -298,14 +299,31 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
                             double* rhsel, double* rhselx, double* rhsely){
     //Input left and right variable/state information
     //Output addition of flux contribution to respective elemets
-    double fflux[NVAR], uInFace[NVAR], uExFace[NVAR], parr;
+    double fflux[NVAR], uInFace[NVAR], *uExFace, parr;
+    uExFace = &(unkExt[iuEx]);
     State varIn = State();
     State varEx = EVExt[ieEx];
     varIn.Initialize(uInFace);
     varEx.Initialize(uExFace);
+    varEx.UpdateState(air);
 
     //Cell centers used for adding in pressure term
     double ycIn = yCenter;
+
+    //Stuff for the type of face
+    double sideMult; //multiplier to correct for is the face is a right face or a left face according to convention.
+    switch (iFaceType) {
+        case 1 : //horizontal face - bottom boundary
+            sideMult = -1.0;
+        case 2 : //vertical face - right boundary
+            sideMult = -1.0;
+        case 3 : //horizontal face - top boundary
+            sideMult = 1.0;
+        case 4 : //vertical face - left boundary
+            sideMult = 1.0;
+        default:
+            printf("No Boundary Face Type Specified\n");
+    }
 
     //DG extension (xsi flux on vertical face)
     double weight = 0.5;
@@ -329,7 +347,7 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
             printf("No Boundary Face Type Specified\n");
     }
 
-
+    //Get the interior values at the quadrature point
     get_u_val(&(unk[iuIn]), ElemVar[ieIn], air, &(ux[iuIn]), &(uy[iuIn]), xsi, eta, uInFace);
     varIn.UpdateState(air);
 
@@ -340,54 +358,198 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     //Add flux contribution to elements
     for (int kvar=0; kvar<NVAR; kvar++){
         if (kvar == NSP+1){ //Axisymmetric pressure correction
-            rhsel[iuL + kvar]  -= weight * (fflux[kvar] + (ycL*parr));
-            rhsel[iuR + kvar]  += weight * (fflux[kvar] + (ycR*parr));
-            rhselx[iuL + kvar] -= weight * (fflux[kvar] + (ycL*parr)) * xsiL;
-            rhselx[iuR + kvar] += weight * (fflux[kvar] + (ycR*parr)) * xsiR;
-            rhsely[iuL + kvar] -= weight * (fflux[kvar] + (ycL*parr)) * etaL;
-            rhsely[iuR + kvar] += weight * (fflux[kvar] + (ycR*parr)) * etaR;
+            rhsel[iuIn + kvar]  += sideMult * weight * (fflux[kvar] + (yCenter*parr));
+            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * xsi;
+            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * eta;
         } else {
-            rhsel[iuL + kvar]  -= weight * fflux[kvar];
-            rhsel[iuR + kvar]  += weight * fflux[kvar];
-            rhselx[iuL + kvar] -= weight * (fflux[kvar]) * xsiL;
-            rhselx[iuR + kvar] += weight * (fflux[kvar]) * xsiR;
-            rhsely[iuL + kvar] -= weight * (fflux[kvar]) * etaL;
-            rhsely[iuR + kvar] += weight * (fflux[kvar]) * etaR;
+            rhsel[iuIn + kvar]  += sideMult * weight * fflux[kvar];
+            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar]) * xsi;
+            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar]) * eta;
         }
     }
     ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
     //2nd point
-    xsiL = -1.0/sqrt(3.0);
-    etaL = -1.0;
-    get_u_val(&(unk[iuL]), ElemVar[ieL], air, &(ux[iuL]), &(uy[iuL]), xsiL, etaL, uLFace);
-    varL.UpdateState(air);
-    xsiR = -1.0/sqrt(3.0);
-    etaR = 1.0;
-    get_u_val(&(unk[iuR]), ElemVar[ieR], air, &(ux[iuR]), &(uy[iuR]), xsiR, etaR, uRFace);
-    varR.UpdateState(air);
+    switch (iFaceType) {
+        case 1 : //horizontal face - bottom boundary
+            xsi = -1.0 / sqrt(3.0);
+            eta = -1.0;
+        case 2 : //vertical face - right boundary
+            xsi = 1.0;
+            eta = -1.0 / sqrt(3.0);
+        case 3 : //horizontal face - top boundary
+            xsi = -1.0 / sqrt(3.0);
+            eta = 1.0;
+        case 4 : //vertical face - left boundary
+            xsi = -1.0;
+            eta = -1.0 / sqrt(3.0);
+        default:
+            printf("No Boundary Face Type Specified\n");
+    }
+
+    //Get the interior values at the quadrature point
+    get_u_val(&(unk[iuIn]), ElemVar[ieIn], air, &(ux[iuIn]), &(uy[iuIn]), xsi, eta, uInFace);
+    varIn.UpdateState(air);
 
     //Find interface flux
-    LDFSS(fNormal[0], fNormal[1], len, rFace, uLFace, varL, uRFace, varR, fflux, &parr);
+    LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
+          uExFace, varEx, fflux, &parr);
 
     //Add flux contribution to elements
     for (int kvar=0; kvar<NVAR; kvar++){
         if (kvar == NSP+1){ //Axisymmetric pressure correction
-            rhsel[iuL + kvar]  -= weight * (fflux[kvar] + (ycL*parr));
-            rhsel[iuR + kvar]  += weight * (fflux[kvar] + (ycR*parr));
-            rhselx[iuL + kvar] -= weight * (fflux[kvar] + (ycL*parr)) * xsiL;
-            rhselx[iuR + kvar] += weight * (fflux[kvar] + (ycR*parr)) * xsiR;
-            rhsely[iuL + kvar] -= weight * (fflux[kvar] + (ycL*parr)) * etaL;
-            rhsely[iuR + kvar] += weight * (fflux[kvar] + (ycR*parr)) * etaR;
+            rhsel[iuIn + kvar]  += sideMult * weight * (fflux[kvar] + (yCenter*parr));
+            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * xsi;
+            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * eta;
         } else {
-            rhsel[iuL + kvar]  -= weight * fflux[kvar];
-            rhsel[iuR + kvar]  += weight * fflux[kvar];
-            rhselx[iuL + kvar] -= weight * (fflux[kvar]) * xsiL;
-            rhselx[iuR + kvar] += weight * (fflux[kvar]) * xsiR;
-            rhsely[iuL + kvar] -= weight * (fflux[kvar]) * etaL;
-            rhsely[iuR + kvar] += weight * (fflux[kvar]) * etaR;
+            rhsel[iuIn + kvar]  += sideMult * weight * fflux[kvar];
+            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar]) * xsi;
+            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar]) * eta;
         }
     }
     ASSERT(!_isnan(fflux[0]+fflux[1]+fflux[2]+fflux[3]),"NAN in flux splitting")
 
+}
+
+/*
+case 1 : //horizontal face - bottom boundary
+xsi = 1.0 / sqrt(3.0);
+eta = -1.0;
+case 2 : //vertical face - right boundary
+xsi = 1.0;
+eta = 1.0 / sqrt(3.0);
+case 3 : //horizontal face - top boundary
+xsi = 1.0 / sqrt(3.0);
+eta = 1.0;
+case 4 : //vertical face - left boundary
+xsi = -1.0;
+eta = 1.0 / sqrt(3.0);
+*/
+void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* uy, State* ElemVar, Thermo air, int* ibound,
+                               double* geofa, double* uFS, double* uGBot, double* uGTop, double* uGLeft, double* uGRight,
+                               State* BotVar, State* TopVar, State* LeftVar, State* RightVar){
+    double unkelij[NVAR];
+    State varij = State();
+
+    //bottom side of domain
+    for (int i=0; i<(nx-1); i++){
+        // left state = interior, right state = ghost
+        int btype;
+        btype = ibound[i];
+        int iint = IJK(i,0,0, nx-1, 4);
+        int iel = IJ(i, 0, nx-1);
+
+        //DG extension
+        double xsi, eta;
+        //point 1
+        xsi = 1.0 / sqrt(3.0);
+        eta = -1.0;
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
+        //==========Face Normal
+        double normx, normy;
+        normx = geofa[IJK(i, 0, 1,nx,6)];
+        normy = geofa[IJK(i, 0, 2,nx,6)];
+        //==========Ghost State
+        BotVar[2*i].Initialize(&(uGBot[2*IJ(0,i,NVAR)]));
+        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
+                       &(uGBot[2*IJ(0,i,NVAR)]));
+        BotVar[2*i].UpdateState(air);
+
+        //point 2
+        xsi = -1.0 / sqrt(3.0);
+        eta = -1.0;
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+        //==========Ghost State
+        BotVar[1+(2*i)].Initialize(&(uGBot[1+(2*IJ(0,i,NVAR))]));
+        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
+                       &(uGBot[1+(2*IJ(0,i,NVAR))]));
+        BotVar[1+(2*i)].UpdateState(air);
+    }
+    //right side of domain
+    for (int j=0; j<(ny-1); j++){
+        // left state = interior, right state = ghost
+        int btype;
+        btype = ibound[j+ nx-1];
+        int iint = IJK(nx-2,j,0, nx-1, NVAR);
+        int iel = IJ(nx-2, j, nx-1);
+
+        //DG extension
+        double xsi, eta;
+        xsi = 1.0;
+        eta = 0.0;
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
+        //==========Face Normal
+        double normx, normy;
+        normx = geofa[IJK(0, j, 4,nx,6)];
+        normy = geofa[IJK(0, j, 5,nx,6)];
+        //==========Ghost State
+        RightVar[j].Initialize(&(uGRight[IJ(0,j,NVAR)]));
+        boundary_state(btype,air,normx,normy,uFS,unkelij, varij,
+                       &(uGRight[IJ(0,j,NVAR)]));
+        RightVar[j].UpdateState(air);
+    }
+
+    //top side of domain
+    for (int i=0; i<(nx-1); i++){
+        // left state = interior, right state = ghost
+        int btype;
+        int ib = nx-2-i;
+        btype = ibound[ib+nx+ny-2];
+        int iint = IJK(i,ny-2,0, nx-1, NVAR);
+        int iel = IJ(i, ny-2, nx-1);
+
+        //DG extension
+        double xsi, eta;
+        xsi = 0.0;
+        eta = 1.0;
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
+        //==========Face Normal
+        double normx, normy;
+        normx = -geofa[IJK(i, ny-1, 1,nx,6)];
+        normy = -geofa[IJK(i, ny-1, 2,nx,6)];
+        //==========Ghost State
+        TopVar[i].Initialize(&(uGTop[IJ(0,i,NVAR)]));
+        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
+                       &(uGTop[IJ(0,i,NVAR)]));
+        TopVar[i].UpdateState(air);
+    }
+
+    //left side of domain
+    for (int j=0; j<(ny-1); j++){
+        // left state = interior, right state = ghost
+        int btype;
+        int jb = (ny-2)-j;
+        btype = ibound[jb+(2*nx)+ny-3];
+        int iint = IJK(0,j,0, nx-1, 4);
+        int iel = IJ(0, j, nx-1);
+
+        //DG extension
+        double xsi, eta;
+        xsi = -1.0;
+        eta =  0.0;
+        get_u_val(&(unk[iint]), ElemVar[iel], air, &(ux[iint]), &(uy[iint]), xsi, eta, unkelij);
+        varij.Initialize(unkelij);
+        varij.UpdateState(air);
+
+        //==========Face Normal
+        double normx, normy;
+        normx = -geofa[IJK(0, j, 4,nx,6)];
+        normy = -geofa[IJK(0, j, 5,nx,6)];
+        //==========Ghost State
+        LeftVar[j].Initialize(&(uGLeft[IJ(0,j,NVAR)]));
+        boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
+                       &(uGLeft[IJ(0,j,NVAR)]));
+        LeftVar[j].UpdateState(air);
+    }
 }

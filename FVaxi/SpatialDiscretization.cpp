@@ -12,91 +12,12 @@
 #include "StateVariables.h"
 #include "DGP1Tools.h"
 
-
-void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
-
-    if (IVISC) {
-        // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
-        ///Need to make axisymmatric modification and add extra termsnn/JE
-        printf("Need to update viscous fluxes for axisymmetric and DP higher order\n");
-        exit(0);
-        double tau[4], Sij[4], st[4], dc2i, trace, vflux[2];
-        double uL, vL, uR, vR;
-
-        double mu = 0.5 * (varL.mu + varR.mu);
-
-        dc2i = 1.0 / (dc[0] * dc[0] + dc[1] * dc[1]);
-
-        uL = uLeft[1];
-        vL = uLeft[2];
-        uR = uRight[1];
-        vR = uRight[2];
-        //stress tensor
-        st[0] = (uR - uL) * dc[0] * dc2i;//  du/dx
-        st[1] = (uR - uL) * dc[1] * dc2i;//  du/dy
-        st[2] = (vR - vL) * dc[0] * dc2i;//  dv/dx
-        st[3] = (vR - vL) * dc[1] * dc2i;//  dv/dy
-        trace = (1.0 / 3.0) * (st[0] + st[3]);
-
-        // Viscous strain rate
-        Sij[0] = st[0] - trace;                //S_1,1
-        Sij[1] = 0.5 * (st[1] + st[2]);         //S_1,2
-        Sij[2] = Sij[1];                        //S_2,1
-        Sij[3] = st[1] - trace;                //S_2,2
-
-        //Viscous Stress  (Stoke's Law for Monoatoms)
-        tau[0] = 2 * mu * Sij[0];
-        tau[1] = 2 * mu * Sij[1];
-        tau[2] = 2 * mu * Sij[2];
-        tau[3] = 2 * mu * Sij[3];
-
-        // Viscous Contributions to Flux
-        vflux[0] = tau[0] * normx + tau[2] * normy;
-        vflux[1] = tau[1] * normx + tau[3] * normy;
-
-        visc_contrib[0] = vflux[0];
-        visc_contrib[1] = vflux[1];
-        visc_contrib[2] = ((uL * tau[0] + vL * tau[2]) * normx + (uL * tau[1] + vL * tau[3]) * normy);
-
-        visc_contrib[3] = vflux[0];
-        visc_contrib[4] = vflux[1];
-        visc_contrib[5] = ((uR * tau[0] + vR * tau[2]) * normx + (uR * tau[1] + vR * tau[3]) * normy);
-
-        for (int iv = 0; iv < 6; iv++) {
-            if (_isnan(visc_contrib[iv])) {
-                printf("asdfaed\n");
-            }
-            ASSERT(!_isnan(visc_contrib[iv]), "Visc Flux NaN");
-        }
-    } else {
-
-        visc_contrib[0] = 0.0;
-        visc_contrib[1] = 0.0;
-        visc_contrib[2] = 0.0;
-        visc_contrib[3] = 0.0;
-        visc_contrib[4] = 0.0;
-        visc_contrib[5] = 0.0;
-    }
-}
-
-void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
-               double* geofa, double* yfa, double* xfa, double* unk, double* ux, double* uy, double* dudt, double* duxdt, double* duydt) {
-    int nelem = (nx-1)*(ny-1);
-    double *rhsel, *rhselx, *rhsely, parr;
+void generate_ghost_cells(int nx, int ny, double* unk, double* ux, double* uy, State* ElemVar, Thermo air, int* ibound,
+                            double* geofa, double* uFS, double* uGBot, double* uGTop, double* uGLeft, double* uGRight,
+                            State* BotVar, State* TopVar, State* LeftVar, State* RightVar){
     double unkelij[NVAR];
     State varij = State();
-    rhsel  = (double*)malloc(NVAR*nelem*sizeof(double));
-    rhselx = (double*)malloc(NVAR*nelem*sizeof(double));
-    rhsely = (double*)malloc(NVAR*nelem*sizeof(double));
-    for(int i=0; i<NVAR*nelem; i++) {
-        rhsel[i]  = 0.0;
-        rhselx[i] = 0.0;
-        rhsely[i] = 0.0;
-    }
 
-    //Calculate boundary cell state (ghost state)
-    double uGBot[NVAR*(nx-1)], uGRight[NVAR*(ny-1)], uGTop[NVAR*(nx-1)], uGLeft[NVAR*(ny-1)];
-    State BotVar[NVAR*(nx-1)], TopVar[NVAR*(nx-1)], RightVar[NVAR*(ny-1)], LeftVar[NVAR*(ny-1)];
     //bottom side of domain
     for (int i=0; i<(nx-1); i++){
         // left state = interior, right state = ghost
@@ -204,6 +125,100 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         boundary_state(btype,air,normx,normy,uFS, unkelij, varij,
                        &(uGLeft[IJ(0,j,NVAR)]));
         LeftVar[j].UpdateState(air);
+    }
+}
+
+void viscous(int nx, double normy, double normx, double* uLeft, State& varL, double* uRight, State varR, double* dc, double* visc_contrib){
+
+    if (IVISC) {
+        // ~~~~~~~~~~ Viscous fluxes ~~~~~~~~~~
+        ///Need to make axisymmatric modification and add extra termsnn/JE
+        printf("Need to update viscous fluxes for axisymmetric and DP higher order\n");
+        exit(0);
+        double tau[4], Sij[4], st[4], dc2i, trace, vflux[2];
+        double uL, vL, uR, vR;
+
+        double mu = 0.5 * (varL.mu + varR.mu);
+
+        dc2i = 1.0 / (dc[0] * dc[0] + dc[1] * dc[1]);
+
+        uL = uLeft[1];
+        vL = uLeft[2];
+        uR = uRight[1];
+        vR = uRight[2];
+        //stress tensor
+        st[0] = (uR - uL) * dc[0] * dc2i;//  du/dx
+        st[1] = (uR - uL) * dc[1] * dc2i;//  du/dy
+        st[2] = (vR - vL) * dc[0] * dc2i;//  dv/dx
+        st[3] = (vR - vL) * dc[1] * dc2i;//  dv/dy
+        trace = (1.0 / 3.0) * (st[0] + st[3]);
+
+        // Viscous strain rate
+        Sij[0] = st[0] - trace;                //S_1,1
+        Sij[1] = 0.5 * (st[1] + st[2]);         //S_1,2
+        Sij[2] = Sij[1];                        //S_2,1
+        Sij[3] = st[1] - trace;                //S_2,2
+
+        //Viscous Stress  (Stoke's Law for Monoatoms)
+        tau[0] = 2 * mu * Sij[0];
+        tau[1] = 2 * mu * Sij[1];
+        tau[2] = 2 * mu * Sij[2];
+        tau[3] = 2 * mu * Sij[3];
+
+        // Viscous Contributions to Flux
+        vflux[0] = tau[0] * normx + tau[2] * normy;
+        vflux[1] = tau[1] * normx + tau[3] * normy;
+
+        visc_contrib[0] = vflux[0];
+        visc_contrib[1] = vflux[1];
+        visc_contrib[2] = ((uL * tau[0] + vL * tau[2]) * normx + (uL * tau[1] + vL * tau[3]) * normy);
+
+        visc_contrib[3] = vflux[0];
+        visc_contrib[4] = vflux[1];
+        visc_contrib[5] = ((uR * tau[0] + vR * tau[2]) * normx + (uR * tau[1] + vR * tau[3]) * normy);
+
+        for (int iv = 0; iv < 6; iv++) {
+            if (_isnan(visc_contrib[iv])) {
+                printf("asdfaed\n");
+            }
+            ASSERT(!_isnan(visc_contrib[iv]), "Visc Flux NaN");
+        }
+    } else {
+
+        visc_contrib[0] = 0.0;
+        visc_contrib[1] = 0.0;
+        visc_contrib[2] = 0.0;
+        visc_contrib[3] = 0.0;
+        visc_contrib[4] = 0.0;
+        visc_contrib[5] = 0.0;
+    }
+}
+
+void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ibound, double* geoel,
+               double* geofa, double* yfa, double* xfa, double* unk, double* ux, double* uy, double* dudt, double* duxdt, double* duydt) {
+    int nelem = (nx-1)*(ny-1);
+    double *rhsel, *rhselx, *rhsely, parr;
+    rhsel  = (double*)malloc(NVAR*nelem*sizeof(double));
+    rhselx = (double*)malloc(NVAR*nelem*sizeof(double));
+    rhsely = (double*)malloc(NVAR*nelem*sizeof(double));
+    for(int i=0; i<NVAR*nelem; i++) {
+        rhsel[i]  = 0.0;
+        rhselx[i] = 0.0;
+        rhsely[i] = 0.0;
+    }
+
+    //Calculate boundary cell state (ghost state)
+    if (ACCUR == 0) {
+        double uGBot[NVAR * (nx - 1)], uGRight[NVAR * (ny - 1)], uGTop[NVAR * (nx - 1)], uGLeft[NVAR * (ny - 1)];
+        State BotVar[NVAR * (nx - 1)], TopVar[NVAR * (nx - 1)], RightVar[NVAR * (ny - 1)], LeftVar[NVAR * (ny - 1)];
+        generate_ghost_cells(nx, ny, unk, ux, uy, ElemVar, air, ibound, geofa, uFS, uGBot, uGTop, uGLeft, uGRight,
+                             BotVar, TopVar, LeftVar, RightVar);
+    } else if (ACCUR==1){
+        double uGBot[2 * NVAR * (nx - 1)], uGRight[2 * NVAR * (ny - 1)], uGTop[2 * NVAR * (nx - 1)], uGLeft[2 * NVAR * (ny - 1)];
+        State BotVar[2 * NVAR * (nx - 1)], TopVar[2 * NVAR * (nx - 1)], RightVar[2 * NVAR * (ny - 1)], LeftVar[2 * NVAR * (ny - 1)];
+    } else {
+        printf("ACCUR must be 1 or 0.");
+        exit(0);
     }
 
     //====================Evaluate Flux Contributions====================
