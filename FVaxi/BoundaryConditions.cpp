@@ -69,7 +69,7 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
     vL = uLeft[2];
     vDOTn = uL*normx + vL*normy;
 
-    //btype = 1; //used for testing
+    btype = 1; //used for testing
 
     //Wall BC
     if (btype == 0 or btype == 4) {

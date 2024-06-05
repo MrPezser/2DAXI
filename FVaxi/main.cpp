@@ -268,7 +268,7 @@ int main() {
                 uy[iu+2] += damp * dvy[iu + 2];
                 uy[iu+3] += damp * dvy[iu + 3];
 
-                /* dumb idea
+                /* //dumb idea
                 double damp2 = 0.9;
                 ux[iu  ] = damp2 * ux[iu  ];
                 ux[iu+1] = damp2 * ux[iu + 1];
@@ -279,7 +279,7 @@ int main() {
                 uy[iu+1] = damp2 * uy[iu + 1];
                 uy[iu+2] = damp2 * uy[iu + 2];
                 uy[iu+3] = damp2 * uy[iu + 3];
-                 */
+                */
 
                 //Slope limiting
                 int iuim, iuip, iujm, iujp;
@@ -340,8 +340,8 @@ int main() {
 
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
-        int printiter = 1;
-        int saveiter = 1;
+        int printiter = 10;
+        int saveiter = 50;
         if (iter%printiter == 0) {
             printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
                     iter, dt, restotal);

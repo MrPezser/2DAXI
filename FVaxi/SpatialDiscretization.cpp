@@ -470,7 +470,7 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     // I|xi fluxes
     for (int j=0; j<ny-1; j++){
         //--------------------  LEFT BOUNDARY
-        len = geofa[IJK(0, j, 3, nx, 6)];
+        len   = geofa[IJK(0, j, 3, nx, 6)];
         normx = geofa[IJK(0, j, 4, nx, 6)];
         normy = geofa[IJK(0, j, 5, nx, 6)];
         yface = yfa[IJK(0, j, 1, nx, 2)];
@@ -743,6 +743,12 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
     }
     /// SINCE M IS DIAGONAL MATRIX, THE BELOW ALREADY INCLUDES THE MULTIPLE 3/VOL FROM ITS INVERSION
     DGP1_volume_integral(nx, ny, 1.0, xfa, yfa, geoel, unk, ElemVar, duxdt, duydt);
+
+    for (int iu=0; iu<nelem*NVAR ; iu++){
+        if (dudt[iu] > 1e-6){
+            //printf("%le\n",dudt[iu]);
+        }
+    }
 
     free(rhsel);
     free(rhselx);

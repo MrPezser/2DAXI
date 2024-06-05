@@ -341,23 +341,23 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     //1st point
     switch (iFaceType) {
         case 1 : {//horizontal face - bottom boundary
-            xsi = 1.0 / sqrt(3.0);
+            xsi = 0.0;//1.0 / sqrt(3.0);
             eta = -1.0;
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
-            eta = 1.0 / sqrt(3.0);
+            eta = 0.0;//1.0 / sqrt(3.0);
             break;
         }
         case 3 : {//horizontal face - top boundary
-            xsi = 1.0 / sqrt(3.0);
+            xsi = 0.0;//1.0 / sqrt(3.0);
             eta = 1.0;
             break;
         }
         case 4 : {//vertical face - left boundary
             xsi = -1.0;
-            eta = 1.0 / sqrt(3.0);
+            eta = 0.0;//1.0 / sqrt(3.0);
             break;
         }
         default: {
@@ -376,9 +376,9 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     //Add flux contribution to elements
     for (int kvar=0; kvar<NVAR; kvar++){
         if (kvar == NSP+1){ //Axisymmetric pressure correction
-            rhsel[iuIn + kvar]  += sideMult * weight * (fflux[kvar] + (yCenter*parr));
-            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * xsi;
-            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (yCenter*parr)) * eta;
+            rhsel[iuIn + kvar]  += sideMult * weight * (fflux[kvar] + (ycIn*parr));
+            rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (ycIn*parr)) * xsi;
+            rhsely[iuIn + kvar] += sideMult * weight * (fflux[kvar] + (ycIn*parr)) * eta;
         } else {
             rhsel[iuIn + kvar]  += sideMult * weight * fflux[kvar];
             rhselx[iuIn + kvar] += sideMult * weight * (fflux[kvar]) * xsi;
@@ -398,23 +398,23 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
     switch (iFaceType) {
         case 1 : {//horizontal face - bottom boundary
-            xsi = -1.0 / sqrt(3.0);
+            xsi = 0.0;//-1.0 / sqrt(3.0);
             eta = -1.0;
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
-            eta = -1.0 / sqrt(3.0);
+            eta = 0.0;//-1.0 / sqrt(3.0);
             break;
         }
         case 3 : {//horizontal face - top boundary
-            xsi = -1.0 / sqrt(3.0);
+            xsi = 0.0;//-1.0 / sqrt(3.0);
             eta = 1.0;
             break;
         }
         case 4 : { //vertical face - left boundary
             xsi = -1.0;
-            eta = -1.0 / sqrt(3.0);
+            eta = 0.0;//-1.0 / sqrt(3.0);
             break;
         }
         default: {
@@ -485,7 +485,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //DG extension
         double xsi, eta;
         //point 1
-        xsi = 1.0 / sqrt(3.0);
+        xsi = 0.0;//1.0 / sqrt(3.0);
         eta = -1.0;
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
@@ -493,7 +493,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         iuEx = IJK(1,i,0,2,NVAR);
         ieEx =  IJ(1,i,2);
 
-        xsi = -1.0 / sqrt(3.0);
+        xsi = 0.0;//-1.0 / sqrt(3.0);
         eta = -1.0;
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
@@ -517,14 +517,14 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         double xsi, eta;
         //point 1
         xsi = 1.0;
-        eta = 1.0 / sqrt(3.0);
+        eta = 0.0;//1.0 / sqrt(3.0);
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
         //point 2
         iuEx = IJK(1,j,0,2,NVAR);
         ieEx = IJ(1,j,2);
         xsi = 1.0;
-        eta = -1.0 / sqrt(3.0);
+        eta = 0.0;//-1.0 / sqrt(3.0);
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
     }
@@ -547,14 +547,14 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //DG extension
         double xsi, eta;
         //point 1
-        xsi = 1.0 / sqrt(3.0);
+        xsi = 0.0;//1.0 / sqrt(3.0);
         eta = 1.0;
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
         //point 2
         iuEx = IJK(1,i,0,2,NVAR);
         ieEx =  IJ(1,i,2);
-        xsi = -1.0 / sqrt(3.0);
+        xsi = 0.0;//-1.0 / sqrt(3.0);
         eta = 1.0;
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
@@ -580,14 +580,14 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         double xsi, eta;
         //point 1
         xsi = -1.0;
-        eta = 1.0 / sqrt(3.0);
+        eta = 0.0;//1.0 / sqrt(3.0);
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
         //point 2
         iuEx = IJK(1,j,0,2,NVAR);
         ieEx = IJ(1,j,2);
         xsi = -1.0;
-        eta = -1.0 / sqrt(3.0);
+        eta = 0.0;//-1.0 / sqrt(3.0);
         get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
                            &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
     }
