@@ -65,12 +65,14 @@ int main() {
     double p0, u0, tol, CFL, T0, v0, rho0;
     int mxiter;
     tol = 1e-7;//1e-6;
-    mxiter = 1e6; //maximum number of iteration before stopping
     CFL = 0.3;
     u0 = 1532.9;
     T0 = 1188.333;
     rho0 = 0.04455;
     v0 = 0.0;
+    mxiter = (int)(10000 * (0.3/CFL));//1e6; //maximum number of iteration before stopping
+    int printiter = 10;
+    int saveiter = 100;
     /*
      * p0 = 15195 = rho0 * 287 * t0
      * M0 = 2.32
@@ -257,7 +259,7 @@ int main() {
             ElemVar[ielem].UpdateState(air);
 
             if (ACCUR ==1) {
-                double damp = 1.0;///3.0;
+                double damp = 1.0;//fmin(iter / (3000.0*0.3/CFL),1.0);
                 ux[iu  ] += damp * dvx[iu  ];
                 ux[iu+1] += damp * dvx[iu + 1];
                 ux[iu+2] += damp * dvx[iu + 2];
@@ -288,31 +290,32 @@ int main() {
                 iujm = iu - IJK(0,1,0,nx-1,NVAR);
                 iujp = iu + IJK(0,1,0,nx-1,NVAR);
                 for (int kvar=0;kvar<NVAR;kvar++){
-                    double du=0.0;
+                    double du, duscale;
+                    duscale = 1.0;
                     int nu = nelem*NVAR;
                     if (iuip < nu-1  and iuim >= 0.0) {
-                       du = ((unk[iuip + kvar] - unk[iuim + kvar]) / 2.0);
+                       du = duscale*((unk[iuip + kvar] - unk[iuim + kvar]) / 2.0);
                        ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
                     } else if (iuim < 0.0) {
                         //bottom boundary
-                        du = ((unk[iuip + kvar] - unk[iu + kvar]) / 1.0);
+                        du = duscale*((unk[iuip + kvar] - unk[iu + kvar]) / 1.0);
                         ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
                     } else {
                         //top boundary
-                        du = ((unk[iu + kvar] - unk[iuim + kvar]) / 1.0);
+                        du = duscale*((unk[iu + kvar] - unk[iuim + kvar]) / 1.0);
                         ux[iu+kvar] = sign(ux[iu+kvar])*fmin(fabs(ux[iu+kvar]), fabs(du));
                     }
 
                     if (iujp <= nu-1 and iujm >= 0) {
-                        du = ((unk[iujp + kvar] - unk[iujm + kvar]) / 2.0);
+                        du = duscale*((unk[iujp + kvar] - unk[iujm + kvar]) / 2.0);
                         uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
                     } else if (iujm < 0.0) {
                         //bottom boundary
-                        du = ((unk[iujp + kvar] - unk[iu + kvar]) / 1.0);
+                        du = duscale*((unk[iujp + kvar] - unk[iu + kvar]) / 1.0);
                         uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
                     } else {
                         //top boundary
-                        du = ((unk[iu + kvar] - unk[iujm + kvar]) / 1.0);
+                        du = duscale*((unk[iu + kvar] - unk[iujm + kvar]) / 1.0);
                         uy[iu+kvar] = sign(uy[iu+kvar])*fmin(fabs(uy[iu+kvar]), fabs(du));
                     }
                 }
@@ -334,17 +337,15 @@ int main() {
         restotal = 0.0;
         for (int i=0; i<NVAR; i++){
             ASSERT(ressum[i] >= 0.0, "Nonpositive Residual")
-            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-8);
+            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-16);
             restotal += ressum[i] / res0[i];
         }
 
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
-        int printiter = 10;
-        int saveiter = 50;
         if (iter%printiter == 0) {
-            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e\n", \
-                    iter, dt, restotal);
+            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e \t\t Absolute Res:%15.5e%15.5e%15.5e%15.5e\n", \
+                    iter, dt, restotal, ressum[0], ressum[1], ressum[2], ressum[3]);
         }
         if (iter > 0 and iter%saveiter == 0){
             //printf("Saving current Solution\n");

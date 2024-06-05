@@ -30,7 +30,6 @@ void read_mesh(int* nx, int* ny, int** ibound, double** x, double** y){
     fscanf(fmsh,"%*s");
     for(int ib=0; ib<nb; ib++){
         fscanf(fmsh, "%d", &(*ibound)[ib]);
-        //(*ibound)[ib] = 1.0;
     }
 }
 

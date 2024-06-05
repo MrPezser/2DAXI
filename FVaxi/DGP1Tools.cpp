@@ -341,23 +341,23 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     //1st point
     switch (iFaceType) {
         case 1 : {//horizontal face - bottom boundary
-            xsi = 0.0;//1.0 / sqrt(3.0);
+            xsi = 1.0 / sqrt(3.0);
             eta = -1.0;
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
-            eta = 0.0;//1.0 / sqrt(3.0);
+            eta = 1.0 / sqrt(3.0);
             break;
         }
         case 3 : {//horizontal face - top boundary
-            xsi = 0.0;//1.0 / sqrt(3.0);
+            xsi = 1.0 / sqrt(3.0);
             eta = 1.0;
             break;
         }
         case 4 : {//vertical face - left boundary
             xsi = -1.0;
-            eta = 0.0;//1.0 / sqrt(3.0);
+            eta = 1.0 / sqrt(3.0);
             break;
         }
         default: {
@@ -370,8 +370,14 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     varIn.UpdateState(air);
 
     //Find interface flux
-    LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
-          uExFace, varEx, fflux, &parr);
+    if (iFaceType == 1 or iFaceType == 2) {
+        LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
+              uExFace, varEx, fflux, &parr);
+    } else {
+        ASSERT(iFaceType == 3 or iFaceType == 4, "Invalid iFaceType")
+        LDFSS(fNormal[0], fNormal[1], len, rFace, uExFace, varEx,
+              uInFace, varIn, fflux, &parr);
+    }
 
     //Add flux contribution to elements
     for (int kvar=0; kvar<NVAR; kvar++){
@@ -398,23 +404,23 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
     switch (iFaceType) {
         case 1 : {//horizontal face - bottom boundary
-            xsi = 0.0;//-1.0 / sqrt(3.0);
+            xsi = -1.0 / sqrt(3.0);
             eta = -1.0;
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
-            eta = 0.0;//-1.0 / sqrt(3.0);
+            eta = -1.0 / sqrt(3.0);
             break;
         }
         case 3 : {//horizontal face - top boundary
-            xsi = 0.0;//-1.0 / sqrt(3.0);
+            xsi = -1.0 / sqrt(3.0);
             eta = 1.0;
             break;
         }
         case 4 : { //vertical face - left boundary
             xsi = -1.0;
-            eta = 0.0;//-1.0 / sqrt(3.0);
+            eta = -1.0 / sqrt(3.0);
             break;
         }
         default: {
@@ -427,8 +433,14 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
     varIn.UpdateState(air);
 
     //Find interface flux
-    LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
-          uExFace, varEx, fflux, &parr);
+    if (iFaceType == 1 or iFaceType == 2) {
+        LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
+              uExFace, varEx, fflux, &parr);
+    } else {
+        ASSERT(iFaceType == 3 or iFaceType == 4, "Invalid iFaceType")
+        LDFSS(fNormal[0], fNormal[1], len, rFace, uExFace, varEx,
+              uInFace, varIn, fflux, &parr);
+    }
 
     //Add flux contribution to elements
     for (int kvar=0; kvar<NVAR; kvar++){
@@ -446,7 +458,7 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
 }
 
-void get_boundary_point(int btype, double normx, double normy, double* uFS, double* unkiint, State EViel, Thermo air,
+void get_boundary_point(int btype, double normx, double normy, double* uFS, double* unkiint, State EViel, Thermo& air,
                         double* uxiint, double* uyiint, double xsi, double eta, State& ElemVarieex, double* uGiuex){
     double unkelij[NVAR];
     State varij = State();
@@ -472,7 +484,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         // left state = interior, right state = ghost
         int btype;
         btype = ibound[i];
-        int iint = IJK(i,0,0, nx-1, NVAR);
+        int iuint = IJK(i, 0, 0, nx - 1, NVAR);
         int iel = IJ(i, 0, nx-1);
         int iuEx = IJK(0,i,0,2,NVAR);
         int ieEx = IJ(0,i,2);
@@ -485,25 +497,25 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //DG extension
         double xsi, eta;
         //point 1
-        xsi = 0.0;//1.0 / sqrt(3.0);
+        xsi = 1.0 / sqrt(3.0);
         eta = -1.0;
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
         //point 2
         iuEx = IJK(1,i,0,2,NVAR);
         ieEx =  IJ(1,i,2);
 
-        xsi = 0.0;//-1.0 / sqrt(3.0);
+        xsi = -1.0 / sqrt(3.0);
         eta = -1.0;
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
     }
     //right side of domain
     for (int j=0; j<(ny-1); j++){
         // left state = interior, right state = ghost
         int btype;
         btype = ibound[j+ nx-1];
-        int iint = IJK(nx-2,j,0, nx-1, NVAR);
+        int iuint = IJK(nx - 2, j, 0, nx - 1, NVAR);
         int iel = IJ(nx-2, j, nx-1);
         int iuEx = IJK(0,j,0,2,NVAR);
         int ieEx = IJ(0,j,2);
@@ -517,16 +529,16 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         double xsi, eta;
         //point 1
         xsi = 1.0;
-        eta = 0.0;//1.0 / sqrt(3.0);
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
+        eta = 1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
         //point 2
         iuEx = IJK(1,j,0,2,NVAR);
         ieEx = IJ(1,j,2);
         xsi = 1.0;
-        eta = 0.0;//-1.0 / sqrt(3.0);
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
+        eta = -1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
     }
 
     //top side of domain
@@ -535,7 +547,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         int btype;
         int ib = nx-2-i;
         btype = ibound[ib+nx+ny-2];
-        int iint = IJK(i,ny-2,0, nx-1, NVAR);
+        int iuint = IJK(i, ny - 2, 0, nx - 1, NVAR);
         int iel = IJ(i, ny-2, nx-1);
         int iuEx = IJK(0,i,0,2,NVAR);
         int ieEx = IJ(0,i,2);
@@ -547,17 +559,17 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //DG extension
         double xsi, eta;
         //point 1
-        xsi = 0.0;//1.0 / sqrt(3.0);
+        xsi = 1.0 / sqrt(3.0);
         eta = 1.0;
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
         //point 2
         iuEx = IJK(1,i,0,2,NVAR);
         ieEx =  IJ(1,i,2);
-        xsi = 0.0;//-1.0 / sqrt(3.0);
+        xsi = -1.0 / sqrt(3.0);
         eta = 1.0;
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
     }
 
     //left side of domain
@@ -566,7 +578,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         int btype;
         int jb = (ny-2)-j;
         btype = ibound[jb+(2*nx)+ny-3];
-        int iint = IJK(0,j,0, nx-1, 4);
+        int iuint = IJK(0, j, 0, nx - 1, NVAR);
         int iel = IJ(0, j, nx-1);
         int iuEx = IJK(0,j,0,2,NVAR);
         int ieEx = IJ(0,j,2);
@@ -580,16 +592,16 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         double xsi, eta;
         //point 1
         xsi = -1.0;
-        eta = 0.0;//1.0 / sqrt(3.0);
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
+        eta = 1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
         //point 2
         iuEx = IJK(1,j,0,2,NVAR);
         ieEx = IJ(1,j,2);
         xsi = -1.0;
-        eta = 0.0;//-1.0 / sqrt(3.0);
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iint]), ElemVar[iel], air, &(ux[iint]),
-                           &(uy[iint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
+        eta = -1.0 / sqrt(3.0);
+        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+                           &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
     }
 }
 
