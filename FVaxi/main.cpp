@@ -70,7 +70,7 @@ int main() {
     T0 = 1188.333;
     rho0 = 0.04455;
     v0 = 0.0;
-    mxiter = (int)(10000 * (0.3/CFL));//1e6; //maximum number of iteration before stopping
+    mxiter = (int)(50000 * (0.3/CFL));//1e6; //maximum number of iteration before stopping
     int printiter = 10;
     int saveiter = 100;
     /*
@@ -259,7 +259,9 @@ int main() {
             ElemVar[ielem].UpdateState(air);
 
             if (ACCUR ==1) {
-                double damp = 1.0;//fmin(iter / (3000.0*0.3/CFL),1.0);
+                double damp = 1.0;//fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
+                if (iter<= 7500) damp = 0.0;
+
                 ux[iu  ] += damp * dvx[iu  ];
                 ux[iu+1] += damp * dvx[iu + 1];
                 ux[iu+2] += damp * dvx[iu + 2];

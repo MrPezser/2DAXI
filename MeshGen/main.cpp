@@ -162,8 +162,8 @@ int main() {
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
     length = 16.3*IN2M;//1.0;//4.0;
-    nx = 501;
-    ny = 201;
+    nx = 301;
+    ny = 151;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;//0.001;
