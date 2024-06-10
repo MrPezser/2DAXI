@@ -260,7 +260,7 @@ int main() {
 
             if (ACCUR ==1) {
                 double damp = 1.0;//fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
-                if (iter<= 7500) damp = 0.0;
+                if (iter<= (3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
 
                 ux[iu  ] += damp * dvx[iu  ];
                 ux[iu+1] += damp * dvx[iu + 1];

@@ -482,13 +482,25 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double ycR = geoel[IJK(0, j, 2, nx - 1, 3)];
 
         if (ACCUR==1){
-            int iFaceType = 4; //number CCW starting from bot
-            int ieEx = IJ(0,j,2);
-            int iuEx = IJK(0,j,0,2,NVAR);
-            double yCenter = ycR;
-            double fNormal[2] = {normx, normy};
+            int iFaceType, ieEx, iuEx;
+            iFaceType = 4; //number CCW starting from bot
+            ieEx = IJ(0,j,2);
+            iuEx = IJK(0,j,0,2,NVAR);
+            double yCenter, fNormal[2]{normx, normy}, fNormalL[2]{normx, normy}, fNormalR[2]{normx, normy};
+            yCenter = ycR;
+
+            //find neighboring normal vectors
+            if (j != 0) {
+                fNormalL[0] = geofa[IJK(0, j - 1, 4, nx, 6)];
+                fNormalL[1] = geofa[IJK(0, j - 1, 5, nx, 6)];
+            }
+            if (j!= ny-2){
+                fNormalR[0] = geofa[IJK(0, j + 1, 4, nx, 6)];
+                fNormalR[1] = geofa[IJK(0, j + 1, 5, nx, 6)];
+            }
+
             DGP1_boundary_face_integral(ieR, ieEx, iuR, iuEx, unk, ElemVar, ux, uy, iFaceType, uGLeft, LeftVar,
-                    yCenter, air, yface, fNormal, len, rhsel, rhselx, rhsely);
+                    yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (xsi flux on vertical face)
@@ -540,13 +552,25 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             double ycL = geoel[IJK(nx - 2, j, 2, nx - 1, 3)];
 
         if (ACCUR==1){
-            int iFaceType = 2; //number CCW starting from bot = 1
-            int ieEx = IJ(0,j,2);
-            int iuEx = IJK(0,j,0,2,NVAR);
-            double yCenter = ycL;
-            double fNormal[2] = {normx, normy};
+            int iFaceType, ieEx, iuEx;
+            iFaceType = 2; //number CCW starting from bot = 1
+            ieEx = IJ(0,j,2);
+            iuEx = IJK(0,j,0,2,NVAR);
+            double yCenter, fNormal[2]{normx, normy}, fNormalL[2]{normx, normy}, fNormalR[2]{normx, normy};
+            yCenter = ycL;
+
+            //find neighboring normal vectors
+            if (j != 0) {
+                fNormalL[0] = geofa[IJK(nx - 1, j-1, 4, nx, 6)];
+                fNormalL[1] = geofa[IJK(nx - 1, j-1, 5, nx, 6)];
+            }
+            if (j!= ny-2){
+                fNormalR[0] = geofa[IJK(nx - 1, j+1, 4, nx, 6)];
+                fNormalR[1] = geofa[IJK(nx - 1, j+1, 5, nx, 6)];
+            }
+
             DGP1_boundary_face_integral(ieL, ieEx, iuL, iuEx, unk, ElemVar, ux, uy, iFaceType, uGRight, RightVar,
-                                        yCenter, air, yface, fNormal, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (xsi flux on vertical face)
@@ -602,13 +626,25 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double ycL = geoel[IJK(i, 0, 2, nx - 1, 3)];
 
         if (ACCUR==1){
-            int iFaceType = 1; //number CCW starting from bot = 1
-            int ieEx = IJ(0,i,2);
-            int iuEx = IJK(0,i,0,2,NVAR);
-            double yCenter = ycL;
-            double fNormal[2] = {normx, normy};
+            int iFaceType, ieEx, iuEx;
+            iFaceType = 1; //number CCW starting from bot = 1
+            ieEx = IJ(0,i,2);
+            iuEx = IJK(0,i,0,2,NVAR);
+            double yCenter, fNormal[2]{normx, normy}, fNormalL[2]{normx, normy}, fNormalR[2]{normx, normy};
+            yCenter = ycL;
+
+            //find neighboring normal vectors
+            if (i != 0) {
+                fNormalL[0] = geofa[IJK(i-1,0,1,nx,6)];
+                fNormalL[1] = geofa[IJK(i-1,0,2,nx,6)];
+            }
+            if (i!= nx-2){
+                fNormalR[0] = geofa[IJK(i+1,0,1,nx,6)];
+                fNormalR[1] = geofa[IJK(i+1,0,2,nx,6)];
+            }
+
             DGP1_boundary_face_integral(ieL, ieEx, iuL, iuEx, unk, ElemVar, ux, uy, iFaceType, uGBot, BotVar,
-                                        yCenter, air, yface, fNormal, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (eta flux on 'horizontal' face)
@@ -664,13 +700,25 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
         double ycR = geoel[IJK(i, ny - 2, 2, nx - 1, 3)];
 
         if (ACCUR==1){
-            int iFaceType = 3; //number CCW starting from bot = 1
-            int ieEx = IJ(0,i,2);
-            int iuEx = IJK(0,i,0,2,NVAR);
-            double yCenter = ycR;
-            double fNormal[2] = {normx, normy};
+            int iFaceType, ieEx, iuEx;
+            iFaceType = 3; //number CCW starting from bot = 1
+            ieEx = IJ(0,i,2);
+            iuEx = IJK(0,i,0,2,NVAR);
+            double yCenter, fNormal[2]{normx, normy}, fNormalL[2]{normx, normy}, fNormalR[2]{normx, normy};
+            yCenter = ycR;
+
+            //find neighboring normal vectors
+            if (i != 0) {
+                fNormalL[0] = geofa[IJK(i-1, ny - 1, 1, nx, 6)];
+                fNormalL[1] = geofa[IJK(i-1, ny - 1, 2, nx, 6)];
+            }
+            if (i!= nx-2){
+                fNormalR[0] = geofa[IJK(i+1, ny - 1, 1, nx, 6)];
+                fNormalR[1] = geofa[IJK(i+1, ny - 1, 2, nx, 6)];
+            }
+
             DGP1_boundary_face_integral(ieR, ieEx, iuR, iuEx, unk, ElemVar, ux, uy, iFaceType, uGTop, TopVar,
-                                        yCenter, air, yface, fNormal, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (eta flux on 'horizontal' face)

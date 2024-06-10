@@ -19,8 +19,8 @@ void DGP1_eta_face_integral(int ieL, int ieR, int iuL, int iuR,double* unk, Stat
                             const double* yCenter, Thermo air, double rFace, double* fNormal, double len,
                             double* rhsel, double* rhselx, double* rhsely);
 void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* unk, State* ElemVar, double* ux, double* uy,
-                                 int iFaceType, double* unkExt, State* EVExt,
-                                 double yCenter, Thermo air, double rFace, double* fNormal, double len,
+                                 int iFaceType, double* unkExt, State* EVExt, double yCenter, Thermo air, double rFace,
+                                 double* fNormal, double* fNormalL, double* fNormalR, double len,
                                  double* rhsel, double* rhselx, double* rhsely);
 void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* uy, State* ElemVar, Thermo air, int* ibound,
                           double* geofa, double* uFS, double* uGBot, double* uGTop, double* uGLeft, double* uGRight,

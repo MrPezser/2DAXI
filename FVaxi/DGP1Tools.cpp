@@ -294,12 +294,13 @@ void DGP1_eta_face_integral(int ieL, int ieR, int iuL, int iuR,double* unk, Stat
 }
 
 void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* unk, State* ElemVar, double* ux, double* uy,
-                            int iFaceType, double* unkExt, State* EVExt,
-                            double yCenter, Thermo air, double rFace, double* fNormal, double len,
+                            int iFaceType, double* unkExt, State* EVExt, double yCenter, Thermo air, double rFace,
+                            double* fNormal, double* fNormalL, double* fNormalR, double len,
                             double* rhsel, double* rhselx, double* rhsely){
     //Input left and right variable/state information
     //Output addition of flux contribution to respective elemets
     double fflux[NVAR], uInFace[NVAR], *uExFace, parr;
+    double normal[2];
     uExFace = &(unkExt[iuEx]);
     State varIn = State();
     State varEx = EVExt[ieEx];
@@ -343,21 +344,33 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
         case 1 : {//horizontal face - bottom boundary
             xsi = 1.0 / sqrt(3.0);
             eta = -1.0;
+
+            normal[0] = (1.0 - 0.5*xsi)*fNormal[0] + 0.5*xsi*fNormalR[0];
+            normal[1] = (1.0 - 0.5*xsi)*fNormal[1] + 0.5*xsi*fNormalR[1];
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
             eta = 1.0 / sqrt(3.0);
+
+            normal[0] = (1.0 - 0.5*eta)*fNormal[0] + 0.5*eta*fNormalR[0];
+            normal[1] = (1.0 - 0.5*eta)*fNormal[1] + 0.5*eta*fNormalR[1];
             break;
         }
         case 3 : {//horizontal face - top boundary
             xsi = 1.0 / sqrt(3.0);
             eta = 1.0;
+
+            normal[0] = (1.0 - 0.5*xsi)*fNormal[0] + 0.5*xsi*fNormalR[0];
+            normal[1] = (1.0 - 0.5*xsi)*fNormal[1] + 0.5*xsi*fNormalR[1];
             break;
         }
         case 4 : {//vertical face - left boundary
             xsi = -1.0;
             eta = 1.0 / sqrt(3.0);
+
+            normal[0] = (1.0 - 0.5*eta)*fNormal[0] + 0.5*eta*fNormalR[0];
+            normal[1] = (1.0 - 0.5*eta)*fNormal[1] + 0.5*eta*fNormalR[1];
             break;
         }
         default: {
@@ -371,11 +384,11 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
     //Find interface flux
     if (iFaceType == 1 or iFaceType == 2) {
-        LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
+        LDFSS(normal[0], normal[1], len, rFace, uInFace, varIn,
               uExFace, varEx, fflux, &parr);
     } else {
         ASSERT(iFaceType == 3 or iFaceType == 4, "Invalid iFaceType")
-        LDFSS(fNormal[0], fNormal[1], len, rFace, uExFace, varEx,
+        LDFSS(normal[0], normal[1], len, rFace, uExFace, varEx,
               uInFace, varIn, fflux, &parr);
     }
 
@@ -406,21 +419,37 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
         case 1 : {//horizontal face - bottom boundary
             xsi = -1.0 / sqrt(3.0);
             eta = -1.0;
+
+            double temp = fabs(xsi);
+            normal[0] = (1.0 - 0.5*temp)*fNormal[0] + 0.5*temp*fNormalL[0];
+            normal[1] = (1.0 - 0.5*temp)*fNormal[1] + 0.5*temp*fNormalL[1];
             break;
         }
         case 2 : {//vertical face - right boundary
             xsi = 1.0;
             eta = -1.0 / sqrt(3.0);
+
+            double temp = fabs(eta);
+            normal[0] = (1.0 - 0.5*temp)*fNormal[0] + 0.5*temp*fNormalL[0];
+            normal[1] = (1.0 - 0.5*temp)*fNormal[1] + 0.5*temp*fNormalL[1];
             break;
         }
         case 3 : {//horizontal face - top boundary
             xsi = -1.0 / sqrt(3.0);
             eta = 1.0;
+
+            double temp = fabs(xsi);
+            normal[0] = (1.0 - 0.5*temp)*fNormal[0] + 0.5*temp*fNormalL[0];
+            normal[1] = (1.0 - 0.5*temp)*fNormal[1] + 0.5*temp*fNormalL[1];
             break;
         }
         case 4 : { //vertical face - left boundary
             xsi = -1.0;
             eta = -1.0 / sqrt(3.0);
+
+            double temp = fabs(eta);
+            normal[0] = (1.0 - 0.5*temp)*fNormal[0] + 0.5*temp*fNormalL[0];
+            normal[1] = (1.0 - 0.5*temp)*fNormal[1] + 0.5*temp*fNormalL[1];
             break;
         }
         default: {
@@ -434,11 +463,11 @@ void DGP1_boundary_face_integral(int ieIn, int ieEx, int iuIn, int iuEx,double* 
 
     //Find interface flux
     if (iFaceType == 1 or iFaceType == 2) {
-        LDFSS(fNormal[0], fNormal[1], len, rFace, uInFace, varIn,
+        LDFSS(normal[0], normal[1], len, rFace, uInFace, varIn,
               uExFace, varEx, fflux, &parr);
     } else {
         ASSERT(iFaceType == 3 or iFaceType == 4, "Invalid iFaceType")
-        LDFSS(fNormal[0], fNormal[1], len, rFace, uExFace, varEx,
+        LDFSS(normal[0], normal[1], len, rFace, uExFace, varEx,
               uInFace, varIn, fflux, &parr);
     }
 
@@ -499,14 +528,37 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //point 1
         xsi = 1.0 / sqrt(3.0);
         eta = -1.0;
+
+        double normR[2]{normx, normy};
+        if (i != nx-2){
+            normR[0] = geofa[IJK(i+1, 0, 1,nx,6)];
+            normR[1] = geofa[IJK(i+1, 0, 2,nx,6)];
+        }
+        normx = normx*(1.0 - 0.5*xsi) + 0.5*xsi*normR[0];
+        normy = normy*(1.0 - 0.5*xsi) + 0.5*xsi*normR[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
+
+
         //point 2
         iuEx = IJK(1,i,0,2,NVAR);
         ieEx =  IJ(1,i,2);
-
         xsi = -1.0 / sqrt(3.0);
         eta = -1.0;
+
+        normx = geofa[IJK(i, 0, 1,nx,6)];
+        normy = geofa[IJK(i, 0, 2,nx,6)];
+        double normL[2]{normx, normy};
+        if (i != 0){
+            normL[0] = geofa[IJK(i-1, 0, 1,nx,6)];
+            normL[1] = geofa[IJK(i-1, 0, 2,nx,6)];
+        }
+        normx = normx*(1.0 + 0.5*xsi) - 0.5*xsi*normL[0];
+        normy = normy*(1.0 + 0.5*xsi) - 0.5*xsi*normL[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, BotVar[ieEx], &(uGBot[iuEx]));
     }
@@ -522,14 +574,24 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
 
         //==========Face Normal
         double normx, normy;
-        normx = geofa[IJK(0, j, 4,nx,6)];
-        normy = geofa[IJK(0, j, 5,nx,6)];
+        normx = geofa[IJK(nx-1, j, 4,nx,6)];
+        normy = geofa[IJK(nx-1, j, 5,nx,6)];
 
         //DG extension
         double xsi, eta;
         //point 1
         xsi = 1.0;
         eta = 1.0 / sqrt(3.0);
+
+        double normR[2]{normx, normy};
+        if (j != ny-2){
+            normR[0] = geofa[IJK(nx-1, j+1, 4,nx,6)];
+            normR[1] = geofa[IJK(nx-1, j+1, 5,nx,6)];
+        }
+        normx = normx*(1.0 - 0.5*eta) + 0.5*eta*normR[0];
+        normy = normy*(1.0 - 0.5*eta) + 0.5*eta*normR[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
         //point 2
@@ -537,6 +599,18 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         ieEx = IJ(1,j,2);
         xsi = 1.0;
         eta = -1.0 / sqrt(3.0);
+
+        normx = geofa[IJK(nx-1, j, 4,nx,6)];
+        normy = geofa[IJK(nx-1, j, 5,nx,6)];
+        double normL[2]{normx, normy};
+        if (j != 0){
+            normL[0] = geofa[IJK(nx-1, j-1, 4,nx,6)];
+            normL[1] = geofa[IJK(nx-1, j-1, 5,nx,6)];
+        }
+        normx = normx*(1.0 + 0.5*eta) - 0.5*eta*normL[0];
+        normy = normy*(1.0 + 0.5*eta) - 0.5*eta*normL[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, RightVar[ieEx], &(uGRight[iuEx]));
     }
@@ -561,6 +635,17 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //point 1
         xsi = 1.0 / sqrt(3.0);
         eta = 1.0;
+
+        double normR[2]{normx, normy};
+        if (i != nx-2){
+            normR[0] = -geofa[IJK(i+1, ny-1, 1,nx,6)];
+            normR[1] = -geofa[IJK(i+1, ny-1, 2,nx,6)];
+        }
+        normx = normx*(1.0 - 0.5*xsi) + 0.5*xsi*normR[0];
+        normy = normy*(1.0 - 0.5*xsi) + 0.5*xsi*normR[1];
+
+        //printf("p1 nx,ny = %f,%f\t\t", normx, normy);
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
         //point 2
@@ -568,6 +653,20 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         ieEx =  IJ(1,i,2);
         xsi = -1.0 / sqrt(3.0);
         eta = 1.0;
+
+
+        normx = -geofa[IJK(i, ny-1, 1,nx,6)];
+        normy = -geofa[IJK(i, ny-1, 2,nx,6)];
+        double normL[2]{normx, normy};
+        if (i != 0){
+            normL[0] = -geofa[IJK(i-1, ny-1, 1,nx,6)];
+            normL[1] = -geofa[IJK(i-1, ny-1, 2,nx,6)];
+        }
+        normx = normx*(1.0 + 0.5*xsi) - 0.5*xsi*normL[0];
+        normy = normy*(1.0 + 0.5*xsi) - 0.5*xsi*normL[1];
+
+        //printf("p2 nx,ny = %f,%f\n", normx, normy);
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
     }
@@ -593,6 +692,16 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         //point 1
         xsi = -1.0;
         eta = 1.0 / sqrt(3.0);
+
+        double normR[2]{normx, normy};
+        if (j != ny-2){
+            normR[0] = -geofa[IJK(0, j+1, 4,nx,6)];
+            normR[1] = -geofa[IJK(0, j+1, 5,nx,6)];
+        }
+        normx = normx*(1.0 - 0.5*eta) + 0.5*eta*normR[0];
+        normy = normy*(1.0 - 0.5*eta) + 0.5*eta*normR[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
         //point 2
@@ -600,6 +709,18 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         ieEx = IJ(1,j,2);
         xsi = -1.0;
         eta = -1.0 / sqrt(3.0);
+
+        normx = -geofa[IJK(0, j, 4,nx,6)];
+        normy = -geofa[IJK(0, j, 5,nx,6)];
+        double normL[2]{normx, normy};
+        if (j != 0){
+            normL[0] = -geofa[IJK(0, j-1, 4,nx,6)];
+            normL[1] = -geofa[IJK(0, j-1, 5,nx,6)];
+        }
+        normx = normx*(1.0 + 0.5*eta) - 0.5*eta*normL[0];
+        normy = normy*(1.0 + 0.5*eta) - 0.5*eta*normL[1];
+
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
     }
