@@ -92,7 +92,7 @@ void get_nozzle(const int nx, const double* x, double* y){
     // Uses a given nozzle contour to find the maximum y values fr the given set of x points
 
     FILE* fcont = fopen("../axicontour.dat","r");
-    if (fcont == nullptr) printf("Couldn't open nozzle contour file");
+    if (fcont == nullptr) printf("Couldn't open nozzle contour file\n");
     int ncon;
     fscanf(fcont, " %d",&ncon);
 
@@ -101,6 +101,8 @@ void get_nozzle(const int nx, const double* x, double* y){
 
     for (int icon=0; icon<ncon; icon++){
         fscanf(fcont,"%lf %lf",&z[icon],&r[icon]);
+
+        z[icon] -= z[0];
     }
 
 
@@ -161,7 +163,7 @@ int main() {
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
-    length = 16.3*IN2M;//1.0;//4.0;
+    length = 21.07*IN2M;//1.0;//4.0;
     nx = 301;
     ny = 151;
     double bias = 1.0;
