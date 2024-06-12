@@ -88,7 +88,7 @@ void print_state(const char *title, int nx, int ny, Thermo& air, double* x, doub
             T   = unk[IJK(i,j,3,nx-1,NVAR)];
             M = sqrt(var.v2) / var.a;
 
-            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
+            fprintf(fout, "%.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e \n",
                     xp, yp, rho, u, v, T, var.p, var.a, M);
         }
     }
@@ -181,7 +181,7 @@ void print_state_DGP1(const char *title, int nx, int ny, Thermo& air, double* x,
             T   = unkout[3];//unk[IJK(i,j,3,nx-1,NVAR)];
             M = sqrt(var.v2) / var.a;
 
-            fprintf(fout, "%lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf,\t %lf \n",
+            fprintf(fout, "%.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e,\t %.16e \n",
                     xp, yp, rho, u, v, T, var.p, var.a, M);
         }
     }
