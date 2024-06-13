@@ -13,7 +13,7 @@
 #define NDEGR 1
 #define NSP 1
 #define IVISC 0
-#define IGAM 1.28
+#define IGAM (-1.28)
 #define ACCUR 1
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))

@@ -100,7 +100,7 @@ void get_nozzle(const int nx, const double* x, double* y){
     auto r = (double*)malloc(ncon*sizeof(double));
 
     for (int icon=0; icon<ncon; icon++){
-        fscanf(fcont,"%lf %lf",&z[icon],&r[icon]);
+        fscanf(fcont,"%lf,%lf",&z[icon],&r[icon]);
 
         z[icon] -= z[0];
     }
@@ -163,9 +163,9 @@ int main() {
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
-    length = 21.07*IN2M;//1.0;//4.0;
-    nx = 301;
-    ny = 151;
+    length = 7.75*IN2M - 0.1;//;21.07*IN2M;//1.0;//4.0;
+    nx = 201;
+    ny = 51;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;//0.001;
@@ -195,7 +195,7 @@ int main() {
     dx = length / (nx-1);
 
     //Read in nozzle geometry
-    for (int i=0; i<nx; i++) z[i] = i*dx/IN2M;
+    for (int i=0; i<nx; i++) z[i] = (i*dx + 0.1)/IN2M;
     get_nozzle(nx, z, r);
     y_offset = 0.0 ;//0.05 * array_max(nx, r);
     /*
@@ -280,6 +280,8 @@ int main() {
     // 1 = freestream
     // 2 = backpressure (kinda not used)
     // 3 = outflow / extrapolation
+    // 4 = inviscid wall / symmetry
+    // 5 = bernouli inflow
     //initialize with freestream
     for(int ib=0; ib<nbound; ib++)
         ibound[ib] = 1;
@@ -301,7 +303,7 @@ int main() {
         int ifront = ib+nx+ny-2;
 
         ibound[iback] = 3;      //      right/exit
-        //ibound[ifront] = 0;
+        ibound[ifront] = 5;
     }
 
 

@@ -100,24 +100,35 @@ void boundary_state(int btype, Thermo& air,double normx, double normy, const dou
     }
 
     //Freestream, Back Pressure, and Outflow BC
-    if (btype == 1 or btype == 2 or btype == 3) {
+    if (btype == 1 or btype == 2 or btype == 3 or btype == 5) {
         double uBound[4];
-
+                            //Inflow
         uBound[0] = uFS[0];
         uBound[1] = uFS[1];
         uBound[2] = uFS[2];
         uBound[3] = uFS[3];
 
-        if (btype==2) {
+        if (btype==2) {         //Back pressure
             uBound[0] = uBP[0];
             uBound[1] = uBP[1];
             uBound[2] = uBP[2];
             uBound[3] = uBP[3];
-        } else if (btype==3){
+        } else if (btype==3){   //extrapolation / outflow
             uRight[0] = uLeft[0];
             uRight[1] = uLeft[1];
             uRight[2] = uLeft[2];
             uRight[3] = uLeft[3];
+            return;
+        } else if (btype==5){   //Bernoulli Inflow
+            // p = p_FS - 0.5*v2
+            double pBern, pFS;
+            pFS = uFS[0]*air.Rs[0]*uFS[3];
+            pBern = pFS - 0.5*uLeft[0]*varL.v2;
+
+            uRight[0] = pBern / (air.Rs[0]*uFS[3]);
+            uRight[1] = uLeft[1];
+            uRight[2] = uLeft[2];
+            uRight[3] = uFS[3];
             return;
         }
 
