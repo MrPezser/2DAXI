@@ -176,6 +176,8 @@ void LDFSS(double normx, double normy, double len, double yface, double* uLeft, 
 
     parr[0] = len * pnet * normy;
 
+    if (not IAXI){yface = 1.0;}
+
     flux[0] = yface*(fml + fmr);                                        //continuity
     flux[1] = yface*(fml*uLeft[1] + fmr*uRight[1] + len*pnet*normx);        //x momentum
     flux[2] = yface*(fml*uLeft[2] + fmr*uRight[2]);                     //y momentum w/o  "+pnet*normy"

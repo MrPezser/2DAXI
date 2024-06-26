@@ -254,7 +254,11 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             len = geofa[IJK(i,j,3,nx,6)];
             fNormal[0] = geofa[IJK(i,j,4,nx,6)];
             fNormal[1] = geofa[IJK(i,j,5,nx,6)];
-            rFace = yfa[IJK(i,j,1,nx,2)];
+            if (IAXI) {
+                rFace = yfa[IJK(i, j, 1, nx, 2)];
+            } else {
+                rFace = 1.0;
+            }
 
             int iuL = IJK(i-1,j,0,nx-1,NVAR);
             int iuR = IJK(i  ,j,0,nx-1,NVAR);
@@ -358,7 +362,11 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
             len = geofa[IJK(i,j,0,nx,6)];
             fNormal[0] = geofa[IJK(i,j,1,nx,6)];
             fNormal[1] = geofa[IJK(i,j,2,nx,6)];
-            rFace = yfa[IJK(i,j,0,nx,2)];
+            if (IAXI) {
+                rFace = yfa[IJK(i, j, 0, nx, 2)];
+            } else {
+                rFace = 1.0;
+            }
 
             int iuL = IJK(i,j  ,0,nx-1,NVAR);
             int iuR = IJK(i,j-1,0,nx-1,NVAR);
@@ -499,10 +507,17 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
                 fNormalR[1] = geofa[IJK(0, j + 1, 5, nx, 6)];
             }
 
-            DGP1_boundary_face_integral(ieR, ieEx, iuR, iuEx, unk, ElemVar, ux, uy, iFaceType, uGLeft, LeftVar,
-                    yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
-        } else {
+            double rFace;
+            if (IAXI) {
+                rFace = yface;
+            } else {
+                rFace = 1.0;
+            }
 
+            DGP1_boundary_face_integral(ieR, ieEx, iuR, iuEx, unk, ElemVar, ux, uy, iFaceType, uGLeft, LeftVar,
+                    yCenter, air, rFace, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
+        } else {
+            ASSERT(1==0, "Need to fix finite volume and add in 2d cart if statements.")
             //DG extension (xsi flux on vertical face)
             double xsiR, etaR;
             xsiR = -1.0;
@@ -569,8 +584,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
                 fNormalR[1] = geofa[IJK(nx - 1, j+1, 5, nx, 6)];
             }
 
+            double rFace;
+            if (IAXI) {
+                rFace = yface;
+            } else {
+                rFace = 1.0;
+            }
+
             DGP1_boundary_face_integral(ieL, ieEx, iuL, iuEx, unk, ElemVar, ux, uy, iFaceType, uGRight, RightVar,
-                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, rFace, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (xsi flux on vertical face)
@@ -643,8 +665,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
                 fNormalR[1] = geofa[IJK(i+1,0,2,nx,6)];
             }
 
+            double rFace;
+            if (IAXI) {
+                rFace = yface;
+            } else {
+                rFace = 1.0;
+            }
+
             DGP1_boundary_face_integral(ieL, ieEx, iuL, iuEx, unk, ElemVar, ux, uy, iFaceType, uGBot, BotVar,
-                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, rFace, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (eta flux on 'horizontal' face)
@@ -717,8 +746,15 @@ void calc_dudt(int nx, int ny, Thermo& air, State* ElemVar, double *uFS, int* ib
                 fNormalR[1] = geofa[IJK(i+1, ny - 1, 2, nx, 6)];
             }
 
+            double rFace;
+            if (IAXI) {
+                rFace = yface;
+            } else {
+                rFace = 1.0;
+            }
+
             DGP1_boundary_face_integral(ieR, ieEx, iuR, iuEx, unk, ElemVar, ux, uy, iFaceType, uGTop, TopVar,
-                                        yCenter, air, yface, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
+                                        yCenter, air, rFace, fNormal, fNormalL, fNormalR, len, rhsel, rhselx, rhsely);
         } else {
 
             //DG extension (eta flux on 'horizontal' face)

@@ -68,10 +68,10 @@ int main() {
     CFL = 0.1;
     Thermo air = Thermo();
 
-    p0 = 2.772e6;
+    p0 = 101325.0;
 
-    u0 = 0.0;                        ///1532.9;
-    T0 = 1256.0;                       ///1188.333;
+    u0 = 600.0;//1532.9;
+    T0 = 300.0;//1188.333;
     rho0 = p0 / (air.Rs[0]*T0);        ///0.04455;
     v0 = 0.0;
     mxiter = (int)(5.0 * 10000 * (0.3/CFL));//1e6; //maximum number of iteration before stopping
@@ -228,9 +228,14 @@ int main() {
                 LUPSolve(D, P, b, N, xLU);
 
                 //axi modification
-                double ycc = geoel[IJK(i,j,2,nx-1, 3)];
+                double rcc;
+                if (IAXI) {
+                    rcc = geoel[IJK(i, j, 2, nx - 1, 3)];
+                } else {
+                    rcc = 1.0;
+                }
                 for (int k=0; k<NVAR; k++){
-                    xLU[k]  *= (1.0/ycc);
+                    xLU[k]  *= (1.0/rcc);
                 }
 
                 if (ACCUR == 1) {
@@ -244,8 +249,8 @@ int main() {
 
                     //axi modification
                     for (int k = 0; k < NVAR; k++) {
-                        xLUx[k] *= (1.0 / ycc);
-                        xLUy[k] *= (1.0 / ycc);
+                        xLUx[k] *= (1.0 / rcc);
+                        xLUy[k] *= (1.0 / rcc);
                     }
                 }
             }
@@ -254,7 +259,9 @@ int main() {
 
         //perform iteration
         double damp = 1.0;///fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
-        if (iter<= 3.0*(3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
+        //if (iter<= (3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
+        //if (iter<= 2000) damp = 0.0;
+        damp = 0.0;
 
         for (int ielem=0; ielem<nelem; ielem++){
             int iu = NVAR*ielem;
