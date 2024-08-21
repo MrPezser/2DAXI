@@ -63,7 +63,12 @@ void DGP1_volume_integral(int nx, int ny, double vol, double* xfa, double* yfa, 
             State var = ElemVar[iel];
 
             //Find Flux Vector
-            double ycc = geoel[IJK(i,j,2,nx-1, 3)];
+            double ycc;
+            if (IAXI) {
+                ycc = geoel[IJK(i,j,2,nx-1, 3)];
+            } else {
+                ycc = 1.0;
+            }
             double rho = unkij[0];
             Fx[0] = ycc *  rho * unkij[1];
             Fx[1] = ycc * (rho * unkij[1] * unkij[1] + var.p);
@@ -122,6 +127,8 @@ void DGP1_volume_integral(int nx, int ny, double vol, double* xfa, double* yfa, 
 void DGP1_xsi_face_integral(int ieL, int ieR, int iuL, int iuR,double* unk, State* ElemVar, double* ux, double* uy,
                         const double* yCenter, Thermo air, double rFace, double* fNormal, double len,
                         double* rhsel, double* rhselx, double* rhsely){
+    if (not IAXI) { rFace = 1.0;}
+
     //Input left and right variable/state information
     //Output addition of flux contribution to respective elemets
     double fflux[NVAR], uLFace[NVAR], uRFace[NVAR], parr;
