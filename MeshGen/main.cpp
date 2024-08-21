@@ -100,7 +100,7 @@ void get_nozzle(const int nx, const double* x, double* y){
     auto r = (double*)malloc(ncon*sizeof(double));
 
     for (int icon=0; icon<ncon; icon++){
-        fscanf(fcont,"%lf,%lf",&z[icon],&r[icon]);
+        fscanf(fcont,"%lf %lf",&z[icon],&r[icon]);
 
         z[icon] -= z[0];
     }
@@ -163,8 +163,8 @@ int main() {
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
-    length = 7.75*IN2M - 0.1;//;21.07*IN2M;//1.0;//4.0;
-    nx = 201;
+    length = 12.0*IN2M;//7.75*IN2M - 0.1;
+    nx = 101;
     ny = 51;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
@@ -195,7 +195,7 @@ int main() {
     dx = length / (nx-1);
 
     //Read in nozzle geometry
-    for (int i=0; i<nx; i++) z[i] = (i*dx + 0.1)/IN2M;
+    for (int i=0; i<nx; i++) z[i] = (i*dx)/IN2M;
     get_nozzle(nx, z, r);
     y_offset = 0.0 ;//0.05 * array_max(nx, r);
     /*
@@ -303,7 +303,7 @@ int main() {
         int ifront = ib+nx+ny-2;
 
         ibound[iback] = 3;      //      right/exit
-        ibound[ifront] = 5;
+        //ibound[ifront] = 5;
     }
 
 

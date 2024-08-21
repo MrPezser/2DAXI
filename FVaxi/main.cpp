@@ -65,14 +65,14 @@ int main() {
     double p0, u0, tol, CFL, T0, v0, rho0;
     int mxiter;
     tol = 1e-7;//1e-6;
-    CFL = 0.1;
+    CFL = 0.3;
     Thermo air = Thermo();
 
-    p0 = 2.772e6;
+    //p0 = 2.772e6;
 
-    u0 = 0.0;                        ///1532.9;
-    T0 = 1256.0;                       ///1188.333;
-    rho0 = p0 / (air.Rs[0]*T0);        ///0.04455;
+    u0 = 1532.9;
+    T0 = 1188.333;
+    rho0 = 0.04455;//p0 / (air.Rs[0]*T0);
     v0 = 0.0;
     mxiter = (int)(5.0 * 10000 * (0.3/CFL));//1e6; //maximum number of iteration before stopping
     int printiter = 10;
@@ -254,7 +254,7 @@ int main() {
 
         //perform iteration
         double damp = 1.0;///fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
-        if (iter<= 3.0*(3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
+        if (iter<= 1.5*(3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
 
         for (int ielem=0; ielem<nelem; ielem++){
             int iu = NVAR*ielem;
