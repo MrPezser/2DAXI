@@ -189,7 +189,7 @@ void print_state_DGP1(const char *title, int nx, int ny, Thermo& air, double* x,
 }
 
 void print_state_axi(const char *title, int nx, int ny, Thermo& air, double* x, double* y, double* unk, double* geoel ) {
-    //Makes a tecplot file of the grid and a setup file for the solver
+    //Makes a 3d tecplot file of the grid, not really working rn
     //int nb = 2*nx + 2*ny;
     int nelem = nx * ny;
     int nrad = 50;
