@@ -127,7 +127,6 @@ void DGP1_volume_integral(int nx, int ny, double vol, double* xfa, double* yfa, 
 void DGP1_xsi_face_integral(int ieL, int ieR, int iuL, int iuR,double* unk, State* ElemVar, double* ux, double* uy,
                         const double* yCenter, Thermo air, double rFace, double* fNormal, double len,
                         double* rhsel, double* rhselx, double* rhsely){
-    if (not IAXI) { rFace = 1.0;}
 
     //Input left and right variable/state information
     //Output addition of flux contribution to respective elemets

@@ -252,6 +252,8 @@ int main() {
         }
 
         //perform iteration
+
+        //Mechanism for switching between 1st and 2nd order
         double damp = 1.0;///fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
         if (iter<= 1.5*(3000.0*(0.3/CFL)*(101.0/101.0))) damp = 0.0;
 
@@ -296,19 +298,6 @@ int main() {
                 uy[iu+2] += damp * dvy[iu + 2];
                 uy[iu+3] += damp * dvy[iu + 3];
 
-                /* //dumb idea
-                double damp2 = 0.9;
-                ux[iu  ] = damp2 * ux[iu  ];
-                ux[iu+1] = damp2 * ux[iu + 1];
-                ux[iu+2] = damp2 * ux[iu + 2];
-                ux[iu+3] = damp2 * ux[iu + 3];
-
-                uy[iu  ] = damp2 * uy[iu  ];
-                uy[iu+1] = damp2 * uy[iu + 1];
-                uy[iu+2] = damp2 * uy[iu + 2];
-                uy[iu+3] = damp2 * uy[iu + 3];
-                */
-
                 //Slope limiting
                 int iuim, iuip, iujm, iujp;
                 iuim = iu - IJK(1,0,0,nx-1,NVAR);
@@ -349,6 +338,27 @@ int main() {
             }
         }
 
+<<<<<<< HEAD
+=======
+        if (ACCUR ==1){
+            for (int i=0; i<NVAR; i++) {
+                ressum[i] += ressumx[i] + ressumy[i];
+            }
+        }
+
+        if (iter==0) {
+            for (int i=0; i<NVAR; i++){
+                res0[i] = ressum[i];
+            }
+        }
+        restotal = 0.0;
+        for (int i=0; i<NVAR; i++){
+            ASSERT(ressum[i] >= 0.0 && !__isnan(ressum[i]), "Invalid Residual")
+            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-16);
+            restotal += ressum[i] / res0[i];
+        }
+
+>>>>>>> 09885d45e62e0b35660d02fe34d5a043eaa46749
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
         if (iter%printiter == 0) {
@@ -375,7 +385,7 @@ int main() {
     } else {
         print_state("Final State", nx, ny, air, x, y, unk, geoel);
     }
-    print_state_axi("Final State", nx, ny, air, x, y, unk, geoel);
+    //print_state_axi("Final State", nx, ny, air, x, y, unk, geoel);
 
 
     printf("Complete.");
