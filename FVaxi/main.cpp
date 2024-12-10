@@ -251,11 +251,28 @@ int main() {
             }
         }
 
-
         //perform iteration
         double damp = 1.0;///fmin(iter / (3000.0*0.3/CFL),1.0);  //coarse mesh 3000, fine 7500
-        if (iter<= 1.5*(3000.0*(0.3/CFL)*(nx/101.0))) damp = 0.0;
+        if (iter<= 1.5*(3000.0*(0.3/CFL)*(101.0/101.0))) damp = 0.0;
 
+        if (ACCUR ==1){
+            for (int i=0; i<NVAR; i++) {
+                ressum[i] += damp*ressumx[i] + damp*ressumy[i];
+            }
+        }
+        if (iter==0) {
+            for (int i=0; i<NVAR; i++){
+                res0[i] = ressum[i];
+            }
+        }
+        restotal = 0.0;
+        for (int i=0; i<NVAR; i++){
+            ASSERT(ressum[i] >= 0.0, "Nonpositive Residual")
+            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-16);
+            restotal += ressum[i] / res0[i];
+        }
+
+        double duscale;
         for (int ielem=0; ielem<nelem; ielem++){
             int iu = NVAR*ielem;
             unk[iu  ] += dv[iu  ];
@@ -299,8 +316,8 @@ int main() {
                 iujm = iu - IJK(0,1,0,nx-1,NVAR);
                 iujp = iu + IJK(0,1,0,nx-1,NVAR);
                 for (int kvar=0;kvar<NVAR;kvar++){
-                    double du, duscale;
-                    duscale = 1.0;
+                    double du;
+                    duscale = 0.5;
                     int nu = nelem*NVAR;
                     if (iuip < nu-1  and iuim >= 0.0) {
                        du = duscale*((unk[iuip + kvar] - unk[iuim + kvar]) / 2.0);
@@ -332,29 +349,13 @@ int main() {
             }
         }
 
-        if (ACCUR ==1){
-            for (int i=0; i<NVAR; i++) {
-                ressum[i] += ressumx[i] + ressumy[i];
-            }
-        }
-
-        if (iter==0) {
-            for (int i=0; i<NVAR; i++){
-                res0[i] = ressum[i];
-            }
-        }
-        restotal = 0.0;
-        for (int i=0; i<NVAR; i++){
-            ASSERT(ressum[i] >= 0.0, "Nonpositive Residual")
-            if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-16);
-            restotal += ressum[i] / res0[i];
-        }
-
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
         if (iter%printiter == 0) {
-            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e \t\t Absolute Res:%15.5e%15.5e%15.5e%15.5e\n", \
+            printf("Iter:%7d\tdt:%7.4e \t\t RelativeTotalResisual:  %8.5e \t\t Absolute Res:%15.5e%15.5e%15.5e%15.5e", \
                     iter, dt, restotal, ressum[0], ressum[1], ressum[2], ressum[3]);
+            printf("\t damp:%f, duscale:%f",damp,duscale);
+            printf("\n");
         }
         if (iter > 0 and iter%saveiter == 0){
             //printf("Saving current Solution\n");
@@ -364,9 +365,9 @@ int main() {
                 print_state("Final State", nx, ny, air, x, y, unk, geoel);
             }
         }
-        if (restotal < tol) break;
+        if (restotal < tol) break;  // and damp >= 1) break;
     }
-    printf("==================== Solution Found ====================\n");
+    printf("==================== Calculation Finished ====================\n");
     printf("Saving Solution File..... \n");
 
     if (ACCUR==1){

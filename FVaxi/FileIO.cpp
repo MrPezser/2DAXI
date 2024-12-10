@@ -24,6 +24,7 @@ void read_mesh(int* nx, int* ny, int** ibound, double** x, double** y){
     //read mesh nodes
     for(int ip=0; ip<npoin; ip++){
         fscanf(fmsh,"%lf%lf", &(*x)[ip], &(*y)[ip]);
+        //(*x)[ip] *= 3.5 / 7.0;
         //(*y)[ip] += 10000.0;
     }
     //read BC assignments

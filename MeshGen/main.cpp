@@ -88,10 +88,10 @@ void printgrid(const char *title, int nx, int ny, double *x, double *y, int* ibo
     fclose(fout2);
 }
 
-void get_nozzle(const int nx, const double* x, double* y){
+void get_nozzle(const int nx, double* x, double* y){
     // Uses a given nozzle contour to find the maximum y values fr the given set of x points
 
-    FILE* fcont = fopen("../axicontour.dat","r");
+    FILE* fcont = fopen("../axicontour_trim_smooth.dat","r");
     if (fcont == nullptr) printf("Couldn't open nozzle contour file\n");
     int ncon;
     fscanf(fcont, " %d",&ncon);
@@ -102,9 +102,10 @@ void get_nozzle(const int nx, const double* x, double* y){
     for (int icon=0; icon<ncon; icon++){
         fscanf(fcont,"%lf %lf",&z[icon],&r[icon]);
 
-        z[icon] -= z[0];
+        if (icon > 0) {
+            z[icon] -= z[0];
+        }
     }
-
 
     for (int ipoin=0; ipoin<nx; ipoin++){
         y[ipoin] = 0.0; //initialize
@@ -115,7 +116,7 @@ void get_nozzle(const int nx, const double* x, double* y){
 
         //find closest point on the left
         double mindel = 999.0;
-        int ileft = -1;
+        int ileft = 0;
         for (int j=0; j<ncon; j++) {
             if (x[ipoin]-z[j] < 0.0) continue;
 
@@ -123,8 +124,8 @@ void get_nozzle(const int nx, const double* x, double* y){
             if (mindel == x[ipoin]-z[j]) ileft = j;
         }
 
-        if (ileft == -1){
-            printf("Filed to find closest neightbor\n");
+        if (ileft == 0 and ipoin > 0){
+            printf("Failed to find closest neightbor\n");
             exit(0);
         }
 
@@ -134,6 +135,10 @@ void get_nozzle(const int nx, const double* x, double* y){
         dz = x[ipoin] - z[ileft];
 
         y[ipoin] = IN2M * (r[ileft] + (drdz*dz));
+
+        if (ipoin > 0){
+            y[ipoin] /= y[0];
+        }
 
         /*
          * //Use lagrange polynomial to interpolate, be wary of spurious oscilations
@@ -153,7 +158,10 @@ void get_nozzle(const int nx, const double* x, double* y){
          */
 
     }
-
+    for (int ipoin=0; ipoin<nx; ipoin++) {
+        x[ipoin] /= y[0];
+    }
+    y[0] = 1.0;
     fclose(fcont);
 
 }
@@ -163,9 +171,10 @@ int main() {
     double height, length;
     int irefine, nx, ny, nyrefine{};
     height = 0.5;
-    length = 12.0*IN2M;//7.75*IN2M - 0.1;
-    nx = 101;
-    ny = 51;
+    double xstart = 0.0;
+    length = 6.222*IN2M - xstart;//7.75*IN2M - 0.1;
+    nx = 201;
+    ny = 75;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;//0.001;
@@ -192,12 +201,16 @@ int main() {
     auto* r = (double*)malloc(nx*sizeof(double));
     auto* ibound = (int*)malloc(nbound*sizeof(int));
 
-    dx = length / (nx-1);
-
     //Read in nozzle geometry
-    for (int i=0; i<nx; i++) z[i] = (i*dx)/IN2M;
+    dx = length / (nx-1);
+    for (int i=0; i<nx; i++) z[i] = (xstart + (i*dx))/IN2M;
     get_nozzle(nx, z, r);
     y_offset = 0.0 ;//0.05 * array_max(nx, r);
+
+    length = IN2M * (z[nx-1] - z[0]);
+    dx = length / (nx-1);
+
+
     /*
     //Modify upper surface to maintain the same area
     for (int i=0; i<nx; i++){

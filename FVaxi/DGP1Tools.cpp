@@ -653,6 +653,7 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
 
         //printf("p1 nx,ny = %f,%f\t\t", normx, normy);
 
+
         get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, TopVar[ieEx], &(uGTop[iuEx]));
         //point 2
@@ -708,8 +709,14 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         normx = normx*(1.0 - 0.5*eta) + 0.5*eta*normR[0];
         normy = normy*(1.0 - 0.5*eta) + 0.5*eta*normR[1];
 
+        double uFSangle[4];
+        double angle = (MXANGLE * M_PI / 180.0) * (double)j / (double)(ny-2);
+        uFSangle[0] = uFS[0];
+        uFSangle[1] = uFS[1]*cos(angle);
+        uFSangle[2] = uFS[1]*sin(angle);
+        uFSangle[3] = uFS[3];
 
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+        get_boundary_point(btype, normx, normy, uFSangle, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
         //point 2
         iuEx = IJK(1,j,0,2,NVAR);
@@ -727,8 +734,13 @@ void DGP1_ghost_cell_generator(int nx, int ny, double* unk, double* ux, double* 
         normx = normx*(1.0 + 0.5*eta) - 0.5*eta*normL[0];
         normy = normy*(1.0 + 0.5*eta) - 0.5*eta*normL[1];
 
+        angle = (MXANGLE * M_PI / 180.0) * (double)j / (double)(ny-2);
+        uFSangle[0] = uFS[0];
+        uFSangle[1] = uFS[1]*cos(angle);
+        uFSangle[2] = uFS[1]*sin(angle);
+        uFSangle[3] = uFS[3];
 
-        get_boundary_point(btype, normx, normy, uFS, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
+        get_boundary_point(btype, normx, normy, uFSangle, &(unk[iuint]), ElemVar[iel], air, &(ux[iuint]),
                            &(uy[iuint]), xsi, eta, LeftVar[ieEx], &(uGLeft[iuEx]));
     }
 }
