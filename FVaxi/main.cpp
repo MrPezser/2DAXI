@@ -338,8 +338,6 @@ int main() {
             }
         }
 
-<<<<<<< HEAD
-=======
         if (ACCUR ==1){
             for (int i=0; i<NVAR; i++) {
                 ressum[i] += ressumx[i] + ressumy[i];
@@ -357,8 +355,6 @@ int main() {
             if (res0[i] < 1e-16) res0[i] = fmax(ressum[i], 1e-16);
             restotal += ressum[i] / res0[i];
         }
-
->>>>>>> 09885d45e62e0b35660d02fe34d5a043eaa46749
         fprintf(fres, "%d,\t%le\n", iter, restotal);
 
         if (iter%printiter == 0) {

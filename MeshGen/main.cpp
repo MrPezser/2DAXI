@@ -173,8 +173,8 @@ int main() {
     height = 0.5;
     double xstart = 0.0;
     length = 6.222*IN2M - xstart;//7.75*IN2M - 0.1;
-    nx = 201;
-    ny = 75;
+    nx = 420;
+    ny = 210;
     double bias = 1.0;
     double y_offset;   // Offset for axisymmetric applications
     y_offset = 0.0;//0.001;
