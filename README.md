@@ -1,0 +1,1 @@
+The start of my 2D code. It is the serial version which PAR2D was developed from. Has an Axisymmetric solver and some attempts and a viscous / Implicit solver. Never got that part fully working, Fututre devleopment will be in the PAR2D repo.
